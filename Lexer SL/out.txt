@@ -1,0 +1,6 @@
+<id,Hola,1,1>
+<id,Como,1,6>
+<id,estas,1,11>
+<tk_num,3.5e+3,4,1>
+<tk_not_equal,6,1>
+<tk_power,8,1>
