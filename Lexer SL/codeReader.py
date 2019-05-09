@@ -1,3 +1,5 @@
+import re
+
 class codeReader:
     
     def __init(self):
@@ -120,6 +122,22 @@ class fileCodeReader:
         pass
     
     
+def readUntilFullMatch(reader, s, reg, eof = False):
+    while(not reader.done() and not re.fullmatch(reg, s)):
+        c = next(reader)
+        s = s + c   
+    if(not re.fullmatch(reg, s) and not eof):
+        raise LexicException
+    else:
+        return s
+        
+def readWhileFullMatch(reader, s, reg): 
+    while(not reader.done() and re.fullmatch(reg, s)):
+        s = s + next(reader)
+    if(not reader.done()):
+        s = s[:-1]
+        reader.reset()
+    return s
 
 class Token(object):
     

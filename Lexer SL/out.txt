@@ -1,6 +1,15 @@
-<id,Hola,1,1>
-<id,Como,1,6>
-<id,estas,1,11>
-<tk_num,3.5e+3,4,1>
-<tk_not_equal,6,1>
-<tk_power,8,1>
+<tk_logico,TRUE,2,1>
+<tk_logico,FALSE,2,6>
+<tk_logico,SI,2,12>
+<tk_logico,NO,2,15>
+<tk_num,100,3,1>
+<tk_num,3.14,3,5>
+<tk_num,2e+10,3,10>
+<tk_num,5.8e-3,3,16>
+<tk_num,8.1E+131,3,23>
+<tk_num,1.7E+308,3,32>
+<tk_cadena,"",4,1>
+<tk_cadena,' ',4,4>
+<tk_cadena," cadena no vacía con Ñ ",5,1>
+<tk_cadena,"Conteste con 'si' o 'no', por favor",6,1>
+<tk_cadena,'María dijo: "¡Buenos días!"',7,1>
