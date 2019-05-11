@@ -1,11 +1,11 @@
 import re
 from codeReader import fullCodeReader, Token, readWhileFullMatch, readUntilFullMatch
 
-reserved_file = 'reserved.txt'
-tokens_file = 'tokens.txt'
-regex_file = 'regex.txt'
-sl_file = './data/3.txt'
-output_file = 'out.txt'
+reserved_file = './data/reserved.txt'
+tokens_file = './data/tokens.txt'
+regex_file = './data/.txt'
+sl_file = './data/4.txt'
+output_file = './data/out.txt'
 
 def init():
     global reserved, tokens, tokens_regexp, regex, code    

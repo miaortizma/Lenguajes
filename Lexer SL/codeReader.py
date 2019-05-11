@@ -111,7 +111,6 @@ class fullCodeReader(codeReader):
             n = len(s)
             self.reset(n)
 
-
 class fileCodeReader:
     """
     clase que lee de un archivo caracter por caracter
@@ -120,8 +119,7 @@ class fileCodeReader:
     
     def __init__(self, filename):
         pass
-    
-    
+     
 def readUntilFullMatch(reader, s, reg, eof = False):
     while(not reader.done() and not re.fullmatch(reg, s)):
         c = next(reader)
