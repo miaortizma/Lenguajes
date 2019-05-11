@@ -14,10 +14,11 @@ class Grammar:
         self.initial = initial
         self.rules = defaultdict(list)
         self.ins = defaultdict(list)
+        self.predicts = defaultdict(list)
         self.follows = defaultdict(set)
+        self.nullable = defaultdict(bool)
         self.non_terminals = set()
         self.firsts = {}
-        self.predicts = {}
         self.explored = set()
         for rule in rules:
             self.addRule(rule)
@@ -26,22 +27,26 @@ class Grammar:
         follows(self, self.initial)
         while(followsResolve(self)):
             pass
+        for nt in self.non_terminals:
+            for rule in self.rules[nt]:
+                rule_predicts = predicts(self, nt, rule)
+                self.predicts[nt].append(rule_predicts)
 
     def addRule(self, rule):
         non_terminal, rule = rule
+        if(rule[0] == 'eps'):
+            self.nullable[non_terminal] |= True
         self.non_terminals.add(non_terminal)
-        for symbol in rule:
-            if(isNT(symbol) and symbol != non_terminal):
-                pos = len(self.rules[non_terminal])
-                self.ins[symbol].append((non_terminal, pos))
         self.rules[non_terminal].append(rule)
 
     def __str__(self):
         s = ''
         s += str(self.initial) + '\n'
         for nt in self.non_terminals:
-            for rule in self.rules[nt]:
-                s += str(nt) + '\t' + str(rule) + '\n'
+            for i in range(len(self.rules[nt])):
+                rule = self.rules[nt][i]
+                predicts = self.predicts[nt][i]
+                s += str(nt) + '\t' + str(rule) + '\t' + str(predicts) + '\n'
         s += 'Firsts:\n'
         for nt in self.non_terminals:
             s += str(nt) + '\t' + str(sorted(self.firsts[nt])) + '\n'
@@ -84,26 +89,31 @@ def parseGrammar(grammar_path):
 
 
 def firsts(grammar, non_terminal):
+    """
+    Problemas si hay recursividad por la izquierda
+    """
     if(non_terminal in grammar.firsts):
         return grammar.firsts[non_terminal]
     ret = set()
     for rule in grammar.rules[non_terminal]:
             if(rule[0] != non_terminal):  # left recursive
                 ret |= first(grammar, rule)
+            elif(grammar.nullable[non_terminal]):  # simple recursion
+                ret |= first(grammar, rule[1:])
     grammar.firsts[non_terminal] = ret
     return ret
 
 
 def first(grammar, alpha):
     if(len(alpha) == 0):
-        return set(['eps'])
+        return {'eps'}
     ret = set()
     terminal = alpha[0] == 'eps' or re.fullmatch(terminal_reg, alpha[0])
     if(terminal):  # terminal or epsilon
         return set([alpha[0]])
     else:  # non-terminal
         sol = firsts(grammar, alpha[0])
-        ret |= sol - set(['eps'])
+        ret |= sol - {'eps'}
         if 'eps' in sol:
             if(len(alpha) == 1):
                 ret.add('eps')
@@ -123,7 +133,7 @@ def follows(grammar, non_terminal):
                 if(symbol not in grammar.explored):
                     follows(grammar, symbol)
                 sol = first(grammar, rule[i + 1:])  # may be epsilon
-                grammar.follows[symbol] |= sol - set(['eps'])
+                grammar.follows[symbol] |= sol - {'eps'}
                 if('eps' in sol):
                     grammar.follows[symbol].add(non_terminal)
 
@@ -143,14 +153,14 @@ def followsResolve(grammar):
     return added
 
 
-def predicts(grammar, non_terminal, rule=None):
-    
-    pass
+def predicts(grammar, non_terminal, alpha):
+    sol = first(grammar, alpha)
+    if('eps' in non_terminal):
+        return (sol - {'eps'}) | grammar.follows[non_terminal]
+    else:
+        return sol
 
 
 grammar = parseGrammar(grammar_path)
-# print(first(grammar, 'A'))
-# print(first(grammar, 'B'))
-# print(first(grammar, 'C'))
 print(grammar)
 print('El análisis sintáctico ha finalizado exitosamente')

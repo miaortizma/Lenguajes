@@ -1,8 +1,12 @@
-A
-A : B C
-A : <ant> A <all>
-B : <big> C
-B : <bus> A <boss>
+S
+S : A <uno> B C
+S : S <dos>
+A : B C D
+A : A <tres>
+A : eps
+B : D <cuatro> C <tres>
 B : eps
-C : <cat>
-C : <cow>
+C : <cinco> D B
+C : eps
+D : <seis>
+D : eps
