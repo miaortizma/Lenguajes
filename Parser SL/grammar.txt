@@ -1,5 +1,0 @@
-A : B C
-B : <tk_num> C
-B : eps
-C : <tk_sign>
-C : eps

@@ -1,0 +1,8 @@
+A
+A : B C
+A : <ant> A <all>
+B : <big> C
+B : <bus> A <boss>
+B : eps
+C : <cat>
+C : <cow>
