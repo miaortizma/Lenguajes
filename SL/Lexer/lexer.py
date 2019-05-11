@@ -2,11 +2,13 @@ import re
 from path import Path
 from codeReader import *
 
-reserved_file = Path(__file__) / 'data/reserved.txt'
-tokens_file = Path(__file__) / 'data/tokens.txt'
-regex_file = Path(__file__) / 'data/regex.txt'
-sl_file = Path(__file__) / 'data/4.txt'
-output_file = Path(__file__) / 'data/out.txt'
+
+localPath = Path(__file__).parent
+reserved_file = localPath / 'data/reserved.txt'
+tokens_file = localPath / 'data/tokens.txt'
+regex_file = localPath / 'data/regex.txt'
+sl_file = localPath / 'data/sl_sample.txt'
+output_file = localPath / 'data/out.txt'
 
 
 def init():
@@ -127,5 +129,6 @@ def main(code):
 
 
 init()
+print(code)
 main(code)
 print('termine')
