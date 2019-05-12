@@ -1,9 +1,105 @@
-<id,Hola,1,1>
-<id,Como,1,6>
-<id,estas,1,11>
-<tk_num,3.5e+3,4,1>
-<tk_not_equal,6,1>
-<tk_power,8,1>
-<id,Pito,10,1>
-<tk_num,2,12,1>
-<id,jajajja,14,1>
+<programa, 1, 1>
+<id, cuadrado, 1, 9>
+<var, 1, 18>
+<id, n, 4, 4>
+<tk_comma, 5, 6>
+<id, cuad, 5, 7>
+<tk_double_point, 6, 9>
+<numerico, 6, 11>
+<inicio, 6, 20>
+<leer, 7, 7>
+<tk_left_par, 9, 5>
+<id, n, 9, 7>
+<tk_right_par, 9, 8>
+<id, cuad, 9, 9>
+<tk_assign, 11, 5>
+<id, n, 11, 7>
+<imprimir, 11, 9>
+<tk_left_par, 12, 9>
+<id, cuad, 12, 11>
+<tk_right_par, 12, 15>
+<fin, 12, 16>
+<subrutina, 13, 4>
+<id, sub1, 16, 10>
+<tk_left_par, 16, 15>
+<tk_right_par, 16, 16>
+<retorna, 16, 17>
+<numerico, 16, 25>
+<const, 16, 34>
+<id, PI, 17, 6>
+<tk_assign, 18, 7>
+<tk_numerico, 3.1415, 18, 9>
+<id, RAIZ, 18, 16>
+<tk_assign, 19, 9>
+<tk_numerico, 0.4442, 19, 11>
+<var, 19, 18>
+<id, X, 20, 4>
+<tk_double_point, 21, 6>
+<numerico, 21, 8>
+<var, 21, 17>
+<id, a, 23, 4>
+<tk_comma, 24, 6>
+<id, b, 24, 7>
+<tk_double_point, 24, 9>
+<numerico, 24, 11>
+<id, c, 24, 20>
+<tk_double_point, 25, 6>
+<numerico, 25, 8>
+<id, str, 25, 17>
+<tk_double_point, 26, 8>
+<cadena, 26, 10>
+<id, enc, 26, 17>
+<tk_double_point, 27, 8>
+<logico, 27, 10>
+<const, 27, 17>
+<id, PI, 28, 6>
+<tk_assign, 29, 7>
+<tk_numerico, 3.1415, 29, 9>
+<tipos, 29, 16>
+<id, PRODUCTO, 30, 6>
+<tk_double_point, 31, 13>
+<registro, 31, 15>
+<tk_left_brace, 31, 24>
+<id, codigo, 32, 17>
+<tk_double_point, 33, 24>
+<numerico, 33, 26>
+<id, descrip, 33, 35>
+<tk_double_point, 34, 25>
+<cadena, 34, 27>
+<id, precio, 34, 34>
+<tk_double_point, 35, 24>
+<numerico, 35, 26>
+<tk_right_brace, 35, 35>
+<id, TLineaTexto, 36, 17>
+<tk_double_point, 37, 16>
+<cadena, 37, 18>
+<id, VEC, 37, 25>
+<tk_double_point, 38, 8>
+<vector, 38, 10>
+<tk_left_bracket, 38, 17>
+<tk_numerico, 10, 38, 19>
+<tk_right_bracket, 38, 21>
+<numerico, 38, 22>
+<id, MAT, 38, 31>
+<tk_double_point, 39, 8>
+<matriz, 39, 10>
+<tk_left_bracket, 39, 17>
+<tk_numerico, 10, 39, 19>
+<tk_comma, 39, 21>
+<tk_numerico, 10, 39, 22>
+<tk_right_bracket, 39, 24>
+<numerico, 39, 25>
+<inicio, 39, 34>
+<imprimir, 40, 7>
+<tk_left_par, 41, 13>
+<tk_cadena, "Hola Mundo", 41, 14>
+<tk_right_par, 41, 26>
+<imprimir, 41, 27>
+<tk_left_par, 42, 13>
+<tk_cadena, "pepe", 42, 14>
+<tk_right_par, 42, 20>
+<retorna, 42, 21>
+<tk_left_par, 43, 12>
+<id, algun_valor, 43, 14>
+<tk_right_par, 43, 25>
+<fin, 43, 26>

@@ -71,7 +71,7 @@ def numerico(reader, s, pos):
     if(re.match(r'[eE][\+-][0-9]', reader.peek(3))):
         s += reader.read(3)
         s = readWhileFullMatch(reader, s, reg)
-    return Token('tk_num', pos[0], pos[1], s)
+    return Token('tk_numerico', pos[0], pos[1], s)
 
 
 def slash(reader, c, pos):
@@ -123,20 +123,20 @@ def nextToken(reader):
                 file.write(
                     'Error Léxico(linea:{},posición:{})'
                     .format(pos[0], pos[1]))
-            break
+            raise ValueError
 
 
-def main(reader):
+def main(reader, verbose=False):
+    load_data()
     with open(output_file, 'w') as file:
         file.write('')  # erases output
     while(not reader.done()):
         token = nextToken(reader)
         appendToken(token)
+    if(verbose):
+        print('termine')
 
-
-load_data()
 
 if __name__ == '__main__':
     reader = fullCodeReader(sl_file)
     main(reader)
-    print('termine')

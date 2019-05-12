@@ -9,9 +9,12 @@ CONSTS2 : CONST CONST2 | eps
 TIPOS : TIPO TIPOS2
 TIPO : <tipo>
 TIPOS2 : TIPO TIPOS2 | eps
-VARS : VAR VARS2 | eps 
-VAR : <var>
+VARS : VAR VARS2 
 VARS2 : VAR VARS2 | eps
+VAR : LISTAID <tk_double_point> TIPOBASICO
+LISTAID : <id> LISTAID2
+LISTAID2 : <tk_comma> <id> LISTAID2
+TIPOBASICO : <numerico> | <cadena> | <logico> 
 SENTENCIAS : LLAMADOFUNC SENTENCIAS | eps
 LLAMADOFUNC : <id> <tk_left_par> <tk_cadena> <tk_right_par> | NOMBREFUNC <tk_left_par> <tk_cadena> <tk_right_par>
 NOMBREFUNC : <imprimir>
@@ -22,6 +25,4 @@ PARAMETROS : PARAMETRO PARAMETROS2 | eps
 PARAMETRO : REF LISTAID <tk_doublepoint> <id>
 PARAMETROS2 : <tk_semicolon> PARAMETRO PARAMETROS2
 REF : <ref> | eps
-LISTAID : <id> LISTAID2
-LISTAID2 : <tk_comman> <id> LISTAID2 
 RETORNA : <retorna> <tk_left_par> <id> <tk_right_par>

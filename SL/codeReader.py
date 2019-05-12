@@ -126,11 +126,11 @@ class fileCodeReader:
         pass
 
 
-def readUntilFullMatch(reader, s, reg, eof=False):
+def readUntilFullMatch(reader, s, reg):
     while(not reader.done() and not re.fullmatch(reg, s)):
         c = next(reader)
         s = s + c
-    if(not re.fullmatch(reg, s) and not eof):
+    if(not re.fullmatch(reg, s)):
         raise LexicException
     else:
         return s
@@ -147,7 +147,7 @@ def readWhileFullMatch(reader, s, reg):
 
 class Token(object):
 
-    def __init__(self, _type, row, col, lexeme=None,):
+    def __init__(self, _type, row, col, lexeme=None):
         self._type = _type
         if(lexeme):
             self.lexeme = lexeme
@@ -158,9 +158,9 @@ class Token(object):
 
     def __str__(self):
         if(self.lexeme == self._type):
-            return '<{},{},{}>'.format(self._type, self.row, self.col)
+            return '<{}, {}, {}>'.format(self._type, self.row, self.col)
         else:
-            return '<{},{},{},{}>'.format(
+            return '<{}, {}, {}, {}>'.format(
                 self._type, self.lexeme, self.row, self.col)
 
 

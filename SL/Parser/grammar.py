@@ -6,6 +6,7 @@ from .sets import *
 grammar_path = Path(__file__).parent / 'grammar.txt'
 terminal_reg = r'(?:\<.+\>)'
 non_terminal_reg = r'(?:[A-Z]+[0-9]*)'
+both_reg = '|'.join([terminal_reg, non_terminal_reg])
 
 
 class Grammar:
@@ -65,24 +66,25 @@ class Grammar:
 def parseRule(rule):
     a, b = rule
     a = a.strip()
-    b = b.strip().split()
+    b = b.split()
     if('eps' in b):
         if(len(b) > 1):
             raise ValueError
         else:
             return a, b
     for symbol in b:
-        reg = '|'.join([terminal_reg, non_terminal_reg])
-        if(not re.fullmatch(reg, symbol)):
+        if(not re.fullmatch(both_reg, symbol)):
             print(symbol + ' Doesn\'t match non_terminal or terminal regex')
             raise ValueError
     return a, b
 
 
 def splitRule(rule):
+    if(rule.strip() == '' or rule[:2] == '//'):
+        return []
     a, b = rule.split(':', 1)
     nt = a.strip()
-    rules = b.strip().split('|')
+    rules = b.split('|')
     arr = [(nt, rule.strip()) for rule in rules]
     return arr
 
