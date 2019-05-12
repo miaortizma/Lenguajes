@@ -1,6 +1,6 @@
 PROGRAMA
 PROGRAMA : PROGRAMAPRC SUBRUTINAS
-PROGRAMAPRC : NOMBRE DECLARACIONES SENTENCIAS 
+PROGRAMAPRC : NOMBRE DECLARACIONES <inicio> SENTENCIAS <fin> 
 NOMBRE : <programa> <id> | eps
 DECLARACIONES : <const> CONSTS DECLARACIONES | <tipo> TIPOS DECLARACIONES | <var> VARS DECLARACIONES | eps 
 CONSTS : CONST CONSTS2
@@ -12,7 +12,9 @@ TIPOS2 : TIPO TIPOS2 | eps
 VARS : VAR VARS2 | eps 
 VAR : <var>
 VARS2 : VAR VARS2 | eps
-SENTENCIAS : eps
+SENTENCIAS : LLAMADOFUNC | eps
+LLAMADOFUNC : <id> <tk_left_par> <tk_cadena> <tk_right_par> | NOMBREFUNC <tk_left_par> <tk_cadena> <tk_right_par>
+NOMBREFUNC : <imprimir>
 SUBRUTINAS : PROCEDIMIENTO SUBRUTINAS | FUNCION SUBRUTINAS | eps
 PROCEDIMIENTO : <procedimiento>
 FUNCION : <subrutina> <id> <tk_left_par> <id> <tk_double_point> PARAMETROS <tk_left_par> <retorna> <id> DECLARACIONES <inicio> SENTENCIAS RETORNA <fin>

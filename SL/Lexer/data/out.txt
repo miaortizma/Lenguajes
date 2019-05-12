@@ -4,3 +4,6 @@
 <tk_num,3.5e+3,4,1>
 <tk_not_equal,6,1>
 <tk_power,8,1>
+<id,Pito,10,1>
+<tk_num,2,12,1>
+<id,jajajja,14,1>

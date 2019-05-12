@@ -41,9 +41,10 @@ class fullCodeReader(codeReader):
     Reads code as a list of lines
     """
 
-    def __init__(self, code):
-        self.code = code
-        self.len = sum([len(line) for line in code])
+    def __init__(self, code_path):
+        with open(code_path) as file:
+            self.code = file.readlines()
+        self.len = sum([len(line) for line in self.code])
         self.row = self.col = self.displacement = self.iter = 0
         self.history = []
         self.c = None
@@ -97,9 +98,10 @@ class fullCodeReader(codeReader):
                 for i in range(n):
                     s = s + next(self)
                 return s
-            except:
+            except Exception as e:
                 n = len(s)
                 self.reset(n)
+                print(e)
                 raise ValueError
 
     def peek(self, n=1):
@@ -163,5 +165,10 @@ class Token(object):
 
 
 class LexicException(Exception):
+    """Raised when a lexic error happens"""
+    pass
+
+
+class SyntaxException(Exception):
     """Raised when a lexic error happens"""
     pass

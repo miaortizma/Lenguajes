@@ -22,7 +22,7 @@ class Grammar:
         self.explored = set()
         for rule in rules:
             self.addRule(rule)
-        self.non_terminals = list(sorted(self.non_terminals))
+        self.non_terminals = list(self.non_terminals)
         self.calculateSets()
 
     def calculateSets(self):
@@ -74,7 +74,7 @@ def parseRule(rule):
     for symbol in b:
         reg = '|'.join([terminal_reg, non_terminal_reg])
         if(not re.fullmatch(reg, symbol)):
-            print(symbol + ' Doesn\'t match non_terminal or terminal regex' )
+            print(symbol + ' Doesn\'t match non_terminal or terminal regex')
             raise ValueError
     return a, b
 
@@ -100,8 +100,5 @@ def parseGrammar(grammar_path):
     return grammar
 
 
-grammar = parseGrammar(grammar_path)
-print(grammar)
-
-print(predicts(grammar, 'S', ['A', 'B', 'C']))
-print('El análisis sintáctico ha finalizado exitosamente')
+if __name__ == '__main__':
+    grammar = parseGrammar(grammar_path)

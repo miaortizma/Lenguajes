@@ -11,7 +11,7 @@ sl_file = localPath / 'data/sl_sample.txt'
 output_file = localPath / 'data/out.txt'
 
 
-def init():
+def load_data():
     global reserved, tokens, tokens_regexp, regex, code
     with open(reserved_file) as file:
         reserved = set([x.rstrip() for x in file.readlines()])
@@ -26,9 +26,6 @@ def init():
         regex = dict([[x.strip() for x in line.split(':', 1)]
                       for line in file])
 
-    with open(sl_file) as file:
-        code = file.readlines()
-
 
 def appendToken(token):
     with open(output_file, 'a') as file:
@@ -37,7 +34,7 @@ def appendToken(token):
 
 def resetMatch(reader, c, pos):
     reader.reset()
-    tokenMatch(reader, c, pos)
+    return tokenMatch(reader, c, pos)
 
 
 def identificador(reader, s, pos):
@@ -45,24 +42,24 @@ def identificador(reader, s, pos):
     s = readWhileFullMatch(reader, s, reg)
     if s in reserved:
         if(s in ['NO', 'SI', 'TRUE', 'FALSE']):
-            appendToken(Token('tk_logico', pos[0], pos[1], s))
+            return Token('tk_logico', pos[0], pos[1], s)
         else:
-            appendToken(Token(s, pos[0], pos[1]))
+            return Token(s, pos[0], pos[1])
     else:
-        appendToken(Token('id', pos[0], pos[1], s))
+        return Token('id', pos[0], pos[1], s)
 
 
 def tokenMatch(reader, s, pos):
     if(not re.match(tokens_regexp, s)):
         raise LexicException
     s = readWhileFullMatch(reader, s, tokens_regexp)
-    appendToken(Token(tokens[s], pos[0], pos[1]))
+    return Token(tokens[s], pos[0], pos[1])
 
 
 def cadena(reader, s, pos):
     reg = regex['cadena']  # "(?:[^\\]|(?:\\.))*"
     s = readUntilFullMatch(reader, s, reg)
-    appendToken(Token('tk_cadena', pos[0], pos[1], s))
+    return Token('tk_cadena', pos[0], pos[1], s)
 
 
 def numerico(reader, s, pos):
@@ -74,7 +71,7 @@ def numerico(reader, s, pos):
     if(re.match(r'[eE][\+-][0-9]', reader.peek(3))):
         s += reader.read(3)
         s = readWhileFullMatch(reader, s, reg)
-    appendToken(Token('tk_num', pos[0], pos[1], s))
+    return Token('tk_num', pos[0], pos[1], s)
 
 
 def slash(reader, c, pos):
@@ -83,7 +80,7 @@ def slash(reader, c, pos):
         '*': lambda: readUntilFullMatch(reader, '/*', regex['block_comment']),
         '/': lambda: readWhileFullMatch(reader, '//', regex['comment'])}
     f = dct.get(p, lambda: resetMatch(reader, c, pos))
-    f()
+    return f()
 
 
 def sign(reader, c, pos):
@@ -91,22 +88,21 @@ def sign(reader, c, pos):
     dct = {True: lambda: numerico(reader, c + p, pos),
            False: lambda: resetMatch(reader, c, pos)}
     f = dct[bool(re.match(r'[0-9]', p))]
-    f()
+    return f()
 
 
 def default(reader, c, pos):
     if(re.match(r'[0-9]', c)):
-        numerico(reader, c, pos)
+        return numerico(reader, c, pos)
     elif(re.match(r'[a-zA-ZñÑ_]', c)):
-        identificador(reader, c, pos)
+        return identificador(reader, c, pos)
     else:
-        tokenMatch(reader, c, pos)
+        return tokenMatch(reader, c, pos)
 
 
-def main(code):
-    with open(output_file, 'w') as file:
-        file.write('')  # erases output
-    reader = fullCodeReader(code)
+def nextToken(reader):
+    if(reader.done()):
+        return '$'
     while(not reader.done()):
         pos = reader.pos()
         c = next(reader)
@@ -119,7 +115,9 @@ def main(code):
                    '"': cadena,
                    "'": cadena}
             f = dct.get(c, default)
-            f(reader, c, pos)
+            token = f(reader, c, pos)
+            if(isinstance(token, Token)):
+                return token
         except LexicException:
             with open(output_file, 'a') as file:
                 file.write(
@@ -128,7 +126,17 @@ def main(code):
             break
 
 
-init()
-print(code)
-main(code)
-print('termine')
+def main(reader):
+    with open(output_file, 'w') as file:
+        file.write('')  # erases output
+    while(not reader.done()):
+        token = nextToken(reader)
+        appendToken(token)
+
+
+load_data()
+
+if __name__ == '__main__':
+    reader = fullCodeReader(sl_file)
+    main(reader)
+    print('termine')
