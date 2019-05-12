@@ -101,10 +101,10 @@ def default(reader, c, pos):
 
 
 def nextToken(reader):
+    pos = reader.pos()
     if(reader.done()):
-        return '$'
+        return Token('$', pos[0], pos[1])
     while(not reader.done()):
-        pos = reader.pos()
         c = next(reader)
         try:
             if(re.match(r'\s', c)):  # espacios en blanco

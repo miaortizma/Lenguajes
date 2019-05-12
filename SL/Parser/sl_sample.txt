@@ -1,2 +1,4 @@
 inicio
 	imprimir("Hola Mundo")
+	hola("pepe")
+fin

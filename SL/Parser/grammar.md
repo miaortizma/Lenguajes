@@ -12,7 +12,7 @@ TIPOS2 : TIPO TIPOS2 | eps
 VARS : VAR VARS2 | eps 
 VAR : <var>
 VARS2 : VAR VARS2 | eps
-SENTENCIAS : LLAMADOFUNC | eps
+SENTENCIAS : LLAMADOFUNC SENTENCIAS | eps
 LLAMADOFUNC : <id> <tk_left_par> <tk_cadena> <tk_right_par> | NOMBREFUNC <tk_left_par> <tk_cadena> <tk_right_par>
 NOMBREFUNC : <imprimir>
 SUBRUTINAS : PROCEDIMIENTO SUBRUTINAS | FUNCION SUBRUTINAS | eps
