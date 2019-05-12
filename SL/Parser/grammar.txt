@@ -1,12 +1,13 @@
 S
-S : A <uno> B C
-S : S <dos>
-A : B C D
-A : A <tres>
+S : A B C
+S : D E
+A : <dos> B <tres>
 A : eps
-B : D <cuatro> C <tres>
-B : eps
-C : <cinco> D B
+B : B2
+B2 : <cuatro> C <cinco> B2
+B2 : eps
+C : <seis> A B
 C : eps
-D : <seis>
-D : eps
+D : <uno> A E
+D : B
+E : <tres>

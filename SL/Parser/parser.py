@@ -20,6 +20,7 @@ class Grammar:
         self.non_terminals = set()
         self.firsts = {}
         self.explored = set()
+
         for rule in rules:
             self.addRule(rule)
         self.non_terminals = list(sorted(self.non_terminals))
@@ -155,7 +156,7 @@ def followsResolve(grammar):
 
 def predicts(grammar, non_terminal, alpha):
     sol = first(grammar, alpha)
-    if('eps' in non_terminal):
+    if('eps' in sol):
         return (sol - {'eps'}) | grammar.follows[non_terminal]
     else:
         return sol
@@ -163,4 +164,6 @@ def predicts(grammar, non_terminal, alpha):
 
 grammar = parseGrammar(grammar_path)
 print(grammar)
+
+print(predicts(grammar, 'S', ['A', 'B', 'C']))
 print('El análisis sintáctico ha finalizado exitosamente')
