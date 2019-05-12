@@ -2,16 +2,17 @@
 -   : tk_minus
 \*  : tk_asterisk
 /   : tk_division
-\^   : tk_power
+\^  : tk_power
 %   : tk_mod
 ;   : tk_semicolon
+\:  : tk_double_point
 <   : tk_less
 <=  : tk_less_equal
 >   : tk_greater
 >=  : tk_greater_equal
 ==  : tk_equal
 <>  : tk_not_equal
-=   : tk_asign
+=   : tk_assign
 \.  : tk_point
 ,   : tk_comma
 \(  : tk_left_par
@@ -20,4 +21,3 @@
 }   : tk_right_brace
 \[  : tk_left_bracket
 \]  : tk_right_bracket
-\:  : tk_double_point
