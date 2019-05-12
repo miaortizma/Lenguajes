@@ -15,6 +15,13 @@ def load_data():
     global reserved, tokens, tokens_regexp, regex, code
     with open(reserved_file) as file:
         reserved = set([x.rstrip() for x in file.readlines()])
+    tokens, tokens_regexp = getTokens()
+    with open(regex_file, encoding='utf-8') as file:
+        regex = dict([[x.strip() for x in line.split(':', 1)]
+                      for line in file])
+
+
+def getTokens():
     with open(tokens_file) as file:
         tokens_regexp = dict(
             [[x.strip() for x in line.split(' : ')] for line in file])
@@ -22,9 +29,7 @@ def load_data():
             x, tokens_regexp[x]) for x in tokens_regexp])
         tokens_regexp = '|'.join([r'(?:{})'.format(reg)
                                   for reg in tokens_regexp])
-    with open(regex_file, encoding='utf-8') as file:
-        regex = dict([[x.strip() for x in line.split(':', 1)]
-                      for line in file])
+    return tokens, tokens_regexp
 
 
 def appendToken(token):

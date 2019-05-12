@@ -10,10 +10,24 @@ leer (n)
 // Calculemos el cuadrado de n para luego imprimirlo
 cuad = n
 imprimir (cuad)
+
+si (TRUE){
+	imprimir ( " haha " )
+	sino si (FALSE)
+		imprimir ( " sad " )
+		si(X){
+			leer(a)
+			sino
+			leer(b)
+		}
+	sino
+	imprimir ( "hola" )
+}
+
 fin
 
 
-subrutina sub1() retorna numerico
+subrutina sub1(n : numerico) retorna numerico
 const
 	PI = 3.1415
 	RAIZ = 0.4442
@@ -22,7 +36,7 @@ var
 
 var 
 	a, b : numerico
-	c : numerico
+	c : numerico;
 	str : cadena
 	enc : logico
 const
@@ -31,12 +45,15 @@ tipos
 	PRODUCTO : registro
 			   {
 			     codigo : numerico
-			     descrip : cadena
-			     precio : numerico 
+			     descrip : cadena;
+			     precio : numerico
+			     ejemplo : registro {
+			     					 hola : cadena
+			     					} 
 			   }
 	TLineaTexto : cadena
 	VEC : vector [10] numerico
-	MAT : matriz [10,10] numerico
+	MAT : matriz [*, 10] numerico
 inicio
 	imprimir("Hola Mundo")
 	imprimir("pepe")

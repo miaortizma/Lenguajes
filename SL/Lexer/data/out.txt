@@ -18,88 +18,140 @@
 <tk_left_par, 12, 9>
 <id, cuad, 12, 11>
 <tk_right_par, 12, 15>
-<fin, 12, 16>
-<subrutina, 13, 4>
-<id, sub1, 16, 10>
-<tk_left_par, 16, 15>
-<tk_right_par, 16, 16>
-<retorna, 16, 17>
-<numerico, 16, 25>
-<const, 16, 34>
-<id, PI, 17, 6>
-<tk_assign, 18, 7>
-<tk_numerico, 3.1415, 18, 9>
-<id, RAIZ, 18, 16>
-<tk_assign, 19, 9>
-<tk_numerico, 0.4442, 19, 11>
-<var, 19, 18>
-<id, X, 20, 4>
-<tk_double_point, 21, 6>
-<numerico, 21, 8>
-<var, 21, 17>
-<id, a, 23, 4>
-<tk_comma, 24, 6>
-<id, b, 24, 7>
-<tk_double_point, 24, 9>
-<numerico, 24, 11>
-<id, c, 24, 20>
-<tk_double_point, 25, 6>
-<numerico, 25, 8>
-<id, str, 25, 17>
-<tk_double_point, 26, 8>
-<cadena, 26, 10>
-<id, enc, 26, 17>
-<tk_double_point, 27, 8>
-<logico, 27, 10>
-<const, 27, 17>
-<id, PI, 28, 6>
-<tk_assign, 29, 7>
-<tk_numerico, 3.1415, 29, 9>
-<tipos, 29, 16>
-<id, PRODUCTO, 30, 6>
-<tk_double_point, 31, 13>
-<registro, 31, 15>
-<tk_left_brace, 31, 24>
-<id, codigo, 32, 17>
-<tk_double_point, 33, 24>
-<numerico, 33, 26>
-<id, descrip, 33, 35>
-<tk_double_point, 34, 25>
-<cadena, 34, 27>
-<id, precio, 34, 34>
-<tk_double_point, 35, 24>
-<numerico, 35, 26>
-<tk_right_brace, 35, 35>
-<id, TLineaTexto, 36, 17>
-<tk_double_point, 37, 16>
-<cadena, 37, 18>
-<id, VEC, 37, 25>
-<tk_double_point, 38, 8>
-<vector, 38, 10>
-<tk_left_bracket, 38, 17>
-<tk_numerico, 10, 38, 19>
-<tk_right_bracket, 38, 21>
-<numerico, 38, 22>
-<id, MAT, 38, 31>
-<tk_double_point, 39, 8>
-<matriz, 39, 10>
-<tk_left_bracket, 39, 17>
-<tk_numerico, 10, 39, 19>
-<tk_comma, 39, 21>
-<tk_numerico, 10, 39, 22>
-<tk_right_bracket, 39, 24>
-<numerico, 39, 25>
-<inicio, 39, 34>
-<imprimir, 40, 7>
-<tk_left_par, 41, 13>
-<tk_cadena, "Hola Mundo", 41, 14>
-<tk_right_par, 41, 26>
-<imprimir, 41, 27>
-<tk_left_par, 42, 13>
-<tk_cadena, "pepe", 42, 14>
-<tk_right_par, 42, 20>
-<retorna, 42, 21>
-<tk_left_par, 43, 12>
-<id, algun_valor, 43, 14>
-<tk_right_par, 43, 25>
-<fin, 43, 26>
+<si, 12, 16>
+<tk_left_par, 14, 3>
+<tk_logico, TRUE, 14, 5>
+<tk_right_par, 14, 9>
+<tk_left_brace, 14, 10>
+<imprimir, 14, 11>
+<tk_left_par, 15, 13>
+<tk_cadena, " haha ", 15, 15>
+<tk_right_par, 15, 24>
+<sino, 15, 26>
+<si, 16, 9>
+<tk_left_par, 16, 12>
+<tk_logico, FALSE, 16, 14>
+<tk_right_par, 16, 19>
+<imprimir, 16, 20>
+<tk_left_par, 17, 17>
+<tk_cadena, " sad ", 17, 19>
+<tk_right_par, 17, 27>
+<si, 17, 29>
+<tk_left_par, 18, 11>
+<id, X, 18, 12>
+<tk_right_par, 18, 13>
+<tk_left_brace, 18, 14>
+<leer, 18, 15>
+<tk_left_par, 19, 17>
+<id, a, 19, 18>
+<tk_right_par, 19, 19>
+<sino, 19, 20>
+<leer, 20, 17>
+<tk_left_par, 21, 17>
+<id, b, 21, 18>
+<tk_right_par, 21, 19>
+<tk_right_brace, 21, 20>
+<sino, 22, 10>
+<imprimir, 23, 9>
+<tk_left_par, 24, 13>
+<tk_cadena, "hola", 24, 15>
+<tk_right_par, 24, 22>
+<tk_right_brace, 24, 24>
+<fin, 25, 2>
+<subrutina, 27, 4>
+<id, sub1, 30, 10>
+<tk_left_par, 30, 15>
+<id, n, 30, 16>
+<tk_double_point, 30, 17>
+<numerico, 30, 19>
+<tk_right_par, 30, 28>
+<retorna, 30, 29>
+<numerico, 30, 37>
+<const, 30, 46>
+<id, PI, 31, 6>
+<tk_assign, 32, 7>
+<tk_numerico, 3.1415, 32, 9>
+<id, RAIZ, 32, 16>
+<tk_assign, 33, 9>
+<tk_numerico, 0.4442, 33, 11>
+<var, 33, 18>
+<id, X, 34, 4>
+<tk_double_point, 35, 6>
+<numerico, 35, 8>
+<var, 35, 17>
+<id, a, 37, 4>
+<tk_comma, 38, 6>
+<id, b, 38, 7>
+<tk_double_point, 38, 9>
+<numerico, 38, 11>
+<id, c, 38, 20>
+<tk_double_point, 39, 6>
+<numerico, 39, 8>
+<tk_semicolon, 39, 17>
+<id, str, 39, 18>
+<tk_double_point, 40, 8>
+<cadena, 40, 10>
+<id, enc, 40, 17>
+<tk_double_point, 41, 8>
+<logico, 41, 10>
+<const, 41, 17>
+<id, PI, 42, 6>
+<tk_assign, 43, 7>
+<tk_numerico, 3.1415, 43, 9>
+<tipos, 43, 16>
+<id, PRODUCTO, 44, 6>
+<tk_double_point, 45, 13>
+<registro, 45, 15>
+<tk_left_brace, 45, 24>
+<id, codigo, 46, 17>
+<tk_double_point, 47, 24>
+<numerico, 47, 26>
+<id, descrip, 47, 35>
+<tk_double_point, 48, 25>
+<cadena, 48, 27>
+<tk_semicolon, 48, 34>
+<id, precio, 48, 35>
+<tk_double_point, 49, 24>
+<numerico, 49, 26>
+<id, ejemplo, 49, 35>
+<tk_double_point, 50, 25>
+<registro, 50, 27>
+<tk_left_brace, 50, 36>
+<id, hola, 50, 38>
+<tk_double_point, 51, 43>
+<cadena, 51, 45>
+<tk_right_brace, 51, 52>
+<tk_right_brace, 52, 39>
+<id, TLineaTexto, 53, 17>
+<tk_double_point, 54, 16>
+<cadena, 54, 18>
+<id, VEC, 54, 25>
+<tk_double_point, 55, 8>
+<vector, 55, 10>
+<tk_left_bracket, 55, 17>
+<tk_numerico, 10, 55, 19>
+<tk_right_bracket, 55, 21>
+<numerico, 55, 22>
+<id, MAT, 55, 31>
+<tk_double_point, 56, 8>
+<matriz, 56, 10>
+<tk_left_bracket, 56, 17>
+<tk_asterisk, 56, 19>
+<tk_comma, 56, 20>
+<tk_numerico, 10, 56, 21>
+<tk_right_bracket, 56, 24>
+<numerico, 56, 25>
+<inicio, 56, 34>
+<imprimir, 57, 7>
+<tk_left_par, 58, 13>
+<tk_cadena, "Hola Mundo", 58, 14>
+<tk_right_par, 58, 26>
+<imprimir, 58, 27>
+<tk_left_par, 59, 13>
+<tk_cadena, "pepe", 59, 14>
+<tk_right_par, 59, 20>
+<retorna, 59, 21>
+<tk_left_par, 60, 12>
+<id, algun_valor, 60, 14>
+<tk_right_par, 60, 25>
+<fin, 60, 26>

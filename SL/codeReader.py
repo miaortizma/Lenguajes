@@ -163,6 +163,9 @@ class Token(object):
             return '<{}, {}, {}, {}>'.format(
                 self._type, self.lexeme, self.row, self.col)
 
+    def __repr__(self):
+        return str(self)
+
 
 class LexicException(Exception):
     """Raised when a lexic error happens"""
