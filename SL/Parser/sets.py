@@ -44,7 +44,7 @@ def first(grammar, alpha):
 def follows(grammar, non_terminal):
     grammar.explored.add(non_terminal)
     if(non_terminal is grammar.initial):
-        grammar.follows[non_terminal].add('$')
+        grammar.follows[non_terminal].add('<$>')
     for rule in grammar.rules[non_terminal]:
         for i in range(len(rule)):
             symbol = rule[i]
