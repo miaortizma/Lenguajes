@@ -12,9 +12,20 @@ sl_sample = localPath / 'sl_sample.txt'
 
 derivation = []
 tokens = []
+position = []
 
 
-def sino(grammar, reader):
+def opt(grammar, reader, verbose=False):
+    global derivation, tokens, positions
+    tk = token(reader)
+    opt_pos = reader.pos()
+    if(positions[0][0] == opt_pos[0]):
+        if(tk._type != 'tk_semicolon'):
+            raise SyntaxException
+    predictDerivation(grammar, reader, verbose=verbose)
+
+
+def sino(grammar, reader, verbose=False):
     global derivation, tokens
     sino_pos = reader.pos()
     tk = token(reader)
@@ -26,15 +37,17 @@ def sino(grammar, reader):
 
 
 def token(reader):
-    global tokens
+    global tokens, positions
     if(len(tokens) == 0):
         tokens.append(nextToken(reader))
+        positions.append(reader.pos())
     return tokens[0]
 
 
-def predictDerivation(grammar, reader, symbol, verbose=False):
-    global derivation
+def predictDerivation(grammar, reader, verbose=False):
+    global derivation, tokens
     tk = token(reader)
+    symbol = derivation[0]
     if(verbose):
             print('--------')
             print('derivación: ', end='')
@@ -43,10 +56,12 @@ def predictDerivation(grammar, reader, symbol, verbose=False):
     for i, rules in enumerate(grammar.rules[symbol]):
         rule = grammar.rules[symbol][i]
         predicts = grammar.predicts[symbol][i]
+        """
         if(verbose):
             print('token: ' + str(tk))
             print(*rule, sep=', ', end=' ')
             print(predicts)
+        """
         if('<' + tk._type + '>' in predicts):
             candidates.append(i)
     if(len(candidates) > 1):
@@ -65,23 +80,27 @@ def predictDerivation(grammar, reader, symbol, verbose=False):
 
 
 def derivate(grammar, reader, verbose=False):
-    global derivation, tokens
+    global derivation, tokens, positions
     while(len(derivation)):
         symbol = derivation[0]
-        if(symbol == 'SINO2'):
-            sino(grammar, reader)
-            continue
-        tk = token(reader)
+        """
+        if read token now it will screw up with knowing
+        if last token and this one is on same line or not
+        """
         if(isNT(symbol)):
-            predictDerivation(grammar, reader, symbol, verbose=verbose)
-        elif(tk._type == symbol[1:-1]):
+            dct = {'SINO2': sino,
+                   'OPT': opt}
+            f = dct.get(symbol, predictDerivation)
+            f(grammar, reader, verbose=verbose)
+        elif(token(reader)._type == symbol[1:-1]):
             if(verbose):
                 print('--------')
                 print('derivación: ', end='')
                 print(*derivation, sep=' ')
-                print('token: ' + str(tk))
+                print('token: ' + str(tokens[0]))
             derivation = derivation[1:]
             tokens = tokens[1:]
+            positions = positions[1:]
         else:
             raise SyntaxException
     return tokens
@@ -104,9 +123,10 @@ def handleSyntaxException(grammar, reader):
 
 
 def parse(grammar, reader, verbose=False):
-    global derivation, tokens
+    global derivation, tokens, positions
     derivation = ['PROGRAMAPRC']
     tokens = []
+    positions = [(1, 1)]
     try:
         tokens = derivate(grammar, reader, verbose=verbose)
     except SyntaxException as e:

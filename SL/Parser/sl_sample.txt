@@ -4,12 +4,21 @@ Dado un número n, imprimir su cuadrado.*/
 var
 	n, // valor proveido por el usuario
 	cuad : numerico // cuadrado de n
+	v : vector[100] registro {
+		a, b : numerico
+	}
 inicio
 /* Pidamos al usuario que ingrese un numero */
 leer (n)
 // Calculemos el cuadrado de n para luego imprimirlo
-cuad = n
-imprimir (cuad)
+cuad = n; imprimir (cuad)
+
+
+hola = {{1, 2, 3}, 
+		{4, 5, 6}, 
+		{7, 8, 9}}
+
+hola[0, 1] = 1
 
 si (TRUE){
 	imprimir ( " haha " )
@@ -17,6 +26,9 @@ si (TRUE){
 		imprimir ( " sad " )
 		si(X){
 			leer(a)
+			si(Y){
+			
+			}
 			sino
 			leer(b)
 		}
@@ -47,6 +59,7 @@ tipos
 			     codigo : numerico
 			     descrip : cadena;
 			     precio : numerico
+			     v : vector [*] numerico
 			     ejemplo : registro {
 			     					 hola : cadena
 			     					} 
