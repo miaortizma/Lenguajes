@@ -2,14 +2,12 @@ import re
 from path import Path
 from codeReader import *
 
-
 localPath = Path(__file__).parent
 reserved_file = localPath / 'data/reserved.txt'
 tokens_file = localPath / 'data/tokens.txt'
 regex_file = localPath / 'data/regex.txt'
 sl_file = localPath / 'data/sl_sample.txt'
 output_file = localPath / 'data/out.txt'
-
 
 def load_data():
     global reserved, tokens, tokens_regexp, regex, code

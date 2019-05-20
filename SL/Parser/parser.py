@@ -9,11 +9,9 @@ localPath = Path(__file__).parent
 grammar_path = localPath / 'grammar.md'
 sl_sample = localPath / 'sl_sample.txt'
 
-
 derivation = []
 tokens = []
 position = []
-
 
 def opt(grammar, reader, verbose=False):
     global derivation, tokens, positions
@@ -50,7 +48,7 @@ def predictDerivation(grammar, reader, verbose=False):
     symbol = derivation[0]
     if(verbose):
             print('--------')
-            print('derivación: ', end='')
+            print('derivacion: ', end='')
             print(*derivation, sep=', ')
     candidates = []
     for i, rules in enumerate(grammar.rules[symbol]):
@@ -95,7 +93,7 @@ def derivate(grammar, reader, verbose=False):
         elif(token(reader)._type == symbol[1:-1]):
             if(verbose):
                 print('--------')
-                print('derivación: ', end='')
+                print('derivacion: ', end='')
                 print(*derivation, sep=' ')
                 print('token: ' + str(tokens[0]))
             derivation = derivation[1:]
@@ -116,7 +114,7 @@ def handleSyntaxException(grammar, reader):
     firsts = first(grammar, derivation)
     firsts = [tokenToSymbol(te[1:-1]) for te in firsts]
     s = '<{}, {}>'.format(pos[0], pos[1])
-    s += ' Error sintáctico: se encontro: "{}";'.format(
+    s += ' Error sintactico: se encontro: "{}";'.format(
         tokenToSymbol(tk._type))
     s += ' Se esperaba: ' + ','.join(['"{}"'.format(te) for te in firsts])
     print(s)
@@ -131,9 +129,9 @@ def parse(grammar, reader, verbose=False):
         tokens = derivate(grammar, reader, verbose=verbose)
     except SyntaxException as e:
         handleSyntaxException(grammar, reader)
-        print('Error sintáctico: falta función principal *correcta*')
+        print('Error sintactico: falta funcion principal *correcta*')
     else:
-        print('Función principal exitosa')
+        print('Funcion principal exitosa')
         derivation = ['SUBRUTINAS']
         try:
             tokens = derivate(
@@ -141,7 +139,7 @@ def parse(grammar, reader, verbose=False):
         except SyntaxException as e:
             handleSyntaxException(grammar, reader)
         else:
-            print('El análisis sintáctico ha finalizado exitosamente')
+            print('El analisis sintactico ha finalizado exitosamente')
 
 
 def load_data():
@@ -153,12 +151,10 @@ def load_data():
     tokensToSymbols['tk_cadena'] = 'cadena'
     tokensToSymbols['tk_logico'] = 'logico'
 
-
 def main(reader, verbose=False):
     load_data()
     grammar = parseGrammar(grammar_path)
     parse(grammar, reader, verbose=verbose)
-
 
 if __name__ == '__main__':
     reader = fullCodeReader(sl_sample)

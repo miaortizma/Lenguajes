@@ -2,10 +2,8 @@ import re
 terminal_reg = r'(?:\<.+\>)'
 non_terminal_reg = r'(?:[A-Z]+[0-9]*)'
 
-
 def isNT(symbol):
     return re.fullmatch(non_terminal_reg, symbol)
-
 
 def firsts(grammar, non_terminal):
     """
@@ -56,7 +54,6 @@ def follows(grammar, non_terminal):
                 if('eps' in sol):
                     grammar.follows[symbol].add(non_terminal)
 
-
 def followsResolve(grammar):
     added = False
     for non_terminal in grammar.non_terminals:
@@ -70,7 +67,6 @@ def followsResolve(grammar):
                 copy -= set([elem])
         grammar.follows[non_terminal] = copy
     return added
-
 
 def predicts(grammar, non_terminal, alpha):
     sol = first(grammar, alpha)

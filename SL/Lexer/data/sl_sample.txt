@@ -1,14 +1,1 @@
-Hola Como estas
-// jeje
-
-3.5e+3
-
-<>
-
-^
-
-Pito
-
-2
-
-jajajja
+c = a ^ 2 * -b

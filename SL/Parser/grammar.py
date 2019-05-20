@@ -8,9 +8,7 @@ terminal_reg = r'(?:\<.+\>)'
 non_terminal_reg = r'(?:[A-Z]+[0-9]*)'
 both_reg = '|'.join([terminal_reg, non_terminal_reg])
 
-
 class Grammar:
-
     def __init__(self, rules, initial):
         self.initial = initial
         self.rules = defaultdict(list)
@@ -62,7 +60,6 @@ class Grammar:
             s += str(nt) + '\t' + str(sorted(self.follows[nt])) + '\n'
         return s
 
-
 def parseRule(rule):
     a, b = rule
     a = a.strip()
@@ -78,7 +75,6 @@ def parseRule(rule):
             raise ValueError
     return a, b
 
-
 def splitRule(rule):
     if(rule.strip() == '' or rule[:2] == '//'):
         return []
@@ -87,7 +83,6 @@ def splitRule(rule):
     rules = b.split('|')
     arr = [(nt, rule.strip()) for rule in rules]
     return arr
-
 
 def parseGrammar(grammar_path):
     """
@@ -100,7 +95,6 @@ def parseGrammar(grammar_path):
         rules = [parseRule(rule) for rule in rules]
     grammar = Grammar(rules, initial)
     return grammar
-
 
 if __name__ == '__main__':
     grammar = parseGrammar(grammar_path)
