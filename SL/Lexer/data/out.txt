@@ -7,5 +7,9 @@
 <tk_assign, 5, 6>
 <tk_minus, 5, 8>
 <id, b, 5, 10>
-<tk_semicolon, 5, 11>
-<fin, 5, 12>
+<tk_plus, 5, 11>
+<id, a, 5, 13>
+<tk_asterisk, 5, 15>
+<tk_numerico, 2, 5, 17>
+<tk_semicolon, 5, 19>
+<fin, 5, 20>
