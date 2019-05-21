@@ -105,8 +105,6 @@ def default(reader, c, pos):
 
 def nextToken(reader):
     pos = reader.pos()
-    if(reader.done()):
-        return Token('$', pos[0], pos[1])
     while(not reader.done()):
         c = next(reader)
         try:
@@ -127,6 +125,8 @@ def nextToken(reader):
                     'Error Léxico(linea:{},posición:{})'
                     .format(pos[0], pos[1]))
             raise ValueError
+    if(reader.done()):
+        return Token('$', pos[0], pos[1])
 
 
 def main(reader, verbose=False):

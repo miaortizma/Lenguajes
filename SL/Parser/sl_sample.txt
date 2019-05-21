@@ -1,20 +1,31 @@
+programa cuadrado
+/*(Esto es un comentario!)
+Dado un número n, imprimir su cuadrado.*/
+var
+	n, // valor proveido por el usuario
+	cuad : numerico // cuadrado de n
+	v : vector[100] registro {
+		a, b : numerico
+	}
+
 var
 	p1 : cadena
 
 inicio
 	a = -b + a * 2;
+	//a = -b;
 	// OPERADORES
-	// c = a ^ 2 * -b ERROR
-	// y = v0y * t + 1/2 * -g * t^2
-	// y = (v0y * t) + ( (1/2)*(-g)*(t^2) )
-	// x1 = (-b + sqrt(b^2 - 4*a*c )) / (2*a);
-	// x2 = (-b - sqrt(b^2 - 4*a*c )) / (2*a);
-	// d = sqrt((p2.y - p1.y)^2 + (p1.x - p2.x)^2)
+	c = a ^ 2 * -b //ERROR
+	y = v0y * t + 1/2 * -g * t^2
+	//y = (v0y * t) + ( (1/2)*(-g)*(t^2) )
+	//x1 = (-b + sqrt(b^2 - 4*a*c )) / (2*a);
+	//x2 = (-b - sqrt(b^2 - 4*a*c )) / (2*a);
+	d = sqrt((p2.y.a[100] - p1[100,20].y)^2 + (p1.x - p2.x)^2)
 
-	// ASIGNACION
-	// a = 10.231
-	// b = a + 1
-	// hipotenusa = sqrt (a^2 + b^2)
+	//ASIGNACION
+	a = 10.231
+	b = a + 1
+	hipotenusa = sqrt (a^2 + b^2)
 
 	// CONDICIONALES
 	// si ( (a > b + c) or (b > a + c) or (c > a + b) )
@@ -23,4 +34,70 @@ inicio
 	//sino
 //		imprimir ("\nPueden formar un triangulo")
 //	}
+/* Pidamos al usuario que ingrese un numero */
+leer (n)
+// Calculemos el cuadrado de n para luego imprimirlo
+cuad = n; imprimir (cuad)
+
+
+hola = {{1, 2, 3}, 
+		{4, 5, 6}, 
+		{7, 8, 9}}
+
+hola[0, 1] = 1
+
+si (TRUE){
+	imprimir ( " haha " )
+	sino si (FALSE)
+		imprimir ( " sad " )
+		si(X){
+			leer(a)
+			si(Y){
+				
+			}
+			sino
+			si (A){
+
+			}
+			leer(b)
+		}
+	sino
+	imprimir ( "hola" )
+}
 fin
+
+
+subrutina sub1(n : numerico) retorna numerico
+const
+	PI = 3.1415
+	RAIZ = 0.4442
+var
+	X : numerico
+
+var 
+	a, b : numerico
+	c : numerico;
+	str : cadena
+	enc : logico
+const
+	PI = 3.1415
+tipos
+	PRODUCTO : registro
+			   {
+			     codigo : numerico
+			     descrip : cadena;
+			     precio : numerico
+			     v : vector [*] numerico
+			     ejemplo : registro {
+			     					 hola : cadena
+			     					} 
+			   }
+	TLineaTexto : cadena
+	VEC : vector [10] numerico
+	MAT : matriz [*, 10] numerico
+inicio
+	imprimir("Hola Mundo")
+	imprimir("pepe")
+	retorna (algun_valor)
+fin
+
