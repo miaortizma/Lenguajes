@@ -11,7 +11,8 @@ sl_sample = localPath / 'sl_sample.txt'
 
 derivation = []
 tokens = []
-position = []
+positions = []
+
 
 def opt(grammar, reader, verbose=False):
     global derivation, tokens, positions
@@ -63,6 +64,9 @@ def predictDerivation(grammar, reader, verbose=False):
         if('<' + tk._type + '>' in predicts):
             candidates.append(i)
     if(len(candidates) > 1):
+        for i in candidates:
+            print(grammar.rules[symbol][i])
+            print(grammar.predicts[symbol][i])
         raise ValueError('Grammar is not LL(1)')
     elif(len(candidates) == 0):
         raise SyntaxException
@@ -78,6 +82,10 @@ def predictDerivation(grammar, reader, verbose=False):
 
 
 def derivate(grammar, reader, verbose=False):
+    """
+    only : only errors with these tokens are taken into account,
+     used to check if main function exists
+    """
     global derivation, tokens, positions
     while(len(derivation)):
         symbol = derivation[0]
@@ -122,24 +130,15 @@ def handleSyntaxException(grammar, reader):
 
 def parse(grammar, reader, verbose=False):
     global derivation, tokens, positions
-    derivation = ['PROGRAMAPRC']
+    derivation = ['PROGRAMA']
     tokens = []
     positions = [(1, 1)]
     try:
         tokens = derivate(grammar, reader, verbose=verbose)
     except SyntaxException as e:
         handleSyntaxException(grammar, reader)
-        print('Error sintactico: falta funcion principal *correcta*')
     else:
-        print('Funcion principal exitosa')
-        derivation = ['SUBRUTINAS']
-        try:
-            tokens = derivate(
-                grammar, reader, verbose=verbose)
-        except SyntaxException as e:
-            handleSyntaxException(grammar, reader)
-        else:
-            print('El analisis sintactico ha finalizado exitosamente')
+        print('El analisis sintactico ha finalizado exitosamente')
 
 
 def load_data():
@@ -147,15 +146,39 @@ def load_data():
     tokens, tokens_regexp = getTokens()
     tokensToSymbols = dict(
         [(tokens[token], token) for token in tokens])  # invert dict
-    tokensToSymbols['tk_numerico'] = 'numerico'
-    tokensToSymbols['tk_cadena'] = 'cadena'
-    tokensToSymbols['tk_logico'] = 'logico'
+    tokensToSymbols['tk_numerico'] = 'tk_numerico'
+    tokensToSymbols['tk_cadena'] = 'tk_cadena'
+    tokensToSymbols['tk_logico'] = 'tk_logico'
 
-def main(reader, verbose=False):
-    load_data()
+
+def mainExists(reader, verbose=False):
+    global tokens, positions
+    tokens = []
+    positions = [(1, 1)]
+    while(token(reader)._type != 'inicio'):
+        if(token(reader)._type == '$'):
+            return False
+        tokens = tokens[1:]
+        positions = positions[1:]
+    while(token(reader)._type != 'fin'):
+        _type = token(reader)._type
+        if(_type == '$' or _type == 'subrutina'):
+            return False
+        tokens = tokens[1:]
+        positions = positions[1:]
+    return True
+
+
+def main(sl_path, verbose=False):
+    reader = fullCodeReader(sl_path)
     grammar = parseGrammar(grammar_path)
-    parse(grammar, reader, verbose=verbose)
+    load_data()
+    if(not mainExists(reader, verbose=verbose)):
+        print('Error sintactico: falta funcion_principal')
+    else:
+        reader = fullCodeReader(sl_path)
+        parse(grammar, reader, verbose=verbose)
+
 
 if __name__ == '__main__':
-    reader = fullCodeReader(sl_sample)
-    main(reader)
+    main(sl_sample)
