@@ -16,7 +16,7 @@ except LexicException as e:
 else:
     print('Exito lexer')
     try:
-        parser.main(sl_path, verbose=False)
+        parser.main(sl_path, verbose=True)
     except SyntaxException as e:
         print(e)
         print('Error parser')
