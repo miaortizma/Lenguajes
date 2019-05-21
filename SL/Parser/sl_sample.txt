@@ -14,11 +14,11 @@ var
 inicio
 	//a = -b;
 	// OPERADORES
-	//c = a ^ 2 * -b //ERROR
+	c = a ^ 2 * -b //ERROR
 	y = v0y * t + 1/2 * -g * t^2
-	y = (v0y * t) + ( (1/2)*(-g)*(t^2) )
+	//y = (v0y * t) + ( (1/2)*(-g)*(t^2) )
 	//x1 = (-b + sqrt(b^2 - 4*a*c )) / (2*a);
-	x2 = (-b - sqrt(b^2 - 4*a*c )) / (2*a);
+	//x2 = (-b - sqrt(b^2 - 4*a*c )) / (2*a);
 	d = sqrt((p2.y.a[100] - p1[100,20].y)^2 + (p1.x - p2.x)^2)
 
 	//ASIGNACION

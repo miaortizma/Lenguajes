@@ -25,7 +25,15 @@
 <tk_double_point, 12, 7>
 <cadena, 12, 9>
 <inicio, 12, 16>
-<id, y, 14, 7>
+<id, c, 14, 7>
+<tk_assign, 17, 6>
+<id, a, 17, 8>
+<tk_power, 17, 10>
+<tk_numerico, 2, 17, 12>
+<tk_asterisk, 17, 14>
+<tk_minus, 17, 16>
+<id, b, 17, 18>
+<id, y, 17, 19>
 <tk_assign, 18, 6>
 <id, v0y, 18, 8>
 <tk_asterisk, 18, 12>
@@ -41,59 +49,7 @@
 <id, t, 18, 29>
 <tk_power, 18, 31>
 <tk_numerico, 2, 18, 32>
-<id, y, 18, 33>
-<tk_assign, 19, 6>
-<tk_left_par, 19, 8>
-<id, v0y, 19, 10>
-<tk_asterisk, 19, 13>
-<id, t, 19, 15>
-<tk_right_par, 19, 17>
-<tk_plus, 19, 18>
-<tk_left_par, 19, 20>
-<tk_left_par, 19, 22>
-<tk_numerico, 1, 19, 24>
-<tk_division, 19, 25>
-<tk_numerico, 2, 19, 26>
-<tk_right_par, 19, 27>
-<tk_asterisk, 19, 28>
-<tk_left_par, 19, 29>
-<tk_minus, 19, 30>
-<id, g, 19, 31>
-<tk_right_par, 19, 32>
-<tk_asterisk, 19, 33>
-<tk_left_par, 19, 34>
-<id, t, 19, 35>
-<tk_power, 19, 36>
-<tk_numerico, 2, 19, 37>
-<tk_right_par, 19, 38>
-<tk_right_par, 19, 39>
-<id, x2, 19, 41>
-<tk_assign, 21, 7>
-<tk_left_par, 21, 9>
-<tk_minus, 21, 11>
-<id, b, 21, 12>
-<tk_minus, 21, 13>
-<id, sqrt, 21, 15>
-<tk_left_par, 21, 20>
-<id, b, 21, 21>
-<tk_power, 21, 22>
-<tk_numerico, 2, 21, 23>
-<tk_minus, 21, 24>
-<tk_numerico, 4, 21, 26>
-<tk_asterisk, 21, 28>
-<id, a, 21, 29>
-<tk_asterisk, 21, 30>
-<id, c, 21, 31>
-<tk_right_par, 21, 32>
-<tk_right_par, 21, 34>
-<tk_division, 21, 35>
-<tk_left_par, 21, 37>
-<tk_numerico, 2, 21, 39>
-<tk_asterisk, 21, 40>
-<id, a, 21, 41>
-<tk_right_par, 21, 42>
-<tk_semicolon, 21, 43>
-<id, d, 21, 44>
+<id, d, 18, 33>
 <tk_assign, 22, 6>
 <id, sqrt, 22, 8>
 <tk_left_par, 22, 13>
