@@ -1,46 +1,169 @@
-<programa, 1, 1>
-<id, uno, 1, 9>
-<var, 1, 13>
-<id, n, 12, 4>
-<tk_comma, 13, 4>
-<id, suma, 13, 5>
-<tk_comma, 13, 10>
-<id, k, 13, 11>
+<tipos, 1, 1>
+<id, PRODUCTO, 1, 6>
+<tk_double_point, 2, 11>
+<registro, 2, 13>
+<tk_left_brace, 2, 22>
+<id, codigo, 3, 13>
+<tk_double_point, 4, 20>
+<numerico, 4, 22>
+<id, descrip, 4, 31>
+<tk_double_point, 5, 21>
+<cadena, 5, 23>
+<id, precio, 5, 30>
+<tk_double_point, 6, 20>
+<numerico, 6, 22>
+<tk_right_brace, 6, 31>
+<var, 7, 14>
+<id, monitor, 8, 4>
+<tk_comma, 9, 10>
+<id, teclado, 9, 11>
+<tk_double_point, 9, 19>
+<id, PRODUCTO, 9, 21>
+<id, lista_prod, 9, 30>
+<tk_double_point, 10, 13>
+<vector, 10, 15>
+<tk_left_bracket, 10, 22>
+<tk_asterisk, 10, 24>
+<tk_right_bracket, 10, 25>
+<id, PRODUCTO, 10, 26>
+<id, r, 10, 35>
+<tk_double_point, 11, 4>
+<registro, 11, 6>
+<tk_left_brace, 11, 15>
+<id, nombre, 12, 6>
 <tk_double_point, 13, 13>
-<numerico, 13, 15>
-<inicio, 13, 24>
-<imprimir, 14, 7>
-<tk_left_par, 15, 11>
-<tk_cadena, "\nSuma de numeros pares entre 1 y n.\nPor favor ", 15, 13>
-<tk_comma, 15, 63>
-<tk_cadena, "ingrese un valor para n: ", 15, 64>
-<tk_right_par, 15, 91>
-<leer, 15, 92>
-<tk_left_par, 16, 7>
-<id, n, 16, 9>
-<tk_right_par, 16, 10>
-<id, suma, 16, 11>
-<tk_assign, 17, 7>
-<tk_numerico, 0, 17, 9>
-<desde, 17, 11>
-<id, k, 18, 8>
-<tk_assign, 18, 10>
-<tk_numerico, 2, 18, 11>
-<hasta, 18, 12>
-<id, n, 18, 18>
-<paso, 18, 20>
-<tk_numerico, 2, 18, 25>
-<tk_left_brace, 18, 27>
-<id, suma, 19, 4>
-<tk_assign, 20, 9>
-<id, suma, 20, 11>
-<tk_plus, 20, 16>
-<id, k, 20, 18>
-<tk_right_brace, 20, 20>
-<imprimir, 21, 4>
-<tk_left_par, 22, 11>
-<tk_cadena, "\nLa suma es ", 22, 13>
-<tk_comma, 22, 28>
-<id, suma, 22, 29>
-<tk_right_par, 22, 34>
-<fin, 22, 35>
+<cadena, 13, 15>
+<id, fecha_nac, 13, 22>
+<tk_double_point, 14, 16>
+<registro, 14, 18>
+<tk_left_brace, 14, 27>
+<id, dia, 15, 18>
+<tk_comma, 16, 23>
+<id, mes, 16, 24>
+<tk_comma, 16, 28>
+<id, ano, 16, 29>
+<tk_double_point, 16, 33>
+<numerico, 16, 35>
+<tk_right_brace, 16, 44>
+<id, notas, 17, 18>
+<tk_double_point, 18, 12>
+<vector, 18, 14>
+<tk_left_bracket, 18, 21>
+<tk_asterisk, 18, 23>
+<tk_right_bracket, 18, 24>
+<numerico, 18, 25>
+<tk_right_brace, 18, 34>
+<id, a, 19, 6>
+<tk_double_point, 20, 4>
+<registro, 20, 6>
+<tk_left_brace, 20, 15>
+<id, x, 21, 6>
+<tk_comma, 22, 8>
+<id, y, 22, 9>
+<tk_double_point, 22, 11>
+<numerico, 22, 13>
+<id, v, 22, 22>
+<tk_double_point, 23, 8>
+<vector, 23, 10>
+<tk_left_bracket, 23, 17>
+<tk_asterisk, 23, 19>
+<tk_right_bracket, 23, 20>
+<numerico, 23, 21>
+<tk_right_brace, 23, 30>
+<id, b, 24, 6>
+<tk_double_point, 25, 4>
+<registro, 25, 6>
+<tk_left_brace, 25, 15>
+<id, m, 26, 6>
+<tk_comma, 27, 8>
+<id, n, 27, 9>
+<tk_double_point, 27, 11>
+<numerico, 27, 13>
+<id, c, 27, 22>
+<tk_double_point, 28, 8>
+<vector, 28, 10>
+<tk_left_bracket, 28, 17>
+<tk_numerico, 3, 28, 19>
+<tk_right_bracket, 28, 20>
+<numerico, 28, 21>
+<tk_right_brace, 28, 30>
+<id, v, 29, 6>
+<tk_double_point, 30, 4>
+<vector, 30, 6>
+<tk_left_bracket, 30, 13>
+<tk_numerico, 100, 30, 15>
+<tk_right_bracket, 30, 18>
+<registro, 30, 19>
+<tk_left_brace, 30, 28>
+<id, a, 31, 6>
+<tk_comma, 32, 8>
+<id, b, 32, 9>
+<tk_double_point, 32, 11>
+<numerico, 32, 13>
+<tk_right_brace, 32, 22>
+<inicio, 33, 6>
+<id, r, 34, 7>
+<tk_assign, 35, 4>
+<tk_left_brace, 35, 6>
+<tk_cadena, "Carolina Gomez", 35, 8>
+<tk_comma, 35, 25>
+<tk_left_brace, 35, 26>
+<tk_numerico, 12, 36, 10>
+<tk_comma, 36, 12>
+<tk_numerico, 07, 36, 13>
+<tk_comma, 36, 16>
+<tk_numerico, 1969, 36, 17>
+<tk_right_brace, 36, 22>
+<tk_comma, 36, 23>
+<tk_left_brace, 36, 24>
+<tk_numerico, 87, 37, 10>
+<tk_comma, 37, 12>
+<tk_numerico, 91, 37, 13>
+<tk_comma, 37, 16>
+<tk_numerico, 99, 37, 17>
+<tk_comma, 37, 20>
+<tk_numerico, 93, 37, 21>
+<tk_right_brace, 37, 24>
+<tk_right_brace, 37, 25>
+<id, r, 38, 8>
+<tk_point, 40, 4>
+<id, fecha_nac, 40, 5>
+<tk_point, 40, 14>
+<id, dia, 40, 15>
+<tk_assign, 40, 18>
+<tk_numerico, 23, 40, 20>
+<id, r, 40, 23>
+<tk_point, 41, 4>
+<id, notas, 41, 5>
+<tk_left_bracket, 41, 10>
+<tk_numerico, 2, 41, 12>
+<tk_right_bracket, 41, 13>
+<tk_assign, 41, 14>
+<tk_numerico, 98, 41, 16>
+<id, b, 41, 19>
+<tk_assign, 42, 4>
+<tk_left_brace, 42, 6>
+<tk_numerico, 10, 42, 8>
+<tk_comma, 42, 11>
+<tk_numerico, 20, 42, 12>
+<tk_comma, 42, 15>
+<tk_left_brace, 42, 16>
+<tk_numerico, 0, 43, 10>
+<tk_comma, 43, 11>
+<tk_numerico, 0, 43, 12>
+<tk_comma, 43, 14>
+<tk_numerico, 0, 43, 15>
+<tk_right_brace, 43, 17>
+<tk_right_brace, 43, 18>
+<id, a, 44, 8>
+<tk_assign, 45, 4>
+<id, b, 45, 6>
+<id, v, 45, 8>
+<tk_left_bracket, 46, 4>
+<tk_numerico, 3, 46, 5>
+<tk_right_bracket, 46, 6>
+<tk_point, 46, 7>
+<id, b, 46, 8>
+<tk_assign, 46, 9>
+<tk_numerico, 35, 46, 11>
+<fin, 46, 14>
