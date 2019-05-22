@@ -1,15 +1,22 @@
 import re
 terminal_reg = r'(?:\<.+\>)'
 non_terminal_reg = r'(?:[A-Z]+[0-9]*)'
+maximum_depth = 500
 
 def isNT(symbol):
     return re.fullmatch(non_terminal_reg, symbol)
 
 def firsts(grammar, non_terminal):
+    global maximum_depth
     """
     Problemas si hay recursividad por la izquierda
     """
+    maximum_depth -= 1
+    if(maximum_depth <= 0):
+        return {'eps'}
+
     if(non_terminal in grammar.firsts):
+        maximum_depth += 1
         return grammar.firsts[non_terminal]
     ret = set()
     for rule in grammar.rules[non_terminal]:
@@ -18,15 +25,19 @@ def firsts(grammar, non_terminal):
             elif(grammar.nullable[non_terminal]):  # simple recursion
                 ret |= first(grammar, rule[1:])
     grammar.firsts[non_terminal] = ret
+    maximum_depth += 1
     return ret
 
 
 def first(grammar, alpha):
-    if(len(alpha) == 0):
+    global maximum_depth
+    maximum_depth -= 1
+    if(len(alpha) == 0 or maximum_depth <= 0):
         return {'eps'}
     ret = set()
     terminal = alpha[0] == 'eps' or re.fullmatch(terminal_reg, alpha[0])
     if(terminal):  # terminal or epsilon
+        maximum_depth += 1
         return set([alpha[0]])
     else:  # non-terminal
         sol = firsts(grammar, alpha[0])
@@ -36,6 +47,7 @@ def first(grammar, alpha):
                 ret.add('eps')
             else:
                 ret |= first(grammar, alpha[1:])
+        maximum_depth += 1
         return ret
 
 
