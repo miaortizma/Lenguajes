@@ -44,12 +44,13 @@ TIPOBASICO3 : <numerico> | <cadena> | <logico>
 
 //tensores
 TENSOR : VECTOR | MATRIZ
-VECTOR : <vector> <tk_left_bracket> VECDIM <tk_right_bracket> TIPOBASICO2
+VECTOR : <vector> <tk_left_bracket> VECDIM <tk_right_bracket> VECTOR2
+VECTOR2 : TIPOBASICO2 | IDENTIFICADOR
 MATRIZ : <matriz> <tk_left_bracket> MATDIM <tk_right_bracket> TIPOBASICO2
 
 
 //dimension
-VECDIM : <tk_numerico> | <tk_asterisk>
+VECDIM : <tk_numerico> | <tk_asterisk> | IDENTIFICADOR
 MATDIM : <tk_numerico> <tk_comma> <tk_numerico> MATDIMA | <tk_asterisk> MATDIMB
 MATDIMA : <tk_comma> <tk_numerico> MATDIMA | eps
 
@@ -101,7 +102,7 @@ EVALSINO : <sino> SENTENCIAS | eps
 
 
 //desde falta probar
-DESDE : <desde> IDENTIFICADOR DESDE2 <tk_assign> <tk_numerico> <hasta> <tk_numerico> PASO <tk_left_brace> SENTENCIAS <tk_right_brace> 
+DESDE : <desde> IDENTIFICADOR DESDE2 <tk_assign> EXPR <hasta> EXPR PASO <tk_left_brace> SENTENCIAS <tk_right_brace> 
 DESDE2 : LLAMADOTENSOR | eps
 PASO : <paso> <tk_numerico>| eps
 
@@ -119,17 +120,15 @@ LITERALES2 : <tk_comma>  LITERAL2 LITERALES2 | eps
 
 
 //EXPR falta probar
-EXPR : EXPRMAT | EXPRLOG
+EXPR : EXPRMAT 
 
 EXPRMAT : EXPRMAT2 EXPRMATT
 EXPRMATT : <tk_plus> EXPRMAT2 EXPRMATT | <tk_minus> EXPRMAT2 EXPRMATT | eps
 EXPRMAT2 : EXPRMAT3 EXPRMATT2
 EXPRMATT2 : <tk_asterisk> EXPRMAT3 EXPRMATT2 | <tk_division> EXPRMAT3 EXPRMATT2 | <tk_mod> EXPRMAT3 EXPRMATT2  | eps
 EXPRMAT3 : <tk_minus> EXPRMAT3 | <tk_plus> EXPRMAT3 | EXPRMAT4
-EXPRMAT4 : EXPRMAT5 EXPRMATT4
-EXPRMATT4 : EXPRMATTT4 | eps
-EXPRMATTT4 : <tk_power> EXPRMATTT4 | EXPRMAT5
-
+EXPRMAT4 : EXPRMAT6 EXPRMATT4
+EXPRMATT4 : <tk_power> EXPRMAT6 EXPRMATT4  | OPERADORLOG EXPRMAT6 EXPRMATT4 | eps
 EXPRMAT5 : EXPRMAT6 EXPRMATT5
 EXPRMATT5 : OPERADORLOG  EXPRMAT6 | eps
 EXPRMAT6 : <not> EXPRMAT6 | EXPRMAT7
@@ -138,10 +137,10 @@ EXPRMATT7 : <and> EXPRMAT8 EXPRMATT7 | eps
 EXPRMAT8 : EXPRMAT10 EXPRMATT8
 EXPRMATT8 : <or> EXPRMAT10 EXPRMATT8 | eps
 
-EXPRMAT10 : <tk_left_par> EXPRMAT10 <tk_right_par> | EXPRMATT10
+EXPRMAT10 : <tk_left_par> EXPR <tk_right_par>| EXPRMATT10
 EXPRMATT10 : OPERANDO
 
-OPERANDO : IDENTIFICADOR OPERANDO2 | RESERVADA LLAMADOSUB | TOKENBASICO | ACCESO
+OPERANDO : IDENTIFICADOR OPERANDO2 | RESERVADA LLAMADOSUB | ACCESO | TOKENBASICO
 OPERANDO2 : LLAMADOSUB | ACCESO | eps
 OPERADORLOG : <tk_greater>  | <tk_greater_equal> | <tk_less> | <tk_less_equal> | <tk_equal> | <tk_not_equal>
 
@@ -151,9 +150,8 @@ LISTAEXPR2 : <tk_comma> EXPR LISTAEXPR2 | eps
 
 //llamado subrutinas falta probar el nombre de Parametros formales y Parametros estan al revez
 LLAMADOSUB : <tk_left_par> PARAMETROSFORMALES <tk_right_par>
-PARAMETROSFORMALES : PARAMETROFORMAL PARAMETROSFORMALES2 | eps
-PARAMETROFORMAL : EXPR
-PARAMETROSFORMALES2 : <tk_comma> PARAMETROFORMAL PARAMETROSFORMALES2 | eps
+PARAMETROSFORMALES : EXPR PARAMETROSFORMALES2 | eps
+PARAMETROSFORMALES2 : <tk_comma> EXPR PARAMETROSFORMALES2 | eps
 
 
 //subrutinas falta probar

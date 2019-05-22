@@ -95,7 +95,7 @@ def derivate(grammar, reader, verbose=False):
         """
         if(isNT(symbol)):
             dct = {'SINO2': sino,
-                   'OPT': opt}
+                   'OPT': opt }
             f = dct.get(symbol, predictDerivation)
             f(grammar, reader, verbose=verbose)
         elif(token(reader)._type == symbol[1:-1]):
@@ -158,12 +158,14 @@ def mainExists(reader, verbose=False):
     while(token(reader)._type != 'inicio'):
         if(token(reader)._type == '$'):
             return False
+        # print(tokens)
         tokens = tokens[1:]
         positions = positions[1:]
     while(token(reader)._type != 'fin'):
         _type = token(reader)._type
         if(_type == '$' or _type == 'subrutina'):
             return False
+        # print(tokens)
         tokens = tokens[1:]
         positions = positions[1:]
     return True

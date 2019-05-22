@@ -1,21 +1,46 @@
 <programa, 1, 1>
-<id, cuadrado, 1, 9>
-<var, 1, 18>
-<id, p1, 2, 4>
-<tk_double_point, 3, 7>
-<cadena, 3, 9>
-<inicio, 3, 16>
-<id, c, 5, 7>
-<tk_assign, 8, 6>
-<tk_minus, 8, 8>
-<id, b, 8, 10>
-<tk_asterisk, 8, 11>
-<id, a, 8, 13>
-<tk_power, 8, 15>
-<tk_numerico, 2, 8, 17>
-<id, m, 8, 19>
-<tk_assign, 9, 6>
-<id, c, 9, 8>
-<tk_less, 9, 10>
-<tk_numerico, 3, 9, 12>
-<fin, 9, 14>
+<id, uno, 1, 9>
+<var, 1, 13>
+<id, n, 12, 4>
+<tk_comma, 13, 4>
+<id, suma, 13, 5>
+<tk_comma, 13, 10>
+<id, k, 13, 11>
+<tk_double_point, 13, 13>
+<numerico, 13, 15>
+<inicio, 13, 24>
+<imprimir, 14, 7>
+<tk_left_par, 15, 11>
+<tk_cadena, "\nSuma de numeros pares entre 1 y n.\nPor favor ", 15, 13>
+<tk_comma, 15, 63>
+<tk_cadena, "ingrese un valor para n: ", 15, 64>
+<tk_right_par, 15, 91>
+<leer, 15, 92>
+<tk_left_par, 16, 7>
+<id, n, 16, 9>
+<tk_right_par, 16, 10>
+<id, suma, 16, 11>
+<tk_assign, 17, 7>
+<tk_numerico, 0, 17, 9>
+<desde, 17, 11>
+<id, k, 18, 8>
+<tk_assign, 18, 10>
+<tk_numerico, 2, 18, 11>
+<hasta, 18, 12>
+<id, n, 18, 18>
+<paso, 18, 20>
+<tk_numerico, 2, 18, 25>
+<tk_left_brace, 18, 27>
+<id, suma, 19, 4>
+<tk_assign, 20, 9>
+<id, suma, 20, 11>
+<tk_plus, 20, 16>
+<id, k, 20, 18>
+<tk_right_brace, 20, 20>
+<imprimir, 21, 4>
+<tk_left_par, 22, 11>
+<tk_cadena, "\nLa suma es ", 22, 13>
+<tk_comma, 22, 28>
+<id, suma, 22, 29>
+<tk_right_par, 22, 34>
+<fin, 22, 35>

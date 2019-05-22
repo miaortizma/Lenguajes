@@ -4,7 +4,7 @@ import Parser.parser as parser
 from codeReader import fullCodeReader, SyntaxException, LexicException
 
 localPath = Path(__file__).parent
-sl_path = localPath / 'Parser/sl_sample.txt'
+sl_path = localPath / 'Parser/1.txt'
 lexerOutPath = localPath / 'Lexer/data/out.txt'
 
 try:
