@@ -1,7 +1,7 @@
 import re
 terminal_reg = r'(?:\<.+\>)'
 non_terminal_reg = r'(?:[A-Z]+[0-9]*)'
-maximum_depth = 500
+maximum_depth = 600
 
 def isNT(symbol):
     return re.fullmatch(non_terminal_reg, symbol)

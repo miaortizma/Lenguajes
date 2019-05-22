@@ -6,5 +6,6 @@ inicio
 	//a = -b;
 	// OPERADORES
 	c = -b * a ^ 2 //ERROR
+	m = c < 3
 	// y = v0y * t + 1/2 * -g * t^2
 fin

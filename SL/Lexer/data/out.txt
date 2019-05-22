@@ -13,4 +13,9 @@
 <id, a, 8, 13>
 <tk_power, 8, 15>
 <tk_numerico, 2, 8, 17>
-<fin, 8, 19>
+<id, m, 8, 19>
+<tk_assign, 9, 6>
+<id, c, 9, 8>
+<tk_less, 9, 10>
+<tk_numerico, 3, 9, 12>
+<fin, 9, 14>
