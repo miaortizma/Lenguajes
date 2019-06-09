@@ -1,6 +1,5 @@
 import re
 
-
 class codeReader:
 
     def __init(self):
@@ -40,7 +39,6 @@ class fullCodeReader(codeReader):
     """
     Reads code as a list of lines
     """
-
     def __init__(self, code_path):
         with open(code_path) as file:
             self.code = file.readlines()

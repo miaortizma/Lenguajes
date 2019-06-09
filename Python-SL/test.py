@@ -4,7 +4,7 @@ import Parser.parser as parser
 from codeReader import fullCodeReader, SyntaxException, LexicException
 
 localPath = Path(__file__).parent
-sl_path = localPath / 'Parser/sl_sample.txt'
+sl_path = localPath / 'Parser/5.txt'
 lexerOutPath = localPath / 'Lexer/data/out.txt'
 
 try:
@@ -16,7 +16,7 @@ except LexicException as e:
 else:
     print('Exito lexer')
     try:
-        parser.main(sl_path, verbose=False)
+        parser.main(sl_path, verbose=True)
     except SyntaxException as e:
         print(e)
         print('Error parser')

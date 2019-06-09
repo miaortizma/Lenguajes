@@ -44,12 +44,13 @@ TIPOBASICO3 : <numerico> | <cadena> | <logico>
 
 //tensores
 TENSOR : VECTOR | MATRIZ
-VECTOR : <vector> <tk_left_bracket> VECDIM <tk_right_bracket> TIPOBASICO2
+VECTOR : <vector> <tk_left_bracket> VECDIM <tk_right_bracket> VECTOR2
+VECTOR2 : TIPOBASICO2 | IDENTIFICADOR
 MATRIZ : <matriz> <tk_left_bracket> MATDIM <tk_right_bracket> TIPOBASICO2
 
 
 //dimension
-VECDIM : <tk_numerico> | <tk_asterisk>
+VECDIM : <tk_numerico> | <tk_asterisk> | IDENTIFICADOR
 MATDIM : <tk_numerico> <tk_comma> <tk_numerico> MATDIMA | <tk_asterisk> MATDIMB
 MATDIMA : <tk_comma> <tk_numerico> MATDIMA | eps
 
@@ -69,6 +70,7 @@ ACCESOREGISTRO : <tk_point> <id>
 ACCESO : LLAMADOTENSOR ACCESO2 | ACCESOREGISTRO ACCESO2
 ACCESO2 : LLAMADOTENSOR ACCESO2 | ACCESOREGISTRO ACCESO2 | eps
 
+
 //sentencias
 SENTENCIAS : SENTENCIA OPT SENTENCIAS | eps
 SENTENCIA : IDENTIFICADOR SENTENCIA2 | RESERVADA LLAMADOSUB | SI | MIENTRAS | REPETIR | EVAL | DESDE 
@@ -77,100 +79,79 @@ OPT : <tk_semicolon> | eps
 
 
 //si probar de nuevo por si acaso
-SI : <si> <tk_left_par> EXPRESION <tk_right_par> <tk_left_brace> SENTENCIAS SINO <tk_right_brace>
+SI : <si> <tk_left_par> EXPR <tk_right_par> <tk_left_brace> SENTENCIAS SINO <tk_right_brace>
 SINO : <sino> SINO2 | eps
 SINO2 : SINOSI | SENTENCIAS
-SINOSI : <si> <tk_left_par> EXPRESION <tk_right_par> SENTENCIAS SINO
+SINOSI : <si> <tk_left_par> EXPR <tk_right_par> SENTENCIAS SINO
 
 
 //mientras falta probar
-MIENTRAS : <mientras> <tk_left_par> EXPRESION <tk_right_par> <tk_left_brace> SENTENCIAS <tk_right_brace>
+MIENTRAS : <mientras> <tk_left_par> EXPR <tk_right_par> <tk_left_brace> SENTENCIAS <tk_right_brace>
 
 
 //repetir falta probar
-REPETIR : <repetir> SENTENCIAS <hasta> <tk_left_par> EXPRESION <tk_right_par>
+REPETIR : <repetir> SENTENCIAS <hasta> <tk_left_par> EXPR <tk_right_par>
 
 
 //eval falta probar
 EVAL : <eval> <tk_left_brace> CASOS EVALSINO <tk_right_brace>
 CASOS : CASO CASOS2
 CASOS2 : CASO CASOS2 | eps
-CASO : <caso> <tk_left_par> EXPRESION <tk_right_par> SENTENCIAS
+CASO : <caso> <tk_left_par> EXPR <tk_right_par> SENTENCIAS
 EVALSINO : <sino> SENTENCIAS | eps
 
 
 //desde falta probar
-DESDE : <desde> IDENTIFICADOR DESDE2 <tk_assign> <tk_numerico> <hasta> <tk_numerico> PASO <tk_left_brace> SENTENCIAS <tk_right_brace> 
+DESDE : <desde> IDENTIFICADOR DESDE2 <tk_assign> EXPR <hasta> EXPR PASO <tk_left_brace> SENTENCIAS <tk_right_brace> 
 DESDE2 : LLAMADOTENSOR | eps
 PASO : <paso> <tk_numerico>| eps
 
+
 //asignacion
 ASIGNACION : <tk_assign> ASIGNACION2
-ASIGNACION2 : EXPRESION | LITERAL
+ASIGNACION2 : EXPR | LITERAL
 
 
 //DECLARACIONES LITERALES
 LITERAL : <tk_left_brace> LITERALES  <tk_right_brace>
-LITERAL2 : LITERAL | EXPRESION
+LITERAL2 : LITERAL | EXPR
 LITERALES : LITERAL2 LITERALES2 | eps
 LITERALES2 : <tk_comma>  LITERAL2 LITERALES2 | eps
 
 
-//EXPRESION falta probar
-EXPRESION : IDENTIFICADOR EXPRESION2 | RESERVADA LLAMADOSUB | TOKENBASICO EXPRESION3 | <tk_left_par> OPERACIONCOMPLETA <tk_right_par> EXPRESION3 | OPERADORCAMBIOSIGNO OPERANDO
-EXPRESION2 : LLAMADOSUB | ACCESO | OPERACION | eps
-EXPRESION3 : OPERACION | eps
+//EXPR falta probar
+EXPR : EXPRMAT 
+
+EXPRMAT : EXPRMAT2 EXPRMATT
+EXPRMATT : <tk_plus> EXPRMAT2 EXPRMATT | <tk_minus> EXPRMAT2 EXPRMATT | eps
+EXPRMAT2 : EXPRMAT3 EXPRMATT2
+EXPRMATT2 : <tk_asterisk> EXPRMAT3 EXPRMATT2 | <tk_division> EXPRMAT3 EXPRMATT2 | <tk_mod> EXPRMAT3 EXPRMATT2  | eps
+EXPRMAT3 : <tk_minus> EXPRMAT3 | <tk_plus> EXPRMAT3 | EXPRMAT4
+EXPRMAT4 : EXPRMAT6 EXPRMATT4
+EXPRMATT4 : <tk_power> EXPRMAT6 EXPRMATT4  | OPERADORLOG EXPRMAT6 EXPRMATT4 | eps
+EXPRMAT5 : EXPRMAT6 EXPRMATT5
+EXPRMATT5 : OPERADORLOG  EXPRMAT6 | eps
+EXPRMAT6 : <or> EXPRMAT6 | EXPRMAT7
+EXPRMAT7 : EXPRMAT8 EXPRMATT7
+EXPRMATT7 : <and> EXPRMAT8 EXPRMATT7 | eps
+EXPRMAT8 : EXPRMAT10 EXPRMATT8
+EXPRMATT8 : <not> EXPRMAT10 EXPRMATT8 | eps
+
+EXPRMAT10 : <tk_left_par> EXPR <tk_right_par>| EXPRMATT10
+EXPRMATT10 : OPERANDO
+
+OPERANDO : IDENTIFICADOR OPERANDO2 | RESERVADA LLAMADOSUB | ACCESO | TOKENBASICO
+OPERANDO2 : LLAMADOSUB | ACCESO | eps
+OPERADORLOG : <tk_greater>  | <tk_greater_equal> | <tk_less> | <tk_less_equal> | <tk_equal> | <tk_not_equal>
 
 LLAMADOTENSOR : <tk_left_bracket> LISTAEXPR <tk_right_bracket>
-LISTAEXPR : EXPRESION LISTAEXPR2
-LISTAEXPR2 : <tk_comma> EXPRESION LISTAEXPR2 | eps
-
-
-// operaciones
-OPERACIONCOMPLETA: OPERANDO OPERACION | OPERADORCAMBIOSIGNO OPERANDO
-OPERACION : OPERADOR OPERACION2
-OPERACION2 : OPERANDO OPERACION4 | <tk_left_par> OPERACION3 <tk_right_par> OPERACION4
-OPERACION3 : <tk_left_par> OPERACION3 <tk_right_par> OPERACION4 | OPERANDO OPERACION4
-OPERACION4 : OPERACION | eps
-
-
-// operandos
-OPERANDO : OPERANDO1 | OPERADORARITMETICO OPERANDO1
-OPERANDO1 : IDENTIFICADOR OPERANDO2 | TOKENBASICO
-OPERANDO2 : EXPRESION4 | eps
-
-
-// operadores
-OPERADOR : OPERADORARITMETICO | OPERADORLOGICO | OPERADORRELACIONAL
-OPERADORARITMETICO : OPERADORARITMETICO1| OPERADORARITMETICO2 | OPERADORARITMETICO3
-OPERADORARITMETICO1 : <tk_power>
-OPERADORCAMBIOSIGNO : <tk_plus> | <tk_minus>
-OPERADORARITMETICO2 : <tk_asterisk> | <tk_division> | <tk_mod>
-OPERADORARITMETICO3 : <tk_plus> | <tk_minus>
-OPERADORRELACIONAL : <tk_less> | <tk_less_equal> | <tk_greater_equal> | <tk_equal> | <tk_assign> | <tk_not_equal> | <tk_greater>
-OPERADORLOGICO : <or> | <and> | <not>
-
-
-// aritmeticos
-//A : E |  A <tk_minus> E | A <tk_plus> E
-//B : A | B <tk_asterisk> A | B <tk_division> A | B <tk_mod> A
-//C : B | <tk_minus> B | <tk_plus> B
-//D : C | D <tk_power> C
-//E : D | <tk_left_par> D <tk_right_par>
-
-// condicion
-//A : E <or> E
-//B : A | B <and> B
-//C : B | <not> B
-//D : C | C <tk_equal> C | C <tk_not_equal> C | C <tk_less> C | C <tk_less_equal> C | C <tk_greater> C | C <tk_greater_equal> C
-//E : D | <tk_left_par> D <tk_right_par> 
-
+LISTAEXPR : EXPR LISTAEXPR2
+LISTAEXPR2 : <tk_comma> EXPR LISTAEXPR2 | eps
 
 //llamado subrutinas falta probar el nombre de Parametros formales y Parametros estan al revez
 LLAMADOSUB : <tk_left_par> PARAMETROSFORMALES <tk_right_par>
-PARAMETROSFORMALES : PARAMETROFORMAL PARAMETROSFORMALES2 | eps
-PARAMETROFORMAL : EXPRESION
-PARAMETROSFORMALES2 : <tk_comma> PARAMETROFORMAL PARAMETROSFORMALES2 | eps
+PARAMETROSFORMALES : EXPR PARAMETROSFORMALES2 | eps
+PARAMETROSFORMALES2 : <tk_comma> EXPR PARAMETROSFORMALES2 | eps
 
 
 //subrutinas falta probar
