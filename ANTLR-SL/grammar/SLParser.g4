@@ -1,15 +1,83 @@
 parser grammar SLParser;
 options { tokenVocab=SLLexer; }
 
-commands    : command *;
-command     : conditional;
 
 
-conditional : IF booleanExpr THEN c1=commands (ELSE c2=commands)? ENDIF;
-booleanExpr : expr ROP expr;
+programa
+    : programaprc subrutinas;
 
-expr        : expr ASTERISK expr
-            | expr PLUS expr
-            | DOUBLE
-            | LEFT_PAR expr RIGHT_PAR
-            ;
+programaprc
+    : nombre declaraciones sentencias;
+
+declaraciones
+    :
+    | CONST const_ consts declaraciones
+    | TIPOS tipo tipos declaraciones
+    | VAR var vars declaraciones;
+
+consts
+    :
+    | const_ consts;
+
+const_
+    : ID ASSIGN literal opt;
+
+tipos
+    :
+    | tipo tipos;
+
+tipo
+    : ID DOUBLE_POINT tipobasico opt;
+
+vars
+    :
+    | var vars;
+
+var
+    : listaid DOUBLE_POINT explicitvar;
+
+explicitvar
+    : ID | tipobasico;
+
+opt
+    :
+    | SEMICOLON;
+
+nombre
+    :
+    | ID;
+
+listaid
+    : ID listaid2;
+
+listaid2
+    : COMMA ID listaid2;
+
+literal
+    : NUMERICO_LITERAL
+    | CADENA_LITERAL
+    | LOGICO_LITERAL;
+
+tipobasico
+    : tipobasico2
+    | tensor;
+
+tipobasico2
+    : tipobasico3
+    | registro;
+
+tipobasico3
+    : NUMERICO
+    | CADENA
+    | LOGICO;
+
+tensor
+    : ;
+
+registro
+    : ;
+
+subrutinas          : ;
+
+sentencias
+    : ;
