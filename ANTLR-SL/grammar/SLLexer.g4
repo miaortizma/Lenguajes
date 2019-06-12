@@ -1,4 +1,4 @@
-lexer grammar SL;
+lexer grammar SLLexer;
 
 
 // Tokens
@@ -26,3 +26,12 @@ LEFT_BRACE : '{';
 RIGHT_BRACE : '}';
 LEFT_BRACKET : '[';
 RIGHT_BRACET : ']';
+
+
+IF : 'if';
+THEN : 'then';
+ELSE : 'else';
+ENDIF : 'endif';
+ROP : ( '<' | '<=' | '>=' | '>' | '==' | '!=' );
+
+DOUBLE : [0-9]+( | [.][0-9]+)*;
