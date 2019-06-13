@@ -14,7 +14,7 @@ public class Interpreter {
             lexer = new SLLexer(CharStreams.fromStream(System.in));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         SLParser parser = new SLParser(tokens);
-        ParseTree tree = parser.commands();
+        ParseTree tree = parser.programa();
 
         MyVisitor<Object> loader = new MyVisitor<Object>();
         loader.visit(tree);

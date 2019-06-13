@@ -1,7 +1,7 @@
 lexer grammar SLLexer;
 
 WHITESPACE
-    : [ \r\t]+ -> skip;
+    : [ \t\n] -> skip;
 
 COMMENT
     : '//' ~ [\r\n]* -> skip;
@@ -9,27 +9,86 @@ COMMENT
 BLOCK_COMMENT
     : '/*' .*? '*/' -> skip;
 
-NEWLINE
-    : ('\r' '\n'? | '\n');
+NEW_LINE
+    : '\r'? '\n';
+
 
 // Keywords
 
+PROGRAMA
+    : 'programa';
+
+CONST
+    : 'const';
+
+TIPOS
+    : 'tipos';
+
+VAR
+    : 'var';
+
+NUMERICO
+    : 'numerico';
+
+CADENA
+    : 'cadena';
+
+LOGICO
+    : 'logico';
+
+SUBRUTINA
+    : 'subrutina';
+
+INICIO
+    : 'inicio';
+
+REF
+    : 'ref';
+
+FIN
+    : 'fin';
+
 IF
     : 'if';
+
 THEN
     : 'then';
+
 ELSE
     : 'else';
+
 ENDIF
     : 'endif';
 
+RETORNA
+    : 'retorna';
+
 LOGICO_LITERAL
-    : ('SI' | 'NO' | 'YES' | 'FALSE' | 'true' | 'false');
+    : ('SI' | 'NO' | 'TRUE' | 'FALSE' );
+
+REGISTRO
+    : 'registro';
+
+TENSOR
+    : 'tensor';
+
+SENTENCIAS
+    : 'sentencias';
+
+
+fragment DIGIT
+    : [0-9];
+
+fragment LETTER
+    : [a-zA-ZñÑ];
+
+ID
+    : (LETTER|[_]) (LETTER|DIGIT|[_])*;
 
 NUMERICO_LITERAL
-    : [0-9]+( | [.][0-9]+)*;
+    : DIGIT+([.] DIGIT+)?;
 
-SEQ_ESCAPE
+fragment SEQ_ESCAPE
     : [\\][.] ;
 
 CADENA_LITERAL
@@ -55,7 +114,7 @@ POWER
 MOD
     : '%';
 
-SEMICOLON
+SEMI
     : ';';
 
 DOUBLE_POINT
@@ -91,25 +150,5 @@ LEFT_BRACKET
 RIGHT_BRACET
     : ']';
 
-
-CONST
-    : 'const';
-
-TIPOS
-    : 'tipos';
-
-VAR
-    : 'var';
-
-
-ID : [a-zA-ZñÑ_][0-9a-zA-ZñÑ_]+;
-
-
-NUMERICO
-    : 'numerico';
-
-CADENA
-    : 'cadena';
-
-LOGICO
-    : 'logico';
+ANY
+    : .;

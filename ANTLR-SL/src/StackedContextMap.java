@@ -1,5 +1,6 @@
 import java.util.HashMap;
 import java.util.Vector;
+import SLParser.SubrutinaContext;
 
 public class StackedContextMap {
 
@@ -10,7 +11,8 @@ public class StackedContextMap {
 
     public StackedContextMap() {
         this.table = new HashMap<>();
-        this.stack = new Vector<>(table);
+        this.stack = new Vector<>();
+        stack.add(table);
     }
 
 
@@ -26,6 +28,11 @@ public class StackedContextMap {
     public void put(String str, Object obj) {
         // to-do handle referenced variable
         this.getContext().put(str, obj);
+    }
+
+    public boolean isFunc(String str) {
+        HashMap context = this.getContext();
+        return (context.containsKey(str) && ( context.get(str) instanceof  SubrutinaContext );
     }
 
     public Object get(String str) {

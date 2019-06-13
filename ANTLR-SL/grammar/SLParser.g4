@@ -1,57 +1,41 @@
 parser grammar SLParser;
 options { tokenVocab=SLLexer; }
 
-
-
 programa
-    : programaprc subrutinas;
+    : programaprc subrutinas EOF ;
 
 programaprc
-    : nombre declaraciones sentencias;
+    : (PROGRAMA ID)? declaraciones? INICIO sentencias? FIN;
 
 declaraciones
-    :
-    | CONST const_ consts declaraciones
-    | TIPOS tipo tipos declaraciones
-    | VAR var vars declaraciones;
+    : ((CONST consts)|(TIPOS tipos)|(VAR vars))+;
 
 consts
-    :
-    | const_ consts;
+    : const_+;
 
 const_
     : ID ASSIGN literal opt;
 
 tipos
-    :
-    | tipo tipos;
+    : tipo+;
 
 tipo
     : ID DOUBLE_POINT tipobasico opt;
 
 vars
-    :
-    | var vars;
+    : var+;
 
 var
-    : listaid DOUBLE_POINT explicitvar;
+    : listaid DOUBLE_POINT explicitvar opt;
 
 explicitvar
     : ID | tipobasico;
 
 opt
-    :
-    | SEMICOLON;
-
-nombre
-    :
-    | ID;
+    : SEMI?;
 
 listaid
-    : ID listaid2;
-
-listaid2
-    : COMMA ID listaid2;
+    : ID (COMMA ID)*;
 
 literal
     : NUMERICO_LITERAL
@@ -72,12 +56,28 @@ tipobasico3
     | LOGICO;
 
 tensor
-    : ;
+    : TENSOR;
 
 registro
-    : ;
+    : REGISTRO;
 
-subrutinas          : ;
+subrutinas
+    : subrutina*;
+
+subrutina
+    : (SUBRUTINA nombre_subrutina=ID LEFT_PAR parametros? RIGHT_PAR) (procedimiento | funcion);
+
+procedimiento
+    :  declaraciones INICIO sentencias? FIN;
+
+funcion
+    : RETORNA ( ID | tipobasico ) declaraciones? INICIO sentencias? RETORNA LEFT_PAR ID RIGHT_PAR FIN;
+
+parametros
+    : parametro (SEMI parametros)*;
+
+parametro
+    : REF? listaid DOUBLE_POINT ( ID | tipobasico );
 
 sentencias
-    : ;
+    : SENTENCIAS;

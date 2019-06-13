@@ -76,23 +76,11 @@ public interface SLParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitOpt(SLParser.OptContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link SLParser#nombre}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitNombre(SLParser.NombreContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link SLParser#listaid}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitListaid(SLParser.ListaidContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link SLParser#listaid2}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitListaid2(SLParser.Listaid2Context ctx);
 	/**
 	 * Visit a parse tree produced by {@link SLParser#literal}.
 	 * @param ctx the parse tree
@@ -135,6 +123,36 @@ public interface SLParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitSubrutinas(SLParser.SubrutinasContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SLParser#subrutina}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSubrutina(SLParser.SubrutinaContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SLParser#procedimiento}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitProcedimiento(SLParser.ProcedimientoContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SLParser#funcion}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFuncion(SLParser.FuncionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SLParser#parametros}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitParametros(SLParser.ParametrosContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SLParser#parametro}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitParametro(SLParser.ParametroContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link SLParser#sentencias}.
 	 * @param ctx the parse tree
