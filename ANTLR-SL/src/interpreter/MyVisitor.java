@@ -1,6 +1,7 @@
 package interpreter;
 
-import SLParser.*;
+import gen.SLParser.*;
+import gen.SL
 
 class Tipo {
 
@@ -23,14 +24,14 @@ public class MyVisitor<T> extends SLParserBaseVisitor<T> {
 
 
     @Override
-    public T visitPrograma(SLParser.ProgramaContext ctx ) {
+    public T visitPrograma(ProgramaContext ctx ) {
 
         //añadir declaraciones globales (CONSTS, VARIABLES, TIPOS)
 
 
         //añadir funciones a el ámbito de variables
-        SLParser.SubrutinasContext subrutinas = ctx.subrutinas();
-        for( SLParser.SubrutinaContext subrutina : subrutinas.subrutina() ) {
+        SubrutinasContext subrutinas = ctx.subrutinas();
+        for( SubrutinaContext subrutina : subrutinas.subrutina() ) {
             table.put(subrutina.nombre_subrutina.getText(), subrutina);
         }
         visitChildren(ctx);
@@ -38,7 +39,7 @@ public class MyVisitor<T> extends SLParserBaseVisitor<T> {
     }
 
     @Override
-    public T visitSubrutina(SLParser.SubrutinaContext ctx) {
+    public T visitSubrutina(SubrutinaContext ctx) {
 
     }
 }

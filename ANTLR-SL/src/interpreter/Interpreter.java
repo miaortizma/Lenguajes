@@ -3,7 +3,8 @@ package interpreter;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
-
+import gen.SLLexer;
+import gen.SLParser;
 
 public class Interpreter {
 

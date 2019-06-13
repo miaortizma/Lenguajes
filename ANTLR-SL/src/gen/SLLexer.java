@@ -1,4 +1,5 @@
 // Generated from /data/Lenguajes/ANTLR-SL/grammar/SLLexer.g4 by ANTLR 4.7.2
+package gen;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;
