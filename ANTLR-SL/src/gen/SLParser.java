@@ -1,4 +1,7 @@
 // Generated from /data/Lenguajes/ANTLR-SL/grammar/SLParser.g4 by ANTLR 4.7.2
+
+package gen;
+
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
@@ -134,11 +137,6 @@ public class SLParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SLParserListener ) ((SLParserListener)listener).exitPrograma(this);
 		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SLParserVisitor ) return ((SLParserVisitor<? extends T>)visitor).visitPrograma(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ProgramaContext programa() throws RecognitionException {
@@ -188,11 +186,6 @@ public class SLParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SLParserListener ) ((SLParserListener)listener).exitProgramaprc(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SLParserVisitor ) return ((SLParserVisitor<? extends T>)visitor).visitProgramaprc(this);
-			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -295,11 +288,6 @@ public class SLParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SLParserListener ) ((SLParserListener)listener).exitDeclaraciones(this);
 		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SLParserVisitor ) return ((SLParserVisitor<? extends T>)visitor).visitDeclaraciones(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final DeclaracionesContext declaraciones() throws RecognitionException {
@@ -387,11 +375,6 @@ public class SLParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SLParserListener ) ((SLParserListener)listener).exitConsts(this);
 		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SLParserVisitor ) return ((SLParserVisitor<? extends T>)visitor).visitConsts(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ConstsContext consts() throws RecognitionException {
@@ -449,11 +432,6 @@ public class SLParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SLParserListener ) ((SLParserListener)listener).exitConst_(this);
 		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SLParserVisitor ) return ((SLParserVisitor<? extends T>)visitor).visitConst_(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final Const_Context const_() throws RecognitionException {
@@ -501,11 +479,6 @@ public class SLParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SLParserListener ) ((SLParserListener)listener).exitTipos(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SLParserVisitor ) return ((SLParserVisitor<? extends T>)visitor).visitTipos(this);
-			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -564,11 +537,6 @@ public class SLParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SLParserListener ) ((SLParserListener)listener).exitTipo(this);
 		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SLParserVisitor ) return ((SLParserVisitor<? extends T>)visitor).visitTipo(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final TipoContext tipo() throws RecognitionException {
@@ -616,11 +584,6 @@ public class SLParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SLParserListener ) ((SLParserListener)listener).exitVars(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SLParserVisitor ) return ((SLParserVisitor<? extends T>)visitor).visitVars(this);
-			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -681,11 +644,6 @@ public class SLParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SLParserListener ) ((SLParserListener)listener).exitVar(this);
 		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SLParserVisitor ) return ((SLParserVisitor<? extends T>)visitor).visitVar(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final VarContext var() throws RecognitionException {
@@ -731,11 +689,6 @@ public class SLParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SLParserListener ) ((SLParserListener)listener).exitExplicitvar(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SLParserVisitor ) return ((SLParserVisitor<? extends T>)visitor).visitExplicitvar(this);
-			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -793,11 +746,6 @@ public class SLParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SLParserListener ) ((SLParserListener)listener).exitOpt(this);
 		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SLParserVisitor ) return ((SLParserVisitor<? extends T>)visitor).visitOpt(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final OptContext opt() throws RecognitionException {
@@ -850,11 +798,6 @@ public class SLParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SLParserListener ) ((SLParserListener)listener).exitListaid(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SLParserVisitor ) return ((SLParserVisitor<? extends T>)visitor).visitListaid(this);
-			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -912,11 +855,6 @@ public class SLParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SLParserListener ) ((SLParserListener)listener).exitLiteral(this);
 		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SLParserVisitor ) return ((SLParserVisitor<? extends T>)visitor).visitLiteral(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final LiteralContext literal() throws RecognitionException {
@@ -967,11 +905,6 @@ public class SLParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SLParserListener ) ((SLParserListener)listener).exitTipobasico(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SLParserVisitor ) return ((SLParserVisitor<? extends T>)visitor).visitTipobasico(this);
-			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -1033,11 +966,6 @@ public class SLParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SLParserListener ) ((SLParserListener)listener).exitTipobasico2(this);
 		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SLParserVisitor ) return ((SLParserVisitor<? extends T>)visitor).visitTipobasico2(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final Tipobasico2Context tipobasico2() throws RecognitionException {
@@ -1094,11 +1022,6 @@ public class SLParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SLParserListener ) ((SLParserListener)listener).exitTipobasico3(this);
 		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SLParserVisitor ) return ((SLParserVisitor<? extends T>)visitor).visitTipobasico3(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final Tipobasico3Context tipobasico3() throws RecognitionException {
@@ -1145,11 +1068,6 @@ public class SLParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SLParserListener ) ((SLParserListener)listener).exitTensor(this);
 		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SLParserVisitor ) return ((SLParserVisitor<? extends T>)visitor).visitTensor(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final TensorContext tensor() throws RecognitionException {
@@ -1186,11 +1104,6 @@ public class SLParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SLParserListener ) ((SLParserListener)listener).exitRegistro(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SLParserVisitor ) return ((SLParserVisitor<? extends T>)visitor).visitRegistro(this);
-			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -1233,11 +1146,6 @@ public class SLParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SLParserListener ) ((SLParserListener)listener).exitSubrutinas(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SLParserVisitor ) return ((SLParserVisitor<? extends T>)visitor).visitSubrutinas(this);
-			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -1301,11 +1209,6 @@ public class SLParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SLParserListener ) ((SLParserListener)listener).exitSubrutina(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SLParserVisitor ) return ((SLParserVisitor<? extends T>)visitor).visitSubrutina(this);
-			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -1390,11 +1293,6 @@ public class SLParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SLParserListener ) ((SLParserListener)listener).exitProcedimiento(this);
 		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SLParserVisitor ) return ((SLParserVisitor<? extends T>)visitor).visitProcedimiento(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ProcedimientoContext procedimiento() throws RecognitionException {
@@ -1466,11 +1364,6 @@ public class SLParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SLParserListener ) ((SLParserListener)listener).exitFuncion(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SLParserVisitor ) return ((SLParserVisitor<? extends T>)visitor).visitFuncion(this);
-			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -1576,11 +1469,6 @@ public class SLParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SLParserListener ) ((SLParserListener)listener).exitParametros(this);
 		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SLParserVisitor ) return ((SLParserVisitor<? extends T>)visitor).visitParametros(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ParametrosContext parametros() throws RecognitionException {
@@ -1644,11 +1532,6 @@ public class SLParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SLParserListener ) ((SLParserListener)listener).exitParametro(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SLParserVisitor ) return ((SLParserVisitor<? extends T>)visitor).visitParametro(this);
-			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -1721,11 +1604,6 @@ public class SLParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SLParserListener ) ((SLParserListener)listener).exitSentencias(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SLParserVisitor ) return ((SLParserVisitor<? extends T>)visitor).visitSentencias(this);
-			else return visitor.visitChildren(this);
 		}
 	}
 

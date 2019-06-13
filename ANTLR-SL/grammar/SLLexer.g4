@@ -12,7 +12,6 @@ BLOCK_COMMENT
 NEW_LINE
     : '\r'? '\n';
 
-
 // Keywords
 
 PROGRAMA

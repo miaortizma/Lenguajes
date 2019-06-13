@@ -1,6 +1,10 @@
 parser grammar SLParser;
 options { tokenVocab=SLLexer; }
 
+@header {
+package gen;
+}
+
 programa
     : programaprc subrutinas EOF ;
 
