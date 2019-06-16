@@ -7,3 +7,6 @@
 [submodule "test/test"]
 	path = test/test
 	url = https://github.com/fstovarr/Programming-Languages
+[submodule "test"]
+	path = test
+	url = https://github.com/fstovarr/Programming-Languages.git
