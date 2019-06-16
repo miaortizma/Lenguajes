@@ -1,0 +1,9 @@
+[submodule "test/GrammarSL"]
+	path = test/GrammarSL
+	url = https://github.com/fstovarr/Programming-Languages
+[submodule "test/Programming-Languages"]
+	path = test/Programming-Languages
+	url = https://github.com/fstovarr/Programming-Languages
+[submodule "test/test"]
+	path = test/test
+	url = https://github.com/fstovarr/Programming-Languages
