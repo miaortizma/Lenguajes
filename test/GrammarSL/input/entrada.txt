@@ -1,3 +1,0 @@
-inicio
-rad = sqrt(2^3)
-fin
