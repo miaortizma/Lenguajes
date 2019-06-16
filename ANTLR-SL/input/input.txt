@@ -1,0 +1,20 @@
+programa HolaMundo
+
+const
+
+    A = 5.14
+
+inicio
+    sentencias
+fin
+
+subrutina entero (n : numerico)
+
+inicio
+    sentencias
+fin
+
+subrutina mi_sub (a, b : numerico)
+inicio
+    sentencias
+fin
