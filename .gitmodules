@@ -1,18 +1,3 @@
-[submodule "test/GrammarSL"]
-	path = test/GrammarSL
-	url = https://github.com/fstovarr/Programming-Languages
-[submodule "test/Programming-Languages"]
-	path = test/Programming-Languages
-	url = https://github.com/fstovarr/Programming-Languages
-[submodule "test/test"]
-	path = test/test
-	url = https://github.com/fstovarr/Programming-Languages
-[submodule "test"]
-	path = test
-	url = https://github.com/fstovarr/Programming-Languages.git
-[submodule "ANTLR/EcoBox"]
-	path = ANTLR/EcoBox
-	url = https://github.com/alerodriguezor/EcoBox.git
 [submodule "ANTLR/Programming-Languages"]
 	path = ANTLR/Programming-Languages
 	url = https://github.com/fstovarr/Programming-Languages.git
