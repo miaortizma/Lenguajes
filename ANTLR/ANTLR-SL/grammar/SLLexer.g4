@@ -71,8 +71,8 @@ REGISTRO
 TENSOR
     : 'tensor';
 
-SENTENCIAS
-    : 'sentencias';
+SENTENCIA
+    : 'sentencia';
 
 
 fragment DIGIT

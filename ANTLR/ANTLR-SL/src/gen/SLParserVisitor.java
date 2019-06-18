@@ -29,6 +29,12 @@ public interface SLParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitDeclaraciones(SLParser.DeclaracionesContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link SLParser#declaracion}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDeclaracion(SLParser.DeclaracionContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link SLParser#consts}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -143,21 +149,57 @@ public interface SLParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitFuncion(SLParser.FuncionContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link SLParser#parametros}.
+	 * Visit a parse tree produced by {@link SLParser#tiporet}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitParametros(SLParser.ParametrosContext ctx);
+	T visitTiporet(SLParser.TiporetContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link SLParser#parametro}.
+	 * Visit a parse tree produced by {@link SLParser#ret}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitParametro(SLParser.ParametroContext ctx);
+	T visitRet(SLParser.RetContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SLParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExpr(SLParser.ExprContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SLParser#parametrosformales}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitParametrosformales(SLParser.ParametrosformalesContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SLParser#parametroformal}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitParametroformal(SLParser.ParametroformalContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link SLParser#sentencias}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitSentencias(SLParser.SentenciasContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SLParser#sentencia}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSentencia(SLParser.SentenciaContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SLParser#llamadosub}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLlamadosub(SLParser.LlamadosubContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SLParser#parametros}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitParametros(SLParser.ParametrosContext ctx);
 }

@@ -5,10 +5,13 @@ programa
     : programaprc subrutinas EOF ;
 
 programaprc
-    : (PROGRAMA ID)? declaraciones? INICIO sentencias? FIN;
+    : (PROGRAMA ID)? (declaraciones)? INICIO sentencias? FIN;
 
 declaraciones
-    : ((CONST consts)|(TIPOS tipos)|(VAR vars))+;
+    : declaracion+;
+
+declaracion
+    : (CONST consts)|(TIPOS tipos)|(VAR vars);
 
 consts
     : const_+;
@@ -65,19 +68,41 @@ subrutinas
     : subrutina*;
 
 subrutina
-    : (SUBRUTINA nombre_subrutina=ID LEFT_PAR parametros? RIGHT_PAR) (procedimiento | funcion);
+    : (SUBRUTINA nombre_subrutina=ID LEFT_PAR parametrosformales? RIGHT_PAR) (procedimiento | funcion);
 
 procedimiento
-    :  declaraciones INICIO sentencias? FIN;
+    :  declaraciones? INICIO sentencias? FIN;
 
 funcion
-    : RETORNA ( ID | tipobasico ) declaraciones? INICIO sentencias? RETORNA LEFT_PAR ID RIGHT_PAR FIN;
+    : RETORNA tiporet declaraciones? INICIO sentencias? RETORNA LEFT_PAR ret RIGHT_PAR FIN;
 
-parametros
-    : parametro (SEMI parametros)*;
+tiporet
+    : ID | tipobasico;
 
-parametro
+ret
+    : ID | expr;
+
+expr
+    : NUMERICO_LITERAL PLUS NUMERICO_LITERAL
+    | NUMERICO_LITERAL
+    | ID;
+
+parametrosformales
+    : parametroformal (SEMI parametroformal)*;
+
+parametroformal
     : REF? listaid DOUBLE_POINT ( ID | tipobasico );
 
 sentencias
-    : SENTENCIAS;
+    : sentencia+;
+
+sentencia
+    : SENTENCIA | llamadosub;
+
+
+llamadosub
+    : ID LEFT_PAR parametros RIGHT_PAR;
+
+parametros
+    : expr (COMMA expr)*;
+

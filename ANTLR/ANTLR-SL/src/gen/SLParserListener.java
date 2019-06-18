@@ -38,6 +38,16 @@ public interface SLParserListener extends ParseTreeListener {
 	 */
 	void exitDeclaraciones(SLParser.DeclaracionesContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link SLParser#declaracion}.
+	 * @param ctx the parse tree
+	 */
+	void enterDeclaracion(SLParser.DeclaracionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SLParser#declaracion}.
+	 * @param ctx the parse tree
+	 */
+	void exitDeclaracion(SLParser.DeclaracionContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link SLParser#consts}.
 	 * @param ctx the parse tree
 	 */
@@ -228,25 +238,55 @@ public interface SLParserListener extends ParseTreeListener {
 	 */
 	void exitFuncion(SLParser.FuncionContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link SLParser#parametros}.
+	 * Enter a parse tree produced by {@link SLParser#tiporet}.
 	 * @param ctx the parse tree
 	 */
-	void enterParametros(SLParser.ParametrosContext ctx);
+	void enterTiporet(SLParser.TiporetContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link SLParser#parametros}.
+	 * Exit a parse tree produced by {@link SLParser#tiporet}.
 	 * @param ctx the parse tree
 	 */
-	void exitParametros(SLParser.ParametrosContext ctx);
+	void exitTiporet(SLParser.TiporetContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link SLParser#parametro}.
+	 * Enter a parse tree produced by {@link SLParser#ret}.
 	 * @param ctx the parse tree
 	 */
-	void enterParametro(SLParser.ParametroContext ctx);
+	void enterRet(SLParser.RetContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link SLParser#parametro}.
+	 * Exit a parse tree produced by {@link SLParser#ret}.
 	 * @param ctx the parse tree
 	 */
-	void exitParametro(SLParser.ParametroContext ctx);
+	void exitRet(SLParser.RetContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SLParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterExpr(SLParser.ExprContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SLParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitExpr(SLParser.ExprContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SLParser#parametrosformales}.
+	 * @param ctx the parse tree
+	 */
+	void enterParametrosformales(SLParser.ParametrosformalesContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SLParser#parametrosformales}.
+	 * @param ctx the parse tree
+	 */
+	void exitParametrosformales(SLParser.ParametrosformalesContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SLParser#parametroformal}.
+	 * @param ctx the parse tree
+	 */
+	void enterParametroformal(SLParser.ParametroformalContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SLParser#parametroformal}.
+	 * @param ctx the parse tree
+	 */
+	void exitParametroformal(SLParser.ParametroformalContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link SLParser#sentencias}.
 	 * @param ctx the parse tree
@@ -257,4 +297,34 @@ public interface SLParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitSentencias(SLParser.SentenciasContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SLParser#sentencia}.
+	 * @param ctx the parse tree
+	 */
+	void enterSentencia(SLParser.SentenciaContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SLParser#sentencia}.
+	 * @param ctx the parse tree
+	 */
+	void exitSentencia(SLParser.SentenciaContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SLParser#llamadosub}.
+	 * @param ctx the parse tree
+	 */
+	void enterLlamadosub(SLParser.LlamadosubContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SLParser#llamadosub}.
+	 * @param ctx the parse tree
+	 */
+	void exitLlamadosub(SLParser.LlamadosubContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SLParser#parametros}.
+	 * @param ctx the parse tree
+	 */
+	void enterParametros(SLParser.ParametrosContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SLParser#parametros}.
+	 * @param ctx the parse tree
+	 */
+	void exitParametros(SLParser.ParametrosContext ctx);
 }

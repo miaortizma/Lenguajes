@@ -35,7 +35,7 @@ public class StackedContextMap {
         return this.stack.elementAt(this.stack.size() - 1);
     }
 
-    public HashMap<String, Object> getContextAt(int index) { return this.stack.elementAt(i); }
+    public HashMap<String, Object> getContextAt(int index) { return this.stack.elementAt(index); }
 
     public void put(String str, Object obj) {
         this.getContext().put(str, obj);
@@ -73,7 +73,7 @@ public class StackedContextMap {
 
     public boolean isFunc(String str) {
         HashMap context = this.getContext();
-        return (context.containsKey(str) && ( context.get(str) instanceof  SubrutinaContext );
+        return (context.containsKey(str) && ( context.get(str) instanceof  SubrutinaContext ) );
     }
 
 
@@ -86,7 +86,8 @@ public class StackedContextMap {
 
 
     public void push() {
-        this.stack.add(new HashMap<>());
+        // New Context copy of global context
+        this.stack.add(new HashMap<>(this.getGlobalContext()));
     }
 
     public int size() { return this.stack.size(); }
