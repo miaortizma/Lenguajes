@@ -1,4 +1,5 @@
 __pycache__/
 ANTLR/ANTLR-SL/.idea/vcs.xml
 ANTLR/ANTLR-SL/.idea/workspace.xml
-ANTLR/ANTLR-SL/grammar/SLLexer.tokens
+ANTLR/ANTLR-SL/grammar/*.tokens
+ANTLR/ANTLR-SL/gen/

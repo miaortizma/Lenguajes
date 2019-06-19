@@ -49,31 +49,31 @@ START_LIT : ('\'') -> more, pushMode(LIT1) ;
 
 CHAR : '\'' . '\'';
 
-TK_PLUS : '+' ;
-TK_MINUS : '-' ;
-TK_TIMES : '*' ;
-TK_DIVISION : '/' ;
-TK_MOD : '%' ;
-TK_POWER : '^' ;
+PLUS : '+' ;
+MINUS : '-' ;
+TIMES : '*' ;
+DIVISION : '/' ;
+MOD : '%' ;
+POWER : '^' ;
 
-TK_NOT_EQUAL : '<>' ;
-TK_EQUAL : '==' ;
-TK_GREATER_EQUAL : '>=' ;
-TK_GREATER : '>' ;
-TK_LESS_EQUAL : '<=';
-TK_LESS : '<';
+NOT_EQUAL : '<>' ;
+EQUAL : '==' ;
+GREATER_EQUAL : '>=' ;
+GREATER : '>' ;
+LESS_EQUAL : '<=';
+LESS : '<';
 
-TK_ASSIGN : '=' ;
-TK_SEMICOLON : ';';
-TK_DOUBLE_POINT : ':';
-TK_POINT : '.';
-TK_COMMA : ',';
-TK_LEFT_PAR : '(';
-TK_RIGHT_PAR : ')';
-TK_LEFT_BRACE : '[';
-TK_RIGHT_BRACE : ']';
-TK_LEFT_BRACKET : '{';
-TK_RIGHT_BRACKET : '}';
+ASSIGN : '=' ;
+SEMICOLON : ';';
+DOUBLE_POINT : ':';
+POINT : '.';
+COMMA : ',';
+LEFT_PAR : '(';
+RIGHT_PAR : ')';
+LEFT_BRACE : '[';
+RIGHT_BRACE : ']';
+LEFT_BRACKET : '{';
+RIGHT_BRACKET : '}';
 
 ID : [A-Za-zñÑ_][0-9A-Za-zñÑ_]*;
 
@@ -90,7 +90,7 @@ SINGLE_LINE_COMMENT: '//' ~[\n]*;
 
 mode STR1;
 
-TK_STRING : '"' -> popMode ;
+STRING : '"' -> popMode ;
 TEXT : ~[\n] -> more ;
 
 mode LIT1;

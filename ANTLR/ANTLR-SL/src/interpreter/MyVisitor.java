@@ -1,7 +1,7 @@
 package interpreter;
 
-import gen.SLParser.*;
-import gen.SLParserBaseVisitor;
+import gen.SLGrammarParser.*;
+import gen.r;
 
 class Const {
     Object maskedInstance;
@@ -22,6 +22,9 @@ class Tensor {
 
 }
 
+class Registro {
+
+}
 /*
 Numerico -> Double
 Cadena -> String
