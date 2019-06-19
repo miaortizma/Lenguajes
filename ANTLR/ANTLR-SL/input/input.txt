@@ -5,16 +5,18 @@ const
     A = 5.14
 
 inicio
-    sentencias
+    sentencia
+    entero(5)
 fin
 
 subrutina entero (n : numerico)
 
 inicio
-    sentencias
+    sentencia
+
 fin
 
 subrutina mi_sub (a, b : numerico)
 inicio
-    sentencias
+    sentencia
 fin
