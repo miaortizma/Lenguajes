@@ -105,21 +105,14 @@ STRING_LITERAL
 fragment DIGIT
     : [0-9] ;
 
-fragment REAL
-    : DIGIT+ ( '.' DIGIT+)?;
-
-fragment EXP_NUMBER
-    : (REAL) ('E'|'e') [+-]? DIGIT+ ;
-
-INT
-    : DIGIT+;
-
-
-NUMBER_LITERAL : INT|REAL|EXP_NUMBER;
+NUMBER_LITERAL
+    : DIGIT+ ( '.' DIGIT+ )?( [Ee] [+-] DIGIT+ )?;
 
 fragment LETTER
     : [A-Za-zñÑ];
-ID : (LETTER|[_])(LETTER|DIGIT|[_])*;
+
+ID
+    : (LETTER|[_])(LETTER|DIGIT|[_])*;
 
 PLUS
     : '+' ;

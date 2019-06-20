@@ -3,177 +3,114 @@ parser grammar SLGrammarParser;
 options { tokenVocab=SLGrammarLexer; }
 
 program
-    : (PROGRAM ID)? declarations? body subroutines?
-    ;
-
-body
-    : START (expression|loop|sentences)* END
-    ;
-
-subroutines
-    : subroutine+
-    ;
+    : (PROGRAM ID)? declarations? START sentences? END subroutines? ;
 
 declarations
-    : (consts|types|vars)+
-    ;
+    : (consts|types|vars)+ ;
 
 consts
-    : CONST const_+
-    ;
+    : CONST const_+ ;
 
 const_
-    : ID ASSIGN (STRING|NUMBER|PREDEF_BOOL_POS|PREDEF_BOOL_NEG)
-    ;
+    : ID ASSIGN (STRING|NUMBER_LITERAL|PREDEF_BOOL_POS|PREDEF_BOOL_NEG) ;
 
 types
-    : TYPES data_type+;
+    : TYPES type+;
+
+type
+    : ID
+    | DATA_TYPE
+    | tensor
+    | record ;
 
 vars
     : VAR var+;
 
 var
-    : id_list simple_data_type;
+    : id_list DOUBLE_POINT type;
 
+sentences
+    : sentence+ ;
 
-data_type
-    : DATA_TYPE
-    | ID ;
+sentence
+    : expression
+    | loop
+    | assign
+    | conditional_sentence
+    | subroutine_call ;
 
-simple_data_type
-    : data_type
-    | VECTOR LEFT_BRACE (TIMES|number_expression) RIGHT_BRACE data_type
-    | MATRIX LEFT_BRACE mat_dim RIGHT_BRACE data_type
-    | RECORD LEFT_BRACKET (id_list simple_data_type)+ RIGHT_BRACKET
-    ;
+record
+    : RECORD LEFT_BRACKET vars RIGHT_BRACKET;
+
+tensor
+    : vector
+    | matrix;
+
+vector
+    : VECTOR LEFT_BRACE (TIMES|expression) RIGHT_BRACE (DATA_TYPE|record);
+
+matrix
+    : MATRIX LEFT_BRACE mat_dim RIGHT_BRACE (DATA_TYPE|record);
 
 mat_dim
-    : (TIMES (COMMA TIMES)* ( COMMA number_expression)* ) | (number_expression (COMMA number_expression) ;
+    : (TIMES (COMMA TIMES)* ( COMMA expression)* ) | (expression (COMMA expression)) ;
 
 id_list
-    : ID (COMMA ID)* DOUBLE_POINT;
+    : ID (COMMA ID)*;
 
 access_variable
-    : ID access_variable_aux
-    ;
+    : ID ( POINT ID )+ access_tensor? ;
 
-access_variable_aux
-    : POINT ID access_variable_aux
-    | LEFT_BRACE (INT|access_variable) (COMMA (INT|access_variable) )* RIGHT_BRACE access_variable_aux
-    |
-    ;
+access_tensor
+    : LEFT_BRACE expression ( COMMA expression )* RIGHT_BRACE access_variable? ;
 
 operand
     : ID
     | STRING_LITERAL
+    | NUMBER_LITERAL;
+
+logic_operand
+    : operand
+    | access_variable
     | NUMBER_LITERAL
-    ;
+    | PREDEF_BOOL_POS
+    | PREDEF_BOOL_NEG ;
 
-additive_operation
-    : PLUS
-    | MINUS
-    ;
+expression
+    : LEFT_PAR expression RIGHT_PAR
+    | expression POWER expression
+    | add_op+ expression // Change sign
+    | expression mul_op expression
+    | expression add_op expression
+    | expression rel_op expression
+    | NOT+ expression
+    | expression AND expression
+    | expression OR expression
+    | (access_variable|array_init|NUMBER_LITERAL) ;
 
-multiplicative_operation
-    : TIMES
-    | DIVISION
-    | MOD
-    ;
-
-relat_operation
+rel_op
     : NOT_EQUAL
     | EQUAL
     | GREATER_EQUAL
     | GREATER
     | LESS_EQUAL
-    | LESS
-    ;
+    | LESS ;
 
-logic_operand
-    : subroutine_call
-    | operand
-    | access_variable
-    | NUMBER_LITERAL
-    | PREDEF_BOOL_POS
-    | PREDEF_BOOL_NEG
-    ;
+add_op
+    : PLUS
+    | MINUS ;
 
-subroutine_call
-    : ID LEFT_PAR parameters RIGHT_PAR
-    ;
-
-parameters
-    : (additive_expression (COMMA additive_expression)*)*
-    ;
-
-expression
-    : number_expression
-    | array_init
-    ;
-
-number_expression
-    : additive_expression
-    | subroutine_call
-    | access_variable
-    | NUMBER_LITERAL
-    ;
+mul_op
+    : TIMES
+    | DIVISION
+    | MOD ;
 
 array_init
     : operand
-    | LEFT_BRACKET (array_init (COMMA array_init)*)? RIGHT_BRACKET
-    ;
-
-additive_expression
-    : multiplicative_expression (additive_operation multiplicative_expression)*
-    ;
-
-multiplicative_expression
-    :
-    change_sign_expression (multiplicative_operation change_sign_expression)*;
-
-change_sign_expression
-    : additive_operation* potentiation_expression;
-
-potentiation_expression
-    : unit POWER potentiation_expression
-    | unit
-    ;
-
-unit
-    : relat_expression
-    | LEFT_PAR additive_expression RIGHT_PAR
-    ;
+    | LEFT_BRACKET (array_init (COMMA array_init)*)? RIGHT_BRACKET ;
 
 concat_expression
-    : STRING (PLUS STRING)+
-    ;
-
-relat_expression
-    : not_expression (relat_operation not_expression)*
-    ;
-
-not_expression
-    : NOT* and_expression
-    ;
-
-and_expression
-    : or_expression (AND or_expression)*
-    ;
-
-or_expression
-    : logic_unit (OR logic_unit)*
-    ;
-
-logic_unit
-    : logic_operand
-    | LEFT_PAR additive_expression RIGHT_PAR
-    ;
-
-sentences
-    : assign
-    | conditional_sentence
-    | subroutine_call
-    ;
+    : STRING (PLUS STRING)+ ; // unused ?
 
 assign
     : access_variable ASSIGN expression ;
@@ -201,20 +138,35 @@ eval_loop
       (ELSE sentences*)* RIGHT_BRACKET ;
 
 from_loop
-    : FROM assign_sentence UNTIL number_expression (STEP number_expression)? LEFT_BRACKET sentences* RIGHT_BRACKET;
+    : FROM assign UNTIL expression (STEP expression)? LEFT_BRACKET sentences* RIGHT_BRACKET;
+
+
+
+parameters
+    : (expression (COMMA expression)*) ;
+
+
+subroutine_call
+    : ID LEFT_PAR parameters? RIGHT_PAR ;
+
+subroutines
+    : subroutine+ ;
 
 subroutine
-    : SUBROUTINE ID LEFT_PAR formal_parameters? RIGHT_PAR (RETURNS data_type)? declarations? subroutine_body ;
+    : SUBROUTINE ID LEFT_PAR formal_parameters? RIGHT_PAR (procedure|function);
 
 formal_parameters
     : formal_parameter (SEMI formal_parameter)* ;
 
 formal_parameter
-    : REF? simple_variable ;
+    : REF? type ;
 
-subroutine_body
-    : START (sentences|loop|expression)* return_expression? END ;
+procedure
+    :  declarations? START sentences? END;
 
-return_expression
+function
+    : RETURNS type declarations? START sentences? RETURNS LEFT_PAR ret RIGHT_PAR END;
+
+ret
     : RETURNS LEFT_PAR expression RIGHT_PAR ;
 

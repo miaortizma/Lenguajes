@@ -1,8 +1,6 @@
 package interpreter;
 
-import gen.SLGrammarParser;
-import groovyjarjarantlr.collections.AST;
-
+import gen.SLGrammarParser.TensorContext;
 import java.util.HashMap;
 import java.util.Vector;
 
@@ -13,9 +11,6 @@ class Tensor implements Assignable<Tensor> {
     int [] dim;
     int openDims;
     boolean initialized;
-
-    public Tensor(int [] dim, Class class_, SLGrammarParser.) {
-    }
 
     public Tensor(int [] dim, Class class_) {
         int n = dim.length();
@@ -35,6 +30,17 @@ class Tensor implements Assignable<Tensor> {
         this.dim = dim;
         this.class_ = class_;
         initialized = false;
+    }
+
+    /**
+     * Construct Tensor out of TensorContext
+     * @param dim
+     * @param class_
+     * @param ctx
+     */
+    public Tensor(int [] dim, Class class_, TensorContext ctx) {
+        this(dim, class_);
+        // to-do
     }
 
     public void clear() {
@@ -62,7 +68,7 @@ class Tensor implements Assignable<Tensor> {
     }
 }
 
-class Registro implements Assignable {
+class Record implements Assignable {
 
     @Override
     public boolean IsAssignable(Object obj) {
@@ -70,7 +76,7 @@ class Registro implements Assignable {
     }
 }
 
-class Numerico implements Assignable {
+class Numeric implements Assignable {
 
     private Double d;
 
