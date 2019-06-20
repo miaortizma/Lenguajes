@@ -1,30 +1,8 @@
 package interpreter;
 
 import gen.SLGrammarParser.*;
-import gen.r;
+import gen.SLGrammarParserBaseVisitor;
 
-class Const {
-    Object maskedInstance;
-
-    public Const(Object maskedInstance) {
-        this.maskedInstance = maskedInstance;
-    }
-}
-
-class Tensor {
-
-    Object tensor;
-    Class class_;
-
-    public Tensor(int[] dim, Class class_) {
-        this.class_ = class_;
-    }
-
-}
-
-class Registro {
-
-}
 /*
 Numerico -> Double
 Cadena -> String
@@ -32,21 +10,24 @@ Cadena -> String
  */
 
 
-public class MyVisitor<T> extends SLParserBaseVisitor<T> {
+
+
+public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
 
     StackedContextMap table = new StackedContextMap();
 
+    /*
     public Object getType(TiporetContext ctx) {
         //if(ctx.ID())
         return new Double(1);
-    }
+    }*/
 
     @Override
-    public T visitPrograma(ProgramaContext ctx) {
+    public T visitProgram(ProgramContext ctx) {
 
         //añadir declaraciones globales (CONSTS, VARIABLES, TIPOS)
-        this.visit(ctx.programaprc().declaraciones());
-        this.visit(ctx.subrutinas());
+        this.visit(ctx.declarations());
+        this.visit(ctx.subroutines());
         //añadir funciones a el ámbito de variables
 
         return null;
@@ -57,6 +38,7 @@ public class MyVisitor<T> extends SLParserBaseVisitor<T> {
         return null;
     }
 
+    /*
     @Override
     public T visitTipos(TiposContext ctx) {
         for(TipoContext tipo : ctx.tipo()){
@@ -123,7 +105,6 @@ public class MyVisitor<T> extends SLParserBaseVisitor<T> {
 
     @Override
     public T visitSentencia(SentenciaContext ctx) {
-
         return null;
     }
 
@@ -131,4 +112,6 @@ public class MyVisitor<T> extends SLParserBaseVisitor<T> {
     public T visitLlamadosub(LlamadosubContext ctx) {
         return null;
     }
+
+     */
 }

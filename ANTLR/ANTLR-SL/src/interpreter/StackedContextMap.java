@@ -1,94 +1,235 @@
 package interpreter;
 
+import gen.SLGrammarParser;
+import groovyjarjarantlr.collections.AST;
+
 import java.util.HashMap;
 import java.util.Vector;
-import gen.SLParser.SubrutinaContext;
 
-class Reference {
+class Tensor implements Assignable<Tensor> {
 
-    int level;
+    Object tensor;
+    Class class_;
+    int [] dim;
+    int openDims;
+    boolean initialized;
 
-    public Reference(int level) {
-        this.level = level;
+    public Tensor(int [] dim, Class class_, SLGrammarParser.) {
     }
 
+    public Tensor(int [] dim, Class class_) {
+        int n = dim.length();
+        if(n == 0)
+            throw new IllegalArgumentException("Dimensionless Tensor");
+
+        int it = 0;
+        while(it < dim.length && dim[it] == 0)
+            ++it;
+
+        openDims = it;
+
+        while(it < dim.length)
+            if(dim[it] == 0)
+                throw new IllegalArgumentException("Tensor with Negative Dimension");
+
+        this.dim = dim;
+        this.class_ = class_;
+        initialized = false;
+    }
+
+    public void clear() {
+        for( int i = 0; i < openDims; ++i ){
+            dim[i] = 0;
+        }
+        // to-do
+    }
+
+    @Override
+    public boolean IsAssignable(Object obj) {
+        if(obj instanceof Tensor) {
+            Tensor nextTensor = (Tensor) obj;
+            if(nextTensor.class_ == class_) {
+                if(!initialized) return true;
+                for(int i = 0; i < )
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean Assign(Tensor obj) {
+        return false;
+    }
 }
 
+class Registro implements Assignable {
 
+    @Override
+    public boolean IsAssignable(Object obj) {
+        return false;
+    }
+}
+
+class Numerico implements Assignable {
+
+    private Double d;
+
+    public Numerico(String str) {
+        d = Double.parseDouble(str);
+    }
+
+    @Override
+    public boolean IsAssignable(Object obj) {
+        return obj instanceof Double;
+    }
+}
+
+class Cadena implements Assignable {
+
+    private String str;
+
+    @Override
+    public boolean IsAssignable(Object obj) {
+        return obj instanceof String;
+    }
+}
+
+/**
+ * Function to manage a stacked context which supports:
+ * - vertical (push, pop) and horizontal (put, get) context
+ * - const elements ( immutable )
+ * - referenced elements ( to lower parts of the stack )
+ * - no more
+ * @author miaortizma
+ */
 public class StackedContextMap {
+
+    /**
+     * read-only
+     */
+    private class Const {
+
+        private Object maskedInstance;
+
+        public Const(Object maskedInstance) {
+            this.maskedInstance = maskedInstance;
+        }
+
+        public Object get() { return this.maskedInstance; }
+
+    }
+
+    private class Reference {
+
+        int level;
+
+        public Reference(int level) { this.level = level; }
+
+    }
 
 
     private Vector<HashMap<String, Object> > stack;
+    private HashMap<String, Object> globalContext, context;
 
 
     public StackedContextMap() {
         this.stack = new Vector<>();
-        stack.add(new HashMap<>());
+        this.globalContext = new HashMap<>();
+        this.context = globalContext;
+        stack.add(this.globalContext);
     }
 
+    public HashMap<String, Object> getGlobalContext() { return this.globalContext; }
 
-    public HashMap<String, Object> getGlobalContext() {
-        return this.stack.elementAt(0);
+    public HashMap<String, Object> getContext() { return this.context; }
+
+    public HashMap<String, Object> getContextAt(int index) {
+        if(index < 0 || index > this.size() - 1) throw new IndexOutOfBoundsException();
+        return this.stack.elementAt(index);
     }
 
-    public HashMap<String, Object> getContext() {
-        return this.stack.elementAt(this.stack.size() - 1);
+    /**
+     * Places nextObj if possible into current context, which may be global context.
+     * @param str
+     * @param nextObj
+     */
+    public void put(String str, Object nextObj) throws IllegalAccessException {
+        //Explore invalid options
+        if(in(this.context, str)) {
+            Object res = this.getUnresolvedConst(str);
+            if(res instanceof Const)
+                throw new IllegalAccessException("Const identifier");
+            else if (res instanceof Assignable && !((Assignable) res).IsAssignable(nextObj))
+                throw new UnsupportedOperationException("Unsupported Assign");
+            else if ( !nextObj.getClass().equals(res.getClass()) )
+                throw new UnsupportedOperationException("Can't assign " + nextObj.getClass() + " to " + res.getClass());
+        }
+        this.context.put(str, nextObj);
     }
 
-    public HashMap<String, Object> getContextAt(int index) { return this.stack.elementAt(index); }
+    /**
+     *
+     * @param str
+     * @return res
+     */
+    private Object getUnresolvedConst(String str) {
+        Object res;
+        if(in(context, str))
+            res = context.get(str);
+        else if(in(globalContext, str))
+            res = globalContext.get(str);
+        else
+            throw new IllegalArgumentException("Variable doesn't exists");
 
-    public void put(String str, Object obj) {
-        this.getContext().put(str, obj);
+        if(res instanceof Reference) res = this.getRef(str, (Reference) res);
+        return res;
     }
 
     public Object get(String str) {
-        Object obj = this.getContext().get(str);
-        if(obj == null) throw new IllegalArgumentException("Variable doesn't exists");
-
-        if(obj instanceof Reference) {
-            return this.getReference(str, (Reference) obj);
+        Object res = getUnresolvedConst(str);
+        if(res instanceof Const) {
+            Const const_res = (Const) res;
+            return const_res.get();
         }
-        return obj;
+        return res;
+    }
+
+
+    public void putConst(String str, Object obj) throws IllegalAccessException {
+        Object const_obj = new Const(obj);
+        put(str, const_obj);
     }
 
     /*
     Takes variable last context and passes it as reference to current level
      */
-    public void putReference(String str) {
+    public void putRef(String str) throws IllegalAccessException {
         // if variable to reference is a reference in last context
-        int level = this.size() - 2;
-        Object referenced = this.getContextAt(level).get(str);
+        int level = size() - 2;
+        Object referenced = getContextAt(level).get(str);
         if(referenced == null)  throw new IllegalArgumentException("Referenced variable doesn't exists");
 
         if(referenced instanceof Reference ){
-            this.put(str, referenced);
+            put(str, referenced);
         }else {
-            this.put(str, new Reference(level));
+            put(str, new Reference(level));
         }
     }
 
-    private Object getReference(String str, Reference ref) {
-        return this.getContextAt(ref.level).get(str);
-    }
+    private Object getRef(String str, Reference ref) { return getContextAt(ref.level).get(str); }
 
-    public boolean isFunc(String str) {
-        HashMap context = this.getContext();
-        return (context.containsKey(str) && ( context.get(str) instanceof  SubrutinaContext ) );
-    }
-
-
+    public boolean in(HashMap context, String str) { return context.containsKey(str); }
 
     public void pop() {
         if(this.size() == 1) throw new IllegalArgumentException("Can't pop Global context!");
-
-        this.stack.removeElementAt(this.stack.size() - 1);
+        stack.removeElementAt(stack.size() - 1);
+        context = this.stack.lastElement(); // forget context
     }
-
 
     public void push() {
-        // New Context copy of global context
-        this.stack.add(new HashMap<>(this.getGlobalContext()));
+        context = new HashMap<>(); //new context
+        stack.add(context);
     }
 
-    public int size() { return this.stack.size(); }
+    public int size() { return stack.size(); }
 }
