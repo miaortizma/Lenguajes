@@ -59,22 +59,13 @@ id_list
     : ID (COMMA ID)*;
 
 access_variable
-    : ID ( POINT ID )+ access_tensor? ;
+    : ID ( access_tensor | access_record );
+
+access_record
+    :  ( POINT ID )+ access_tensor? ;
 
 access_tensor
-    : LEFT_BRACE expression ( COMMA expression )* RIGHT_BRACE access_variable? ;
-
-operand
-    : ID
-    | STRING_LITERAL
-    | NUMBER_LITERAL;
-
-logic_operand
-    : operand
-    | access_variable
-    | NUMBER_LITERAL
-    | PREDEF_BOOL_POS
-    | PREDEF_BOOL_NEG ;
+    : LEFT_BRACE expression ( COMMA expression )* RIGHT_BRACE access_record ? ;
 
 expression
     : LEFT_PAR expression RIGHT_PAR
@@ -86,7 +77,10 @@ expression
     | NOT+ expression
     | expression AND expression
     | expression OR expression
-    | (access_variable|array_init|NUMBER_LITERAL) ;
+    | (ID|access_variable|NUMBER_LITERAL|STRING_LITERAL|bool_literal) ;
+
+bool_literal
+    : PREDEF_BOOL_POS | PREDEF_BOOL_NEG ;
 
 rel_op
     : NOT_EQUAL
@@ -105,15 +99,15 @@ mul_op
     | DIVISION
     | MOD ;
 
-array_init
-    : operand
-    | LEFT_BRACKET (array_init (COMMA array_init)*)? RIGHT_BRACKET ;
-
 concat_expression
     : STRING (PLUS STRING)+ ; // unused ?
 
 assign
-    : access_variable ASSIGN expression ;
+    : (ID|access_variable) ASSIGN (expression|structured_literal) ;
+
+structured_literal // Structured literal for tensors and records
+    : LEFT_BRACKET (expression (COMMA expression)*)? RIGHT_BRACKET ;
+
 
 conditional_sentence
     :
@@ -140,8 +134,6 @@ eval_loop
 from_loop
     : FROM assign UNTIL expression (STEP expression)? LEFT_BRACKET sentences* RIGHT_BRACKET;
 
-
-
 parameters
     : (expression (COMMA expression)*) ;
 
@@ -159,7 +151,7 @@ formal_parameters
     : formal_parameter (SEMI formal_parameter)* ;
 
 formal_parameter
-    : REF? type ;
+    : REF? id_list DOUBLE_POINT type ;
 
 procedure
     :  declarations? START sentences? END;
