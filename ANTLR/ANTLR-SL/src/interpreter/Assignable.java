@@ -2,7 +2,6 @@ package interpreter;
 
 public interface Assignable<T> {
 
-    public boolean IsAssignable(Object obj);
+    public void AssignIfPossible(T obj);
 
-    public boolean Assign(T obj);
 }

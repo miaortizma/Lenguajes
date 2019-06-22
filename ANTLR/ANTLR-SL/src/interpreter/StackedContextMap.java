@@ -1,104 +1,32 @@
 package interpreter;
 
-import gen.SLGrammarParser.TensorContext;
 import java.util.HashMap;
 import java.util.Vector;
 
-class Tensor implements Assignable<Tensor> {
+/**
+ * read-only
+ */
+private class Const {
 
-    Object tensor;
-    Class class_;
-    int [] dim;
-    int openDims;
-    boolean initialized;
+    private Object maskedInstance;
 
-    public Tensor(int [] dim, Class class_) {
-        int n = dim.length();
-        if(n == 0)
-            throw new IllegalArgumentException("Dimensionless Tensor");
-
-        int it = 0;
-        while(it < dim.length && dim[it] == 0)
-            ++it;
-
-        openDims = it;
-
-        while(it < dim.length)
-            if(dim[it] == 0)
-                throw new IllegalArgumentException("Tensor with Negative Dimension");
-
-        this.dim = dim;
-        this.class_ = class_;
-        initialized = false;
+    public Const(Object maskedInstance) {
+        this.maskedInstance = maskedInstance;
     }
 
-    /**
-     * Construct Tensor out of TensorContext
-     * @param dim
-     * @param class_
-     * @param ctx
-     */
-    public Tensor(int [] dim, Class class_, TensorContext ctx) {
-        this(dim, class_);
-        // to-do
-    }
+    public Object get() { return this.maskedInstance; }
 
-    public void clear() {
-        for( int i = 0; i < openDims; ++i ){
-            dim[i] = 0;
-        }
-        // to-do
-    }
-
-    @Override
-    public boolean IsAssignable(Object obj) {
-        if(obj instanceof Tensor) {
-            Tensor nextTensor = (Tensor) obj;
-            if(nextTensor.class_ == class_) {
-                if(!initialized) return true;
-                for(int i = 0; i < )
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public boolean Assign(Tensor obj) {
-        return false;
-    }
 }
 
-class Record implements Assignable {
+private class Reference {
 
-    @Override
-    public boolean IsAssignable(Object obj) {
-        return false;
-    }
+    int level;
+
+    public Reference(int level) { this.level = level; }
+
 }
 
-class Numeric implements Assignable {
 
-    private Double d;
-
-    public Numerico(String str) {
-        d = Double.parseDouble(str);
-    }
-
-    @Override
-    public boolean IsAssignable(Object obj) {
-        return obj instanceof Double;
-    }
-}
-
-class Cadena implements Assignable {
-
-    private String str;
-
-    @Override
-    public boolean IsAssignable(Object obj) {
-        return obj instanceof String;
-    }
-}
 
 /**
  * Function to manage a stacked context which supports:
@@ -110,31 +38,9 @@ class Cadena implements Assignable {
  */
 public class StackedContextMap {
 
-    /**
-     * read-only
-     */
-    private class Const {
-
-        private Object maskedInstance;
-
-        public Const(Object maskedInstance) {
-            this.maskedInstance = maskedInstance;
-        }
-
-        public Object get() { return this.maskedInstance; }
-
-    }
-
-    private class Reference {
-
-        int level;
-
-        public Reference(int level) { this.level = level; }
-
-    }
 
 
-    private Vector<HashMap<String, Object> > stack;
+    private Vector<HashMap<String, Object>> stack;
     private HashMap<String, Object> globalContext, context;
 
 
@@ -145,11 +51,7 @@ public class StackedContextMap {
         stack.add(this.globalContext);
     }
 
-    public HashMap<String, Object> getGlobalContext() { return this.globalContext; }
-
-    public HashMap<String, Object> getContext() { return this.context; }
-
-    public HashMap<String, Object> getContextAt(int index) {
+    private HashMap<String, Object> getContextAt(int index) {
         if(index < 0 || index > this.size() - 1) throw new IndexOutOfBoundsException();
         return this.stack.elementAt(index);
     }
@@ -165,10 +67,8 @@ public class StackedContextMap {
             Object res = this.getUnresolvedConst(str);
             if(res instanceof Const)
                 throw new IllegalAccessException("Const identifier");
-            else if (res instanceof Assignable && !((Assignable) res).IsAssignable(nextObj))
-                throw new UnsupportedOperationException("Unsupported Assign");
-            else if ( !nextObj.getClass().equals(res.getClass()) )
-                throw new UnsupportedOperationException("Can't assign " + nextObj.getClass() + " to " + res.getClass());
+            else
+                DefaultAssigner.AssignIfPossible(res, nextObj);
         }
         this.context.put(str, nextObj);
     }
@@ -224,7 +124,11 @@ public class StackedContextMap {
 
     private Object getRef(String str, Reference ref) { return getContextAt(ref.level).get(str); }
 
-    public boolean in(HashMap context, String str) { return context.containsKey(str); }
+    private boolean in(HashMap context, String str) { return context.containsKey(str); }
+
+    public boolean has(String str) {
+        return context.containsKey(str) || globalContext.containsKey(str);
+    }
 
     public void pop() {
         if(this.size() == 1) throw new IllegalArgumentException("Can't pop Global context!");

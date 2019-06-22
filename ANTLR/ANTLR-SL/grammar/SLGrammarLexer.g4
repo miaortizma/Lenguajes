@@ -78,11 +78,8 @@ STEP
 TYPES
     : 'tipos' ;
 
-PREDEF_BOOL_POS
-    : 'TRUE'|'SI' ;
-
-PREDEF_BOOL_NEG
-    : 'FALSE'|'NO' ;
+PREDEF_BOOL
+    : 'TRUE'|'SI'|'FALSE'|'NO';
 
 NOT
     : 'not';
