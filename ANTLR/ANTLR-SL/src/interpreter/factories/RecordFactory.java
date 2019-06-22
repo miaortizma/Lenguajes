@@ -1,8 +1,10 @@
-package interpreter;
+package interpreter.factories;
+
+import interpreter.assignables.Record;
 
 import java.util.HashMap;
 
-public class RecordFactory implements AbstractFactory<Record>{
+public class RecordFactory implements AbstractFactory<Record> {
 
     HashMap<String, AbstractFactory> attributes;
 

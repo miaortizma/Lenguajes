@@ -1,4 +1,4 @@
-package interpreter;
+package interpreter.assignables;
 
 public class Logic implements Assignable<Logic> {
 
@@ -8,12 +8,12 @@ public class Logic implements Assignable<Logic> {
 
     public void Logic(String str) {
         switch (str) {
-            case 'TRUE':
-            case 'SI':
+            case "TRUE":
+            case "SI":
                 aBoolean = Boolean.TRUE;
                 break;
-            case 'FALSE':
-            case 'NO':
+            case "FALSE":
+            case "NO":
                 aBoolean = Boolean.FALSE;
         }
     }

@@ -12,7 +12,7 @@ consts
     : CONST const_+ ;
 
 const_
-    : ID ASSIGN (STRING|NUMBER_LITERAL|PREDEF_BOOL_POS|PREDEF_BOOL_NEG) ;
+    : ID ASSIGN (STRING|NUMBER_LITERAL|PREDEF_BOOL) ;
 
 types
     : TYPES type+;
@@ -77,10 +77,8 @@ expression
     | NOT+ expression
     | expression AND expression
     | expression OR expression
-    | (ID|access_variable|NUMBER_LITERAL|STRING_LITERAL|bool_literal) ;
+    | (ID|access_variable|NUMBER_LITERAL|STRING_LITERAL|PREDEF_BOOL) ;
 
-bool_literal
-    : PREDEF_BOOL_POS | PREDEF_BOOL_NEG ;
 
 rel_op
     : NOT_EQUAL

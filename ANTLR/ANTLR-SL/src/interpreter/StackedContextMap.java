@@ -1,32 +1,9 @@
 package interpreter;
 
+import interpreter.assignables.Assignable;
+
 import java.util.HashMap;
 import java.util.Vector;
-
-/**
- * read-only
- */
-private class Const {
-
-    private Object maskedInstance;
-
-    public Const(Object maskedInstance) {
-        this.maskedInstance = maskedInstance;
-    }
-
-    public Object get() { return this.maskedInstance; }
-
-}
-
-private class Reference {
-
-    int level;
-
-    public Reference(int level) { this.level = level; }
-
-}
-
-
 
 /**
  * Function to manage a stacked context which supports:
@@ -39,9 +16,36 @@ private class Reference {
 public class StackedContextMap {
 
 
+    /**
+     * read-only
+     */
+    private class Const implements Assignable {
 
-    private Vector<HashMap<String, Object>> stack;
-    private HashMap<String, Object> globalContext, context;
+        private Assignable maskedInstance;
+
+        public Const(Assignable maskedInstance) {
+            this.maskedInstance = maskedInstance;
+        }
+
+        public Assignable get() { return this.maskedInstance; }
+
+        @Override
+        public void AssignIfPossible(Object obj) { }
+    }
+
+    private class Reference implements Assignable {
+
+        int level;
+
+        public Reference(int level) { this.level = level; }
+
+        @Override
+        public void AssignIfPossible(Object obj) { }
+    }
+
+
+    private Vector<HashMap<String, Assignable>> stack;
+    private HashMap<String, Assignable> globalContext, context;
 
 
     public StackedContextMap() {
@@ -51,7 +55,7 @@ public class StackedContextMap {
         stack.add(this.globalContext);
     }
 
-    private HashMap<String, Object> getContextAt(int index) {
+    private HashMap<String, Assignable> getContextAt(int index) {
         if(index < 0 || index > this.size() - 1) throw new IndexOutOfBoundsException();
         return this.stack.elementAt(index);
     }
@@ -61,25 +65,19 @@ public class StackedContextMap {
      * @param str
      * @param nextObj
      */
-    public void put(String str, Object nextObj) throws IllegalAccessException {
+    public void put(String str, Assignable nextObj) {
         //Explore invalid options
         if(in(this.context, str)) {
-            Object res = this.getUnresolvedConst(str);
-            if(res instanceof Const)
-                throw new IllegalAccessException("Const identifier");
-            else
-                DefaultAssigner.AssignIfPossible(res, nextObj);
+            Assignable res = get(str);
+            res.AssignIfPossible(nextObj);
         }
         this.context.put(str, nextObj);
     }
 
-    /**
-     *
-     * @param str
-     * @return res
-     */
-    private Object getUnresolvedConst(String str) {
-        Object res;
+
+    public Assignable get(String str) {
+        Assignable res;
+
         if(in(context, str))
             res = context.get(str);
         else if(in(globalContext, str))
@@ -87,12 +85,9 @@ public class StackedContextMap {
         else
             throw new IllegalArgumentException("Variable doesn't exists");
 
-        if(res instanceof Reference) res = this.getRef(str, (Reference) res);
-        return res;
-    }
+        if(res instanceof Reference)
+            res = this.getRef(str, (Reference) res);
 
-    public Object get(String str) {
-        Object res = getUnresolvedConst(str);
         if(res instanceof Const) {
             Const const_res = (Const) res;
             return const_res.get();
@@ -101,8 +96,8 @@ public class StackedContextMap {
     }
 
 
-    public void putConst(String str, Object obj) throws IllegalAccessException {
-        Object const_obj = new Const(obj);
+    public void putConst(String str, Assignable obj) {
+        Const const_obj = new Const(obj);
         put(str, const_obj);
     }
 
@@ -112,7 +107,7 @@ public class StackedContextMap {
     public void putRef(String str) throws IllegalAccessException {
         // if variable to reference is a reference in last context
         int level = size() - 2;
-        Object referenced = getContextAt(level).get(str);
+        Assignable referenced = getContextAt(level).get(str);
         if(referenced == null)  throw new IllegalArgumentException("Referenced variable doesn't exists");
 
         if(referenced instanceof Reference ){
@@ -122,7 +117,7 @@ public class StackedContextMap {
         }
     }
 
-    private Object getRef(String str, Reference ref) { return getContextAt(ref.level).get(str); }
+    private Assignable getRef(String str, Reference ref) { return getContextAt(ref.level).get(str); }
 
     private boolean in(HashMap context, String str) { return context.containsKey(str); }
 

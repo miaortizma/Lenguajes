@@ -1,5 +1,7 @@
-package interpreter;
+package interpreter.factories;
 
+
+import interpreter.assignables.Tensor;
 
 public class TensorFactory implements AbstractFactory<Tensor> {
 

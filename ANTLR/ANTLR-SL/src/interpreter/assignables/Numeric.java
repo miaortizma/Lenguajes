@@ -1,4 +1,4 @@
-package interpreter;
+package interpreter.assignables;
 
 public class Numeric implements Assignable<Numeric> {
 
