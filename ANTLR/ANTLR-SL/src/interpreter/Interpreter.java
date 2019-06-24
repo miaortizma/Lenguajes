@@ -1,9 +1,16 @@
 package interpreter;
 
+import gen.SLGrammarParser;
+import gen.SLGrammarLexer;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTree;
+
+import java.io.IOException;
 
 public class Interpreter {
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws IOException {
         SLGrammarLexer lexer;
         System.out.println(args[0]);
         if (args.length>0)

@@ -2,47 +2,65 @@ package interpreter;
 
 import gen.SLGrammarParser.*;
 import gen.SLGrammarParserBaseVisitor;
+import interpreter.assignables.Assignable;
+import interpreter.factories.AbstractFactory;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
-/*
-Numerico -> Double
-Cadena -> String
-
- */
+import javax.swing.*;
 
 
+class Subroutine implements Assignable {
+
+    private final SubroutineContext ctx;
+
+    public Subroutine(SubroutineContext ctx) { this.ctx = ctx; }
+
+    @Override
+    public boolean IsAssignable(Object obj) { return false; }
+
+    @Override
+    public void AssignIfPossible(Object obj) { throw new UnsupportedOperationException();}
+
+    public SubroutineContext get() { return ctx; }
+
+}
 
 
 public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
 
     StackedContextMap table = new StackedContextMap();
 
-    /*
-    public Object getType(TiporetContext ctx) {
-        //if(ctx.ID())
-        return new Double(1);
-    }*/
-
     @Override
     public T visitProgram(ProgramContext ctx) {
 
         //añadir declaraciones globales (CONSTS, VARIABLES, TIPOS)
+
         this.visit(ctx.declarations());
-        this.visit(ctx.subroutines());
+
+        SubroutinesContext subs = ctx.subroutines();
+        for(SubroutineContext subroutine : subs.subroutine()) {
+            String str = subroutine.ID().getText();
+            table.putConst(str, new Subroutine(subroutine));
+            System.out.println(str);
+        }
         //añadir funciones a el ámbito de variables
+
+        this.visit(ctx.sentences());
 
         return null;
     }
 
     @Override
+    //
     public T visitConsts(ConstsContext ctx) {
         return null;
     }
 
-    /*
+
     @Override
-    public T visitTipos(TiposContext ctx) {
-        for(TipoContext tipo : ctx.tipo()){
-            System.out.print(tipo.tipobasico());
+    public T visitTypes(TypesContext ctx) {
+        for(TypeContext tipo : ctx.type()){
+            System.out.print(tipo.ID());
         }
         return null;
     }
@@ -52,66 +70,73 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
         return null;
     }
 
-    @Override
-    public T visitSubrutinas(SubrutinasContext ctx) {
-        for(SubrutinaContext subrutina : ctx.subrutina()) {
-            String str = subrutina.nombre_subrutina.getText();
-            table.put(str, subrutina);
-            System.out.println(str);
-        }
-        return null;
-    }
 
     @Override
-    public T visitSubrutina(SubrutinaContext ctx) {
+    public T visitSubroutine(SubroutineContext ctx) {
         table.push();
-        this.visit(ctx.parametrosformales());
-        if(ctx.procedimiento() != null) {
-            this.visit(ctx.procedimiento().declaraciones());
-            this.visit(ctx.procedimiento().sentencias());
+        this.visit(ctx.formal_parameters());
+        if(ctx.procedure() != null) {
+            this.visit(ctx.procedure().declarations());
+            this.visit(ctx.procedure().sentences());
 
             table.pop();
             return null;
         } else {
-            FuncionContext funcion = ctx.funcion();
+            FunctionContext function = ctx.function();
 
-            this.visit(funcion.declaraciones());
-            this.visit(funcion.sentencias());
+            this.visit(function.declarations());
+            this.visit(function.sentences());
 
-            RetContext retctx = funcion.ret();
+            RetContext retctx = function.ret();
 
-            Object ret;
-            if(retctx.expr() != null) {
-                ret = this.visit(retctx.expr());
-            } else {
-                ret = table.get(retctx.ID().getText());
-            }
+            Assignable ret = (Assignable) this.visit(retctx.expression()); // Should return Assignable
 
-            Object type = this.getType(funcion.tiporet());
+            AbstractFactory type = (AbstractFactory) this.visit(function.type()); // Should return factory
 
-            if( ret.getClass().equals(type.getClass()) ) {
-                table.pop();
-                return (T) (Object) ret;
-            }else {
+            if(!type.build().IsAssignable(ret))
                 throw new ClassCastException("Incompatible types");
-            }
+
+            return ret;
         }
     }
 
     @Override
-    public T visitParametrosformales(ParametrosformalesContext ctx) {
+    public T visitFormal_parameters(Formal_parametersContext ctx) {
         return null;
     }
 
     @Override
-    public T visitSentencia(SentenciaContext ctx) {
+    public T visitSentence(SentenceContext ctx) {
         return null;
     }
+
 
     @Override
-    public T visitLlamadosub(LlamadosubContext ctx) {
-        return null;
-    }
+    public T visitSubroutine_call(Subroutine_callContext ctx) {
+        Subroutine_call_nameContext nameCtx = ctx.subroutine_call_name();
+        String name;
+        if(nameCtx.PREDEF_FUNC() != null) {
+            name = nameCtx.PREDEF_FUNC().getText();
+            switch(name) {
+                case "imprimir": {
 
-     */
+                    System.out.println();
+                    break;
+                }
+            }
+        }
+        name = nameCtx.ID().getText();
+
+        if(!table.has(name))
+            throw new UnsupportedOperationException("Subroutine doesn't exists");
+
+        Assignable assg = table.get(name);
+
+        if(!(assg instanceof Subroutine))
+            throw new UnsupportedOperationException("Not a function: " + assg.getClass());
+
+        Subroutine sub = (Subroutine) assg;
+
+        return this.visit(sub.get());
+    }
 }

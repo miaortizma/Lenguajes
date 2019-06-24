@@ -1,7 +1,11 @@
 lexer grammar SLGrammarLexer;
 
 // Reserved words
-RESERVED : 'archivo'|'constantes'|'lib'|'libext'|'sin'|'variables';
+RESERVED
+    : 'archivo'|'constantes'|'lib'|'libext'|'sin'|'variables';
+
+PREDEF_FUNC
+    : 'imprimir';
 
 PROGRAM
     : 'programa';

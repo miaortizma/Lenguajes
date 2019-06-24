@@ -4,16 +4,16 @@ import interpreter.factories.AbstractFactory;
 
 import java.util.Vector;
 
-public class Tensor implements Assignable<Tensor> {
+public class Tensor<T extends Assignable> implements Assignable {
 
-    private final AbstractFactory factory;
-    private int [] dim;
+    private final AbstractFactory<T> factory;
+    private final Class<T> clss;
+    private final int [] dim;
     private int n, openDims;
     private boolean initialized;
     private Vector tensor;
 
-
-    public Tensor(int [] dim, AbstractFactory factory) {
+    public Tensor(int [] dim, AbstractFactory<T> factory, Class<T> clss) {
         n = dim.length;
         if(n == 0)
             throw new RuntimeException();
@@ -32,9 +32,10 @@ public class Tensor implements Assignable<Tensor> {
             ++it;
         }
         initialized = openDims == 0;
-
         this.dim = dim;
         this.factory = factory;
+        this.clss = clss;
+
         if(initialized){
             Assignable assignable = this.factory.build();
             tensor = new Vector(dim[n - 1]);
@@ -60,25 +61,33 @@ public class Tensor implements Assignable<Tensor> {
         if(pos.length != n)
             throw new IndexOutOfBoundsException();
         for(int i = 0; i < n; ++i)
-            if(0 > pos[i] || pos[i] >= dim[i])
+            if(!( 1 <= pos[i] && pos[i] <= dim[i]) )
                 throw new IndexOutOfBoundsException();
+    }
+
+    private void validateInitialized() {
+        if(!initialized)
+            throw new UnsupportedOperationException();
     }
 
     private Vector getLastVec(int [] pos) {
         Vector vec = tensor;
         for(int i = 0; i < n - 1; ++i)
-            vec = (Vector) vec.get(pos[i]);
+            vec = (Vector) vec.get(pos[i] - 1);
         return vec;
     }
 
-    public Assignable get(int [] pos) {
+    public T get(int [] pos) {
+        validateInitialized();
         validatePos(pos);
         Vector vec = getLastVec(pos);
-        return (Assignable) vec.get(pos[n - 1]);
+        return (T) vec.get(pos[n - 1] - 1);
     }
 
-    public void put(int [] pos, Assignable nextObj) {
-        Assignable obj = get(pos);
+    public void put(int [] pos, Object nextObj) {
+        validateInitialized();
+        validatePos(pos);
+        T obj = get(pos);
         obj.AssignIfPossible(nextObj);
     }
 
@@ -87,20 +96,43 @@ public class Tensor implements Assignable<Tensor> {
      * tensor = {}
      */
     public void clear() {
+        if(openDims == 0)
+            throw new UnsupportedOperationException();
         for( int i = 0; i < openDims; ++i )
             dim[i] = 0;
-
+        initialized = false;
         tensor = null;
     }
 
+
+    public int[] getDim() { return dim; }
+
     @Override
-    public void AssignIfPossible(Tensor obj) {
+    public boolean IsAssignable(Object obj) {
+        if(obj instanceof Tensor) {
+            Tensor aTensor = (Tensor) obj;
+            if(aTensor.initialized){
+                boolean sameDims = true;
+                if(!initialized)
+                    for(int i = openDims; i < n; ++i)
+                        sameDims &= dim[i] == aTensor.dim[i];
+
+                return (factory.equals(aTensor.factory) && sameDims);
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public void AssignIfPossible(Object obj) {
+        if(!IsAssignable(obj))
+            throw new UnsupportedOperationException("Can't assign "+obj.getClass()+" to "+name()+" of "+this.clss);
+        Tensor aTensor = (Tensor) obj;
         if(!initialized)
             for(int i = 0; i < openDims; ++i)
-                dim[i] = 0;
-
-        if (factory.equals(obj.factory) && dim == obj.dim)
-            tensor = obj.tensor;
+                dim[i] = aTensor.dim[i];
+        initialized = true;
+        tensor = aTensor.tensor;
     }
 
 }

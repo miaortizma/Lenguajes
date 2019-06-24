@@ -1,7 +1,10 @@
 package interpreter.assignables;
 
-public interface Assignable<T> {
+public interface Assignable {
 
-    public void AssignIfPossible(T obj);
+    boolean IsAssignable(Object obj);
+
+    void AssignIfPossible(Object obj);
+
 
 }

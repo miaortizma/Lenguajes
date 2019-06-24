@@ -1,22 +1,13 @@
-programa HolaMundo
-
-const
-
-    A = 5.14
-
+programa hola
 inicio
-    sentencia
-    entero(5)
+    a = 5
+    b = 1 + 2
+    hola()
+    hola()
+    hola()
 fin
 
-subrutina entero (n : numerico)
-
+subrutina hola()
 inicio
-    sentencia
-
-fin
-
-subrutina mi_sub (a, b : numerico)
-inicio
-    sentencia
+    imprimir("holaa")
 fin

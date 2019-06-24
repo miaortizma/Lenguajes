@@ -30,7 +30,10 @@ public class StackedContextMap {
         public Assignable get() { return this.maskedInstance; }
 
         @Override
-        public void AssignIfPossible(Object obj) { }
+        public boolean IsAssignable(Object obj) { return false; }
+
+        @Override
+        public void AssignIfPossible(Object obj) { throw new UnsupportedOperationException(); }
     }
 
     private class Reference implements Assignable {
@@ -40,7 +43,10 @@ public class StackedContextMap {
         public Reference(int level) { this.level = level; }
 
         @Override
-        public void AssignIfPossible(Object obj) { }
+        public boolean IsAssignable(Object obj) { return false; }
+
+        @Override
+        public void AssignIfPossible(Object obj) { throw new UnsupportedOperationException(); }
     }
 
 
@@ -60,24 +66,8 @@ public class StackedContextMap {
         return this.stack.elementAt(index);
     }
 
-    /**
-     * Places nextObj if possible into current context, which may be global context.
-     * @param str
-     * @param nextObj
-     */
-    public void put(String str, Assignable nextObj) {
-        //Explore invalid options
-        if(in(this.context, str)) {
-            Assignable res = get(str);
-            res.AssignIfPossible(nextObj);
-        }
-        this.context.put(str, nextObj);
-    }
-
-
-    public Assignable get(String str) {
+    private Assignable getUnresolvedConst(String str) {
         Assignable res;
-
         if(in(context, str))
             res = context.get(str);
         else if(in(globalContext, str))
@@ -88,6 +78,32 @@ public class StackedContextMap {
         if(res instanceof Reference)
             res = this.getRef(str, (Reference) res);
 
+        return res;
+    }
+
+    /**
+     * Places nextObj if possible into current context, which may be global context.
+     * @param str
+     * @param nextObj
+     */
+    public void put(String str, Assignable nextObj) {
+        //Explore invalid options
+        if(in(this.context, str)) {
+            Assignable res = getUnresolvedConst(str);
+            if(res instanceof Const)
+                throw new UnsupportedOperationException("Can't assign to a const value");
+            res.AssignIfPossible(nextObj);
+        } else {
+          context.put(str, nextObj);
+        }
+
+    }
+
+
+
+
+    public Assignable get(String str) {
+        Assignable res = getUnresolvedConst(str);
         if(res instanceof Const) {
             Const const_res = (Const) res;
             return const_res.get();
@@ -104,7 +120,7 @@ public class StackedContextMap {
     /*
     Takes variable last context and passes it as reference to current level
      */
-    public void putRef(String str) throws IllegalAccessException {
+    public void putRef(String str) {
         // if variable to reference is a reference in last context
         int level = size() - 2;
         Assignable referenced = getContextAt(level).get(str);
@@ -121,9 +137,7 @@ public class StackedContextMap {
 
     private boolean in(HashMap context, String str) { return context.containsKey(str); }
 
-    public boolean has(String str) {
-        return context.containsKey(str) || globalContext.containsKey(str);
-    }
+    public boolean has(String str) { return context.containsKey(str) || globalContext.containsKey(str); }
 
     public void pop() {
         if(this.size() == 1) throw new IllegalArgumentException("Can't pop Global context!");

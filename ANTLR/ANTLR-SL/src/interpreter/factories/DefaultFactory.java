@@ -4,7 +4,7 @@ import interpreter.assignables.Assignable;
 
 import java.lang.reflect.Constructor;
 
-public class DefaultFactory<T extends Assignable> implements AbstractFactory {
+public class DefaultFactory<T extends Assignable> implements AbstractFactory<T> {
 
     private final Constructor<T> ctor;
 
@@ -27,7 +27,11 @@ public class DefaultFactory<T extends Assignable> implements AbstractFactory {
 
     @Override
     public boolean equals(AbstractFactory factory) {
-        return ctor.equals(factory);
+        if(factory instanceof DefaultFactory) {
+            DefaultFactory df = (DefaultFactory)factory;
+            return ctor.equals(df.ctor);
+        }
+        return false;
     }
 
 }

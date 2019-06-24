@@ -1,12 +1,12 @@
 package interpreter.assignables;
 
-public class Logic implements Assignable<Logic> {
+public class Logic implements Assignable {
 
     private boolean aBoolean;
 
-    public void Logic() { aBoolean = Boolean.FALSE; }
+    public Logic() { aBoolean = Boolean.FALSE; }
 
-    public void Logic(String str) {
+    public Logic(String str) {
         switch (str) {
             case "TRUE":
             case "SI":
@@ -19,5 +19,15 @@ public class Logic implements Assignable<Logic> {
     }
 
     @Override
-    public void AssignIfPossible(Logic obj) { this.aBoolean = obj.aBoolean; }
+    public boolean IsAssignable(Object obj) {
+        return obj instanceof Logic;
+    }
+
+    @Override
+    public void AssignIfPossible(Object obj) {
+        if(!IsAssignable(obj))
+            throw new UnsupportedOperationException();
+        Logic aLogic = (Logic) obj;
+        aBoolean = aLogic.aBoolean;
+    }
 }

@@ -40,7 +40,7 @@ sentence
     | subroutine_call ;
 
 record
-    : RECORD LEFT_BRACKET vars RIGHT_BRACKET;
+    : RECORD LEFT_BRACKET var+ RIGHT_BRACKET;
 
 tensor
     : vector
@@ -135,9 +135,11 @@ from_loop
 parameters
     : (expression (COMMA expression)*) ;
 
-
 subroutine_call
-    : ID LEFT_PAR parameters? RIGHT_PAR ;
+    : subroutine_call_name LEFT_PAR parameters? RIGHT_PAR ;
+
+subroutine_call_name
+    : (ID|PREDEF_FUNC);
 
 subroutines
     : subroutine+ ;
