@@ -44,14 +44,14 @@ public class TestStackedContext {
             System.out.println("Catched variable shouldn't exists test");
         }
 
-        table.putRef("var3");
+        table.putRef("var3", "var3");
         aNumeric = (Numeric) table.get("var3");
         System.out.println(aNumeric.get());
 
         table.put("var3", new Numeric("1e5"));
 
         try {
-            table.putRef("var4");
+            table.putRef("var4", "var4");
             throw new RuntimeException();
         } catch(IllegalArgumentException e) {
             System.out.println("Catched variable doesn't exists in last context");

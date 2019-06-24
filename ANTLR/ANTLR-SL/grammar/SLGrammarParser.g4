@@ -15,13 +15,13 @@ const_
     : ID ASSIGN (STRING_LITERAL|NUMBER_LITERAL|PREDEF_BOOL) ;
 
 types
-    : TYPES type+;
+    : TYPES alias+;
+
+alias:
+    (ID DOUBLE_POINT type);
 
 type
-    : ID
-    | DATA_TYPE
-    | tensor
-    | record ;
+    : (ID|DATA_TYPE|tensor|record);
 
 vars
     : VAR var+;
@@ -151,7 +151,10 @@ formal_parameters
     : formal_parameter (SEMI formal_parameter)* ;
 
 formal_parameter
-    : REF? id_list DOUBLE_POINT type ;
+    : formal_parameter_id (COMMA formal_parameter_id)* DOUBLE_POINT type ;
+
+formal_parameter_id
+    : REF? ID;
 
 procedure
     :  declarations? START sentences? END;

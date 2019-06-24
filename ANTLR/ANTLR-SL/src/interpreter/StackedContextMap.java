@@ -6,6 +6,27 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.Vector;
 
+
+/**
+ * read-only
+ */
+class Const implements Assignable {
+
+    private Object maskedInstance;
+
+    public Const(Object maskedInstance) {
+        this.maskedInstance = maskedInstance;
+    }
+
+    public Object get() { return this.maskedInstance; }
+
+    @Override
+    public boolean IsAssignable(Object obj) { return false; }
+
+    @Override
+    public void AssignIfPossible(Object obj) { throw new UnsupportedOperationException(); }
+}
+
 /**
  * Function to manage a stacked context which supports:
  * - vertical (push, pop) and horizontal (put, get) context
@@ -17,26 +38,6 @@ import java.util.Vector;
 public class StackedContextMap {
 
     private final int STACK_LIM = 1000;
-
-    /**
-     * read-only
-     */
-    private class Const implements Assignable {
-
-        private Assignable maskedInstance;
-
-        public Const(Assignable maskedInstance) {
-            this.maskedInstance = maskedInstance;
-        }
-
-        public Assignable get() { return this.maskedInstance; }
-
-        @Override
-        public boolean IsAssignable(Object obj) { return false; }
-
-        @Override
-        public void AssignIfPossible(Object obj) { throw new UnsupportedOperationException(); }
-    }
 
     private class Reference implements Assignable {
 
@@ -68,7 +69,8 @@ public class StackedContextMap {
         return this.stack.elementAt(index);
     }
 
-    private Assignable getUnresolvedRef(String str) {
+
+    private Assignable getUnresolvedConst(String str) {
         Assignable res;
         if(in(context, str))
             res = context.get(str);
@@ -76,15 +78,19 @@ public class StackedContextMap {
             res = globalContext.get(str);
         else
             throw new IllegalArgumentException("Variable doesn't exists");
+        if(res instanceof Reference)
+            res = this.getRef(str, (Reference) res);
 
         return res;
     }
 
-    private Assignable getUnresolvedConst(String str) {
-        Assignable res = getUnresolvedRef(str);
-        if(res instanceof Reference)
-            res = this.getRef(str, (Reference) res);
-
+    public Assignable get(String str) {
+        Assignable res = getUnresolvedConst(str);
+        if(res instanceof Const){
+            Const cnst = (Const) res;
+            if(cnst.get() instanceof Assignable)
+                return (Assignable) cnst.get();
+        }
         return res;
     }
 
@@ -95,31 +101,18 @@ public class StackedContextMap {
      */
     public void put(String str, Assignable nextObj) {
         //Explore invalid options
-        if(in(this.context, str)) {
+        if (in(this.context, str)) {
             Assignable res = getUnresolvedConst(str);
-            if(res instanceof Const)
+            if (res instanceof Const)
                 throw new UnsupportedOperationException("Can't assign to a const value");
             res.AssignIfPossible(nextObj);
         } else {
-          context.put(str, nextObj);
+            context.put(str, nextObj);
         }
-
     }
 
 
-
-
-    public Assignable get(String str) {
-        Assignable res = getUnresolvedConst(str);
-        if(res instanceof Const) {
-            Const const_res = (Const) res;
-            return const_res.get();
-        }
-        return res;
-    }
-
-
-    public void putConst(String str, Assignable obj) {
+    public void putConst(String str, Object obj) {
         Const const_obj = new Const(obj);
         put(str, const_obj);
     }
@@ -127,10 +120,10 @@ public class StackedContextMap {
     /*
     Takes variable last context and passes it as reference to current level
      */
-    public void putRef(String str) {
+    public void putRef(String str, String toReference) {
         // if variable to reference is a reference in last context
         int level = size() - 2;
-        Assignable referenced = getContextAt(level).get(str);
+        Assignable referenced = getContextAt(level).get(toReference);
         if(referenced == null)  throw new IllegalArgumentException("Referenced variable doesn't exists");
 
         if(referenced instanceof Reference ){

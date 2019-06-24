@@ -9,22 +9,6 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import java.util.Vector;
 
 
-class Subroutine implements Assignable {
-
-    private final SubroutineContext ctx;
-
-    public Subroutine(SubroutineContext ctx) { this.ctx = ctx; }
-
-    @Override
-    public boolean IsAssignable(Object obj) { return false; }
-
-    @Override
-    public void AssignIfPossible(Object obj) { throw new UnsupportedOperationException();}
-
-    public SubroutineContext get() { return ctx; }
-
-}
-
 class Access { }
 
 class TensorAccess extends Access {
@@ -42,6 +26,34 @@ class RecordAccess extends Access {
 
 }
 
+class Parameter {
+    Assignable assig;
+    String id;
+
+    public Parameter(Assignable assig) {
+        this.assig = assig;
+        id = null;
+    }
+
+    public Parameter(Assignable assig, String id) {
+        this.assig = assig;
+        this.id = id;
+    }
+
+}
+
+class FormalParameter {
+    AbstractFactory factory;
+    String name;
+    boolean isRef;
+
+    public FormalParameter(AbstractFactory factory, String name, boolean isRef) {
+        this.factory = factory;
+        this.name = name;
+        this.isRef = isRef;
+    }
+}
+
 // mirar ejemplo https://jakubdziworski.github.io/java/2016/04/01/antlr_visitor_vs_listener.html
 
 
@@ -49,6 +61,64 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
 
     StackedContextMap table = new StackedContextMap();
     ExpressionVisitor expvis = new ExpressionVisitor();
+    TypeVisitor tyvis = new TypeVisitor();
+    Access_variableVisitor avvis = new Access_variableVisitor();
+    Access_tensorVisitor atvis = new Access_tensorVisitor();
+    Access_recordVisitor arvis = new Access_recordVisitor();
+    ParametersVisitor prmvis = new ParametersVisitor();
+
+
+    class Subroutine {
+
+        private final SubroutineContext ctx;
+        private final Vector<FormalParameter> formalParameters;
+
+        public Subroutine(SubroutineContext ctx) {
+            this.ctx = ctx;
+            this.formalParameters = new Vector<>();
+            if(ctx.formal_parameters() != null) {
+                for (Formal_parameterContext formal : ctx.formal_parameters().formal_parameter()) {
+                    AbstractFactory factory = tyvis.visitType(formal.type());
+                    for (Formal_parameter_idContext formal_id : formal.formal_parameter_id()) {
+                        boolean isRef = formal_id.REF() != null;
+                        String name = formal_id.ID().getText();
+                        formalParameters.add(new FormalParameter(factory, name, isRef));
+                    }
+                }
+            }
+        }
+
+        public SubroutineContext get() { return ctx; }
+
+        public Vector<FormalParameter> getFormalParameters() { return formalParameters; }
+
+    }
+
+    private class TypeVisitor extends SLGrammarParserBaseVisitor<AbstractFactory> {
+        @Override
+        public AbstractFactory visitType(TypeContext ctx) {
+            return null;
+        }
+    }
+
+    private class ParametersVisitor extends SLGrammarParserBaseVisitor<Vector<Parameter>> {
+        @Override
+        public Vector<Parameter> visitParameters(ParametersContext ctx) {
+            Vector<Parameter> vec = new Vector<>();
+            if (ctx.expression() != null) {
+                int n = ctx.expression().size();
+                for (ExpressionContext exp : ctx.expression()) {
+                    Assignable assig = expvis.visitExpression(exp);
+                    if(exp.ID() != null) {
+                        vec.add(new Parameter(assig, exp.ID().getText()));
+                    } else {
+                        vec.add(new Parameter(assig));
+                    }
+                }
+            }
+            return vec;
+        }
+    }
 
     private class ExpressionVisitor extends SLGrammarParserBaseVisitor<Assignable> {
         @Override
@@ -76,8 +146,7 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
             for(TerminalNode id : ctx.ID())
                 vec.add(new RecordAccess(id.getText()));
             if(ctx.access_tensor() != null){
-                Access_tensorVisitor visitor = new Access_tensorVisitor();
-                vec.addAll(visitor.visitAccess_tensor(ctx.access_tensor()));
+                vec.addAll(atvis.visitAccess_tensor(ctx.access_tensor()));
             }
             return vec;
         }
@@ -98,8 +167,7 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
             vec.add(new TensorAccess(pos));
 
             if(ctx.access_record() != null){
-                Access_recordVisitor acvis = new Access_recordVisitor();
-                vec.addAll(acvis.visitAccess_record(ctx.access_record()));
+                vec.addAll(arvis.visitAccess_record(ctx.access_record()));
             }
 
             return vec;
@@ -115,14 +183,22 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
 
             Vector<Access> vec;
             if(ctx.access_record() != null) {
-                Access_recordVisitor acvis = new Access_recordVisitor();
-                vec = acvis.visitAccess_record(ctx.access_record());
+                vec = arvis.visitAccess_record(ctx.access_record());
             }else {
-                Access_tensorVisitor atvis = new Access_tensorVisitor();
                 vec = atvis.visitAccess_tensor(ctx.access_tensor());
             }
 
             Assignable accesed_var = table.get(name);
+
+            if(accesed_var instanceof Cadena) {
+                if(vec.size() == 1 && vec.get(0) instanceof TensorAccess) {
+                    TensorAccess ta = (TensorAccess) vec.get(0);
+                    if(ta.pos.length == 1) {
+                        return ((Cadena) accesed_var).charAt(ta.pos[0]);
+                    }
+                }
+                throw new RuntimeException();
+            }
 
             for(Access ac : vec) {
                 if(ac instanceof TensorAccess) {
@@ -198,53 +274,62 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
      */
     @Override
     public T visitTypes(TypesContext ctx) {
-        for(TypeContext tipo : ctx.type()){
-            System.out.print(tipo.ID());
+        for (AliasContext alias : ctx.alias()) {
+            String name = alias.ID().getText();
+            validateFree(name);
+            AbstractFactory factory = tyvis.visitType(alias.type());
+            table.putConst(name, factory);
         }
         return null;
     }
 
     @Override
     public T visitVars(VarsContext ctx) {
-        return null;
-    }
+        for (VarContext var : ctx.var()) {
+            AbstractFactory factory = tyvis.visitType(var.type());
 
-
-    private void imprimir() {
-        if (table.topContextKeys().size() != 1)
-            throw new RuntimeException("Expected one argument but got none");
-        Assignable assignable = table.get("1");
-        if (assignable instanceof Numeric){
-            System.out.println(((Numeric) assignable).get());
-        } else if (assignable instanceof Cadena) {
-            System.out.println(((Cadena) assignable).get());
-        } else if (assignable instanceof Logic) {
-            System.out.println(((Logic) assignable).get());
-        } else {
-            System.out.print(assignable); // Tensor or Record
+            for (TerminalNode id : var.id_list().ID())
+                table.put(id.getText(), factory.build());
         }
+        return null;
     }
 
-    @Override
-    public T visitParameters(ParametersContext ctx) {
-        int n = ctx.expression().size();
-        for(int i = 1; i <= n; ++i)
-            table.put(""+i, expvis.visitExpression(ctx.expression(i - 1)));
-        return null;
+
+    private void imprimir(Vector<Parameter> vec) {
+        int n = table.topContextKeys().size();
+        for (Parameter param  : vec) {
+            Assignable assignable = param.assig;
+            if (assignable instanceof Numeric){
+                System.out.println(((Numeric) assignable).get());
+            } else if (assignable instanceof Cadena) {
+                System.out.println(((Cadena) assignable).get());
+            } else if (assignable instanceof Logic) {
+                System.out.println(((Logic) assignable).get());
+            } else {
+                System.out.print(assignable); // Tensor or Record
+            }
+        }
     }
 
     @Override
     public T visitSubroutine_call(Subroutine_callContext ctx) {
         table.push();
-        if(ctx.parameters() != null)
-            this.visit(ctx.parameters());
+        Vector<Parameter> parameters;
+        if(ctx.parameters() != null){
+            parameters = prmvis.visitParameters(ctx.parameters());
+        } else {
+            parameters = new Vector<>();
+        }
 
         String name;
         if(ctx.PREDEF_FUNC() != null) {
+            if(ctx.parameters() != null)
+                this.visit(ctx.parameters());
+
             name = ctx.PREDEF_FUNC().getText();
             switch(name) {
                 case "imprimir": {
-                    imprimir();
+                    imprimir(parameters);
                     table.pop();
                     return null;
                 }
@@ -252,23 +337,44 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
         }
         name = ctx.ID().getText();
         if(!table.has(name))
-            throw new UnsupportedOperationException("Subroutine doesn't exists");
+            throw new UnsupportedOperationException("Subroutine doesn't exists: "+name);
 
-        Assignable assg = table.get(name);
+        Const cnst = (Const) table.get(name);
+        Object obj = cnst.get();
+        if(!(obj instanceof MyVisitor.Subroutine))
+            throw new UnsupportedOperationException("Not a subroutine: "+name);
 
-        if(!(assg instanceof Subroutine))
-            throw new UnsupportedOperationException("Not a function: " + assg.getClass());
+        MyVisitor.Subroutine sub = (MyVisitor.Subroutine) obj;
+        Vector<FormalParameter> formalParameters = sub.getFormalParameters();
 
-        Subroutine sub = (Subroutine) assg;
-        T ret = this.visitSubroutine(sub.get());
+        if(formalParameters.size() != parameters.size())
+            throw new RuntimeException("Got wrong number of parameters");
+        int n = parameters.size();
+
+        for (int i = 0; i < n; ++i) {
+            FormalParameter formal = formalParameters.get(i);
+            Parameter parameter = parameters.get(i);
+            Assignable assig = formal.factory.build();
+
+            if (formal.isRef) {
+               if(parameter.id != null && assig.IsAssignable(parameter.assig)) {
+                   table.putRef(formal.name, parameter.id);
+                   continue;
+               }
+               throw new RuntimeException("Expected Referenced variable");
+            }
+            if(assig.IsAssignable(parameter.assig)) {
+                table.put(formal.name, parameter.assig);
+            }
+            throw new RuntimeException("Couldn't assign parameter to formal parameter");
+        }
+        T ret = visitSubroutine(sub.ctx);
         table.pop();
         return ret;
     }
 
     @Override
     public T visitSubroutine(SubroutineContext ctx) {
-        if(ctx.formal_parameters() != null)
-            this.visit(ctx.formal_parameters()); // check that sub parameters and formal parameters coincide
 
         if(ctx.procedure() != null) {
 
@@ -301,11 +407,6 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
         }
     }
 
-    @Override
-    public T visitFormal_parameters(Formal_parametersContext ctx) {
-        for()
-        return null;
-    }
 
     @Override
     public T visitSentence(SentenceContext ctx) {
