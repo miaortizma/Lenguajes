@@ -22,16 +22,14 @@ public class DefaultFactory<T extends Assignable> implements AbstractFactory<T> 
         } catch (Exception e) {
             throw new RuntimeException();
         }
-
     }
 
     @Override
     public boolean equals(AbstractFactory factory) {
-        if(factory instanceof DefaultFactory) {
-            DefaultFactory df = (DefaultFactory)factory;
+        if (factory instanceof DefaultFactory) {
+            DefaultFactory df = (DefaultFactory) factory;
             return ctor.equals(df.ctor);
         }
         return false;
     }
-
 }

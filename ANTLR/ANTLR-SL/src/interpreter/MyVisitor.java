@@ -8,22 +8,24 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.Vector;
 
+interface Access {
+}
 
-class Access { }
+class TensorAccess implements Access {
+    int[] pos;
 
-class TensorAccess extends Access {
-    int [] pos;
-
-    public TensorAccess(int [] pos) { this.pos = pos; }
-
+    public TensorAccess(int[] pos) {
+        this.pos = pos;
+    }
 }
 
 
-class RecordAccess extends Access {
+class RecordAccess implements Access {
     String name;
 
-    public RecordAccess(String name) { this.name = name; }
-
+    public RecordAccess(String name) {
+        this.name = name;
+    }
 }
 
 class Parameter {
@@ -39,7 +41,6 @@ class Parameter {
         this.assig = assig;
         this.id = id;
     }
-
 }
 
 class FormalParameter {
@@ -56,7 +57,6 @@ class FormalParameter {
 
 // mirar ejemplo https://jakubdziworski.github.io/java/2016/04/01/antlr_visitor_vs_listener.html
 
-
 public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
 
     StackedContextMap table = new StackedContextMap();
@@ -67,6 +67,201 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
     Access_recordVisitor arvis = new Access_recordVisitor();
     ParametersVisitor prmvis = new ParametersVisitor();
 
+    @Override
+    public T visitProgram(ProgramContext ctx) {
+
+        //añadir declaraciones globales (CONSTS, VARIABLES, TIPOS)
+        if (ctx.declarations() != null)
+            this.visit(ctx.declarations());
+
+        SubroutinesContext subs = ctx.subroutines();
+        for (SubroutineContext subroutine : subs.subroutine()) {
+            String str = subroutine.ID().getText();
+            table.putConst(str, new Subroutine(subroutine));
+        }
+        //añadir funciones a el ámbito de variables
+        if (ctx.sentences() != null)
+            this.visitSentences(ctx.sentences());
+
+        return null;
+    }
+
+    private void validateExists(String name) {
+        if (!table.has(name))
+            throw new RuntimeException("Identifier doesn't exists: " + name);
+    }
+
+    private void validateFree(String name) {
+        if (table.has(name))
+            throw new RuntimeException("Identifier already exists: " + name);
+    }
+
+    @Override
+    public T visitConsts(ConstsContext ctx) {
+        for (Const_Context const_ctx : ctx.const_()) {
+            String name = const_ctx.ID().getText();
+            validateFree(name);
+            if (const_ctx.STRING_LITERAL() != null) {
+                Cadena cdn = new Cadena(const_ctx.STRING_LITERAL().getText());
+                table.putConst(name, cdn);
+            } else if (const_ctx.NUMBER_LITERAL() != null) {
+                Numeric num = new Numeric(const_ctx.NUMBER_LITERAL().getText());
+                table.putConst(name, num);
+            } else if (const_ctx.PREDEF_BOOL() != null) {
+                Logic log = new Logic(const_ctx.PREDEF_BOOL().getText());
+                table.putConst(name, log);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Should return an AbstractFactory
+     *
+     * @param ctx
+     * @return
+     */
+    @Override
+    public T visitTypes(TypesContext ctx) {
+        for (AliasContext alias : ctx.alias()) {
+            String name = alias.ID().getText();
+            validateFree(name);
+            AbstractFactory factory = tyvis.visitType(alias.type());
+            table.putConst(name, factory);
+        }
+        return null;
+    }
+
+    @Override
+    public T visitVars(VarsContext ctx) {
+        for (VarContext var : ctx.var()) {
+            AbstractFactory factory = tyvis.visitType(var.type());
+
+            for (TerminalNode id : var.id_list().ID())
+                table.put(id.getText(), factory.build());
+        }
+        return null;
+    }
+
+    private void imprimir(Vector<Parameter> vec) {
+        int n = table.topContextKeys().size();
+        for (Parameter param : vec) {
+            Assignable assignable = param.assig;
+            if (assignable instanceof Numeric) {
+                System.out.println(((Numeric) assignable).get());
+            } else if (assignable instanceof Cadena) {
+                System.out.println(((Cadena) assignable).get());
+            } else if (assignable instanceof Logic) {
+                System.out.println(((Logic) assignable).get());
+            } else {
+                System.out.print(assignable); // Tensor or Record
+            }
+        }
+    }
+
+    @Override
+    public T visitSubroutine_call(Subroutine_callContext ctx) {
+        table.push();
+        Vector<Parameter> parameters;
+        if (ctx.parameters() != null) {
+            parameters = prmvis.visitParameters(ctx.parameters());
+        } else {
+            parameters = new Vector<>();
+        }
+
+        String name;
+        if (ctx.PREDEF_FUNC() != null) {
+            if (ctx.parameters() != null)
+                this.visit(ctx.parameters());
+
+            name = ctx.PREDEF_FUNC().getText();
+            switch (name) {
+                case "imprimir": {
+                    imprimir(parameters);
+                    table.pop();
+                    return null;
+                }
+            }
+        }
+        name = ctx.ID().getText();
+        if (!table.has(name))
+            throw new UnsupportedOperationException("Subroutine doesn't exists: " + name);
+
+        Const cnst = (Const) table.get(name);
+        Object obj = cnst.get();
+        if (!(obj instanceof MyVisitor.Subroutine))
+            throw new UnsupportedOperationException("Not a subroutine: " + name);
+
+        MyVisitor.Subroutine sub = (MyVisitor.Subroutine) obj;
+        Vector<FormalParameter> formalParameters = sub.getFormalParameters();
+
+        if (formalParameters.size() != parameters.size())
+            throw new RuntimeException("Got wrong number of parameters");
+        int n = parameters.size();
+
+        for (int i = 0; i < n; ++i) {
+            FormalParameter formal = formalParameters.get(i);
+            Parameter parameter = parameters.get(i);
+            Assignable assig = formal.factory.build();
+
+            if (formal.isRef) {
+                if (parameter.id != null && assig.IsAssignable(parameter.assig)) {
+                    table.putRef(formal.name, parameter.id);
+                    continue;
+                }
+                throw new RuntimeException("Expected Referenced variable");
+            }
+            if (assig.IsAssignable(parameter.assig)) {
+                table.put(formal.name, parameter.assig);
+            }
+            throw new RuntimeException("Couldn't assign parameter to formal parameter");
+        }
+        T ret = visitSubroutine(sub.ctx);
+        table.pop();
+        return ret;
+    }
+
+    @Override
+    public T visitSubroutine(SubroutineContext ctx) {
+
+        if (ctx.procedure() != null) {
+
+            if (ctx.procedure().declarations() != null)
+                this.visitDeclarations(ctx.procedure().declarations());
+
+            if (ctx.procedure().sentences() != null)
+                this.visitSentences(ctx.procedure().sentences());
+
+            return null;
+        } else {
+            FunctionContext function = ctx.function();
+
+            if (ctx.function().declarations() != null)
+                this.visitDeclarations(ctx.procedure().declarations());
+
+            if (ctx.function().sentences() != null)
+                this.visitSentences(ctx.procedure().sentences());
+
+            RetContext retctx = function.ret();
+
+            Assignable ret = expvis.visitExpression(retctx.expression());
+
+            AbstractFactory type = (AbstractFactory) this.visit(function.type()); // Should return factory
+
+            if (!type.build().IsAssignable(ret))
+                throw new ClassCastException("Incompatible types");
+
+            return (T) ret;
+        }
+    }
+
+    @Override
+    public T visitSentence(SentenceContext ctx) {
+        if (ctx.subroutine_call() != null) {
+            this.visit(ctx.subroutine_call());
+        }
+        return null;
+    }
 
     class Subroutine {
 
@@ -76,7 +271,7 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
         public Subroutine(SubroutineContext ctx) {
             this.ctx = ctx;
             this.formalParameters = new Vector<>();
-            if(ctx.formal_parameters() != null) {
+            if (ctx.formal_parameters() != null) {
                 for (Formal_parameterContext formal : ctx.formal_parameters().formal_parameter()) {
                     AbstractFactory factory = tyvis.visitType(formal.type());
                     for (Formal_parameter_idContext formal_id : formal.formal_parameter_id()) {
@@ -88,9 +283,13 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
             }
         }
 
-        public SubroutineContext get() { return ctx; }
+        public SubroutineContext get() {
+            return ctx;
+        }
 
-        public Vector<FormalParameter> getFormalParameters() { return formalParameters; }
+        public Vector<FormalParameter> getFormalParameters() {
+            return formalParameters;
+        }
 
     }
 
@@ -109,7 +308,7 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
                 int n = ctx.expression().size();
                 for (ExpressionContext exp : ctx.expression()) {
                     Assignable assig = expvis.visitExpression(exp);
-                    if(exp.ID() != null) {
+                    if (exp.ID() != null) {
                         vec.add(new Parameter(assig, exp.ID().getText()));
                     } else {
                         vec.add(new Parameter(assig));
@@ -143,9 +342,9 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
         @Override
         public Vector<Access> visitAccess_record(Access_recordContext ctx) {
             Vector<Access> vec = new Vector<>();
-            for(TerminalNode id : ctx.ID())
+            for (TerminalNode id : ctx.ID())
                 vec.add(new RecordAccess(id.getText()));
-            if(ctx.access_tensor() != null){
+            if (ctx.access_tensor() != null) {
                 vec.addAll(atvis.visitAccess_tensor(ctx.access_tensor()));
             }
             return vec;
@@ -157,23 +356,22 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
         public Vector<Access> visitAccess_tensor(Access_tensorContext ctx) {
             Vector<Access> vec = new Vector<>();
             int n = ctx.expression().size();
-            int [] pos = new int[n];
-            for(int i = 0; i < n; ++i) {
+            int[] pos = new int[n];
+            for (int i = 0; i < n; ++i) {
                 Numeric aNumeric = (Numeric) expvis.visitExpression(ctx.expression(i));
-                if((int) aNumeric.get() != aNumeric.get())
+                if ((int) aNumeric.get() != aNumeric.get())
                     throw new RuntimeException("Expression is not integer");
                 pos[i] = (int) aNumeric.get();
             }
             vec.add(new TensorAccess(pos));
 
-            if(ctx.access_record() != null){
+            if (ctx.access_record() != null) {
                 vec.addAll(arvis.visitAccess_record(ctx.access_record()));
             }
 
             return vec;
         }
     }
-
 
     private class Access_variableVisitor extends SLGrammarParserBaseVisitor<Assignable> {
         @Override
@@ -182,30 +380,30 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
             validateExists(name);
 
             Vector<Access> vec;
-            if(ctx.access_record() != null) {
+            if (ctx.access_record() != null) {
                 vec = arvis.visitAccess_record(ctx.access_record());
-            }else {
+            } else {
                 vec = atvis.visitAccess_tensor(ctx.access_tensor());
             }
 
             Assignable accesed_var = table.get(name);
 
-            if(accesed_var instanceof Cadena) {
-                if(vec.size() == 1 && vec.get(0) instanceof TensorAccess) {
+            if (accesed_var instanceof Cadena) {
+                if (vec.size() == 1 && vec.get(0) instanceof TensorAccess) {
                     TensorAccess ta = (TensorAccess) vec.get(0);
-                    if(ta.pos.length == 1) {
+                    if (ta.pos.length == 1) {
                         return ((Cadena) accesed_var).charAt(ta.pos[0]);
                     }
                 }
                 throw new RuntimeException();
             }
 
-            for(Access ac : vec) {
-                if(ac instanceof TensorAccess) {
+            for (Access ac : vec) {
+                if (ac instanceof TensorAccess) {
                     TensorAccess ta = (TensorAccess) ac;
                     Tensor t = (Tensor) accesed_var;
                     accesed_var = t.get(ta.pos);
-                }else {
+                } else {
                     RecordAccess ra = (RecordAccess) ac;
                     Record r = (Record) accesed_var;
                     accesed_var = r.get(ra.name);
@@ -215,205 +413,6 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
             return accesed_var;
         }
 
-    }
-
-
-    @Override
-    public T visitProgram(ProgramContext ctx) {
-
-        //añadir declaraciones globales (CONSTS, VARIABLES, TIPOS)
-        if(ctx.declarations() != null)
-            this.visit(ctx.declarations());
-
-        SubroutinesContext subs = ctx.subroutines();
-        for(SubroutineContext subroutine : subs.subroutine()) {
-            String str = subroutine.ID().getText();
-            table.putConst(str, new Subroutine(subroutine));
-        }
-        //añadir funciones a el ámbito de variables
-        if(ctx.sentences() != null)
-            this.visitSentences(ctx.sentences());
-
-        return null;
-    }
-
-    private void validateExists(String name) {
-        if(!table.has(name))
-            throw new RuntimeException("Identifier doesn't exists: "+name);
-    }
-
-    private void validateFree(String name) {
-        if(table.has(name))
-            throw new RuntimeException("Identifier already exists: " + name);
-    }
-
-    @Override
-    public T visitConsts(ConstsContext ctx) {
-        for(Const_Context const_ctx : ctx.const_()) {
-            String name = const_ctx.ID().getText();
-            validateFree(name);
-            if(const_ctx.STRING_LITERAL() != null) {
-                Cadena cdn = new Cadena(const_ctx.STRING_LITERAL().getText());
-                table.putConst(name, cdn);
-            } else if (const_ctx.NUMBER_LITERAL() != null) {
-                Numeric num = new Numeric(const_ctx.NUMBER_LITERAL().getText());
-                table.putConst(name, num);
-            } else if (const_ctx.PREDEF_BOOL() != null) {
-                Logic log = new Logic(const_ctx.PREDEF_BOOL().getText());
-                table.putConst(name, log);
-            }
-        }
-        return null;
-    }
-
-
-    /**
-     * Should return an AbstractFactory
-     * @param ctx
-     * @return
-     */
-    @Override
-    public T visitTypes(TypesContext ctx) {
-        for (AliasContext alias : ctx.alias()) {
-            String name = alias.ID().getText();
-            validateFree(name);
-            AbstractFactory factory = tyvis.visitType(alias.type());
-            table.putConst(name, factory);
-        }
-        return null;
-    }
-
-    @Override
-    public T visitVars(VarsContext ctx) {
-        for (VarContext var : ctx.var()) {
-            AbstractFactory factory = tyvis.visitType(var.type());
-
-            for (TerminalNode id : var.id_list().ID())
-                table.put(id.getText(), factory.build());
-        }
-        return null;
-    }
-
-
-    private void imprimir(Vector<Parameter> vec) {
-        int n = table.topContextKeys().size();
-        for (Parameter param  : vec) {
-            Assignable assignable = param.assig;
-            if (assignable instanceof Numeric){
-                System.out.println(((Numeric) assignable).get());
-            } else if (assignable instanceof Cadena) {
-                System.out.println(((Cadena) assignable).get());
-            } else if (assignable instanceof Logic) {
-                System.out.println(((Logic) assignable).get());
-            } else {
-                System.out.print(assignable); // Tensor or Record
-            }
-        }
-    }
-
-    @Override
-    public T visitSubroutine_call(Subroutine_callContext ctx) {
-        table.push();
-        Vector<Parameter> parameters;
-        if(ctx.parameters() != null){
-            parameters = prmvis.visitParameters(ctx.parameters());
-        } else {
-            parameters = new Vector<>();
-        }
-
-        String name;
-        if(ctx.PREDEF_FUNC() != null) {
-            if(ctx.parameters() != null)
-                this.visit(ctx.parameters());
-
-            name = ctx.PREDEF_FUNC().getText();
-            switch(name) {
-                case "imprimir": {
-                    imprimir(parameters);
-                    table.pop();
-                    return null;
-                }
-            }
-        }
-        name = ctx.ID().getText();
-        if(!table.has(name))
-            throw new UnsupportedOperationException("Subroutine doesn't exists: "+name);
-
-        Const cnst = (Const) table.get(name);
-        Object obj = cnst.get();
-        if(!(obj instanceof MyVisitor.Subroutine))
-            throw new UnsupportedOperationException("Not a subroutine: "+name);
-
-        MyVisitor.Subroutine sub = (MyVisitor.Subroutine) obj;
-        Vector<FormalParameter> formalParameters = sub.getFormalParameters();
-
-        if(formalParameters.size() != parameters.size())
-            throw new RuntimeException("Got wrong number of parameters");
-        int n = parameters.size();
-
-        for (int i = 0; i < n; ++i) {
-            FormalParameter formal = formalParameters.get(i);
-            Parameter parameter = parameters.get(i);
-            Assignable assig = formal.factory.build();
-
-            if (formal.isRef) {
-               if(parameter.id != null && assig.IsAssignable(parameter.assig)) {
-                   table.putRef(formal.name, parameter.id);
-                   continue;
-               }
-               throw new RuntimeException("Expected Referenced variable");
-            }
-            if(assig.IsAssignable(parameter.assig)) {
-                table.put(formal.name, parameter.assig);
-            }
-            throw new RuntimeException("Couldn't assign parameter to formal parameter");
-        }
-        T ret = visitSubroutine(sub.ctx);
-        table.pop();
-        return ret;
-    }
-
-    @Override
-    public T visitSubroutine(SubroutineContext ctx) {
-
-        if(ctx.procedure() != null) {
-
-            if(ctx.procedure().declarations() != null)
-                this.visitDeclarations(ctx.procedure().declarations());
-
-            if(ctx.procedure().sentences() != null)
-                this.visitSentences(ctx.procedure().sentences());
-
-            return null;
-        } else {
-            FunctionContext function = ctx.function();
-
-            if(ctx.function().declarations() != null)
-                this.visitDeclarations(ctx.procedure().declarations());
-
-            if(ctx.function().sentences() != null)
-                this.visitSentences(ctx.procedure().sentences());
-
-            RetContext retctx = function.ret();
-
-            Assignable ret = expvis.visitExpression(retctx.expression());
-
-            AbstractFactory type = (AbstractFactory) this.visit(function.type()); // Should return factory
-
-            if(!type.build().IsAssignable(ret))
-                throw new ClassCastException("Incompatible types");
-
-            return (T) ret;
-        }
-    }
-
-
-    @Override
-    public T visitSentence(SentenceContext ctx) {
-        if(ctx.subroutine_call() != null) {
-            this.visit(ctx.subroutine_call());
-        }
-        return null;
     }
 
 }

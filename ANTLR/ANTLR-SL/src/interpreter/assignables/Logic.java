@@ -1,10 +1,11 @@
 package interpreter.assignables;
 
 public class Logic implements Assignable {
-
     private boolean aBoolean;
 
-    public Logic() { aBoolean = Boolean.FALSE; }
+    public Logic() {
+        aBoolean = Boolean.FALSE;
+    }
 
     public Logic(String str) {
         switch (str) {
@@ -18,7 +19,9 @@ public class Logic implements Assignable {
         }
     }
 
-    public boolean get() { return aBoolean; }
+    public boolean get() {
+        return aBoolean;
+    }
 
     @Override
     public boolean IsAssignable(Object obj) {
@@ -27,7 +30,7 @@ public class Logic implements Assignable {
 
     @Override
     public void AssignIfPossible(Object obj) {
-        if(!IsAssignable(obj))
+        if (!IsAssignable(obj))
             throw new UnsupportedOperationException();
         Logic aLogic = (Logic) obj;
         aBoolean = aLogic.aBoolean;
