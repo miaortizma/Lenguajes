@@ -5,24 +5,30 @@ import interpreter.factories.DefaultFactory;
 
 import java.util.HashMap;
 import java.util.Set;
+import java.util.Vector;
 
 
 public class Record implements Assignable {
 
-    private HashMap<String, Assignable> map = new HashMap<>();
+    private HashMap<String, Assignable> map;
+    private Vector<String> order;
 
-    public Record(HashMap<String, AbstractFactory> map) {
-        for(String key : map.keySet())
+    public Record(HashMap<String, AbstractFactory> map, Vector<String> order) {
+        this.map = new HashMap<>();
+        for(String key : order)
             this.map.put(key, map.get(key).build());
+        this.order = order;
     }
 
-    public static Record FromClassMap(HashMap<String, Class> map) {
+    public static Record FromClasses(HashMap<String,Class> map, Vector<String> vec) {
         HashMap<String, AbstractFactory> fMap = new HashMap<>();
-        for(String key : map.keySet()){
+        if(vec.size() != map.size())
+            throw new RuntimeException("Vec and map sizes are wrong");
+        for(String key  : vec){
             DefaultFactory factory = new DefaultFactory(map.get(key));
             fMap.put(key, factory);
         }
-        return new Record(fMap);
+        return new Record(fMap, vec);
     }
 
     public Assignable get(String str) {

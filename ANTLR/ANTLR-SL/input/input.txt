@@ -2,13 +2,21 @@ programa hola
 const
     str = ""
     PI = 3.1415
+var
+    myVector : vector[*] numerico
+    myRecord : registro {
+        myNumeric : numerico
+        myMatrix : matriz [2, 2, 3] numerico
+        myLogic : logico
+        myCadena : cadena
+        myRecursiveRecord : registro {
+            hola : cadena
+        }
+    }
 inicio
     a = 5
     b = 1 + 2
     hola()
-    hola()
-    hola()
-    imprimir("hola mundo")
     imprimir(123)
     imprimir(TRUE)
     imprimir(SI)
@@ -16,6 +24,12 @@ inicio
     imprimir(NO)
     imprimir(PI)
     imprimir(str)
+    imprimir(myRecord.myNumeric)
+    imprimir(myRecord.myMatrix[1, 1, 1])
+    imprimir(myRecord.myLogic)
+    imprimir(myRecord.myCadena)
+    imprimir("UwU")
+    imprimir(myRecord.myRecursiveRecord.hola)
 fin
 
 subrutina hola()

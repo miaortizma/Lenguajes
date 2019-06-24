@@ -14,6 +14,12 @@ public class Numeric implements Assignable {
 
     public double get() { return aDouble; }
 
+    public int asInt() {
+        if((int) aDouble != aDouble)
+            throw new RuntimeException("Not a integer");
+        return (int) aDouble;
+    }
+
     @Override
     public boolean IsAssignable(Object obj) { return obj instanceof Numeric; }
 

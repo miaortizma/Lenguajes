@@ -8,6 +8,7 @@ import interpreter.factories.TensorFactory;
 import interpreter.assignables.Cadena; // don't know why direct import is needed
 
 import java.util.HashMap;
+import java.util.Vector;
 
 public class TestStackedContext {
 
@@ -143,15 +144,18 @@ public class TestStackedContext {
 
 
         // Records
-
+        // Se usa Order para poder luego usar literales estructurados (requiere tener una nocion de orden entre los atributos)
 
         // Simple Record
         HashMap<String, AbstractFactory> fMap = new HashMap<>();
         fMap.put("myNumeric", new DefaultFactory(Numeric.class));
         fMap.put("myTensor1", tf);
         fMap.put("myTensor2",  tf2);
-
-        Record aRecord = new Record(fMap);
+        Vector<String> order = new Vector<>();
+        order.add("myNumeric");
+        order.add("myTensor1");
+        order.add("myTensor2");
+        Record aRecord = new Record(fMap, order);
 
 
         System.out.println("Basic Record");
@@ -167,8 +171,12 @@ public class TestStackedContext {
         cMap.put("myNumeric", Numeric.class);
         cMap.put("myCadena", Cadena.class);
         cMap.put("myLogic", Logic.class);
+        order = new Vector<>();
+        order.add("myNumeric");
+        order.add("myCadena");
+        order.add("myLogic");
+        aRecord = Record.FromClasses(cMap, order);
 
-        aRecord = Record.FromClassMap(cMap);
         System.out.println("Record From Class Map");
         for(String key : aRecord.keys())
             System.out.println(aRecord.get(key));
@@ -181,8 +189,10 @@ public class TestStackedContext {
         oMap.put("myCadena", Cadena.class);
         oMap.put("myLogic", Logic.class);
         oMap.put("myTensor", tf);
+        order.add("myTensor");
 
-        RecordFactory rf = new RecordFactory(oMap);
+        RecordFactory rf = new RecordFactory(oMap, order);
+
 
         aRecord = rf.build();
 
@@ -196,8 +206,11 @@ public class TestStackedContext {
         // Record with Record inside
 
         oMap.put("myRecord", rf);
-
-        rf = new RecordFactory(oMap);
+        rf.build();
+        order.add("myRecord");
+        rf.build();
+        rf.build();
+        rf = new RecordFactory(oMap, order);
 
         aRecord = rf.build();
 

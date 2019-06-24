@@ -1,5 +1,12 @@
 lexer grammar SLGrammarLexer;
 
+// Ignore
+SPACES : [ \t\r\n]+ -> skip ;
+
+BLOCK_COMMENT: '/*' .*? '*/'  -> skip;
+
+COMMENT: '//' ~[\r\n]* -> skip;
+
 // Reserved words
 RESERVED
     : 'archivo'|'constantes'|'lib'|'libext'|'sin'|'variables';
@@ -183,13 +190,6 @@ LEFT_BRACKET
 
 RIGHT_BRACKET
     : '}';
-
-// Ignore
-SPACES : [ \t\r\n]+ -> skip ;
-
-BLOCK_COMMENT: '/*' .*? '*/'  -> skip;
-
-COMMENT: '//' ~[\r\n]* -> skip;
 
 ANY :
     . ;

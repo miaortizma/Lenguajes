@@ -21,7 +21,7 @@ alias:
     (ID DOUBLE_POINT type);
 
 type
-    : (ID|DATA_TYPE|tensor|record);
+    : (ID|data_type|tensor|record);
 
 vars
     : VAR var+;
@@ -43,17 +43,19 @@ record
     : RECORD LEFT_BRACKET var+ RIGHT_BRACKET;
 
 tensor
-    : vector
-    | matrix;
+    : (vector|matrix) (data_type|record);
 
 vector
-    : VECTOR LEFT_BRACE (TIMES|expression) RIGHT_BRACE (DATA_TYPE|record);
+    : VECTOR LEFT_BRACE (TIMES|expression) RIGHT_BRACE ;
 
 matrix
-    : MATRIX LEFT_BRACE mat_dim RIGHT_BRACE (DATA_TYPE|record);
+    : MATRIX LEFT_BRACE mat_dim RIGHT_BRACE ;
+
+data_type
+    : DATA_TYPE;
 
 mat_dim
-    : (TIMES (COMMA TIMES)* ( COMMA expression)* ) | (expression (COMMA expression)) ;
+    : (TIMES (COMMA TIMES)* ( COMMA expression)* ) | (expression (COMMA expression)* ) ;
 
 id_list
     : ID (COMMA ID)*;

@@ -4,8 +4,13 @@ import gen.SLGrammarParser.*;
 import gen.SLGrammarParserBaseVisitor;
 import interpreter.assignables.*;
 import interpreter.factories.AbstractFactory;
+import interpreter.factories.DefaultFactory;
+import interpreter.factories.RecordFactory;
+import interpreter.factories.TensorFactory;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import javax.xml.crypto.Data;
+import java.util.HashMap;
 import java.util.Vector;
 
 
@@ -66,6 +71,7 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
     Access_tensorVisitor atvis = new Access_tensorVisitor();
     Access_recordVisitor arvis = new Access_recordVisitor();
     ParametersVisitor prmvis = new ParametersVisitor();
+    Data_typeVisitor dtvis = new Data_typeVisitor();
 
 
     class Subroutine {
@@ -94,10 +100,93 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
 
     }
 
+    private class Data_typeVisitor extends SLGrammarParserBaseVisitor<Class> {
+        @Override
+        public Class visitData_type(Data_typeContext ctx) {
+            String name = ctx.DATA_TYPE().getText();
+            switch(name) {
+                case "numerico":
+                    return Numeric.class;
+                case "logico":
+                    return Logic.class;
+                case "cadena":
+                    return Cadena.class;
+                default:
+                    throw new RuntimeException("Class not found");
+            }
+        }
+    }
+
+
     private class TypeVisitor extends SLGrammarParserBaseVisitor<AbstractFactory> {
+
+
+        @Override
+        public AbstractFactory visitRecord(RecordContext ctx) {
+            Vector<String> order = new Vector<>();
+            HashMap<String, Object> fMap = new HashMap<>();
+            for (VarContext vctx : ctx.var()) {
+                AbstractFactory factory = tyvis.visitType(vctx.type());
+                for (TerminalNode id : vctx.id_list().ID()) {
+                    String name = id.getText();
+                    order.add(name);
+                    fMap.put(name, factory);
+                }
+            }
+
+            return new RecordFactory(fMap, order);
+        }
+
+        @Override
+        public AbstractFactory visitTensor(TensorContext ctx) {
+
+            AbstractFactory factory;
+            Class clss;
+            if (ctx.data_type() != null) {
+                clss = dtvis.visitData_type(ctx.data_type());
+                factory = new DefaultFactory(clss);
+            } else {
+                factory = visitRecord(ctx.record());
+                clss = Record.class;
+            }
+
+            if (ctx.vector() != null) {
+                VectorContext vctx = ctx.vector();
+                if(vctx.TIMES() != null) {
+                    return new TensorFactory(new int [] {0}, factory, clss);
+                } else {
+                    Numeric num = (Numeric) expvis.visitExpression(vctx.expression());
+                    return new TensorFactory(new int [] {num.asInt()}, factory, clss);
+                }
+            } else {
+                MatrixContext mctx = ctx.matrix();
+                int n = mctx.mat_dim().expression().size();
+                int pos[] = new int[n];
+                for (int i = 0; i < n; ++i) {
+                    Numeric num = (Numeric) expvis.visitExpression(mctx.mat_dim().expression(i));
+                    pos[i] = num.asInt();
+                }
+
+                return new TensorFactory(pos, factory, clss);
+            }
+        }
+
+
         @Override
         public AbstractFactory visitType(TypeContext ctx) {
-            return null;
+            if (ctx.ID() != null) {
+                String name = ctx.ID().getText();
+                if (!table.has(name))
+                    throw new RuntimeException("Type doesn't exist");
+                Const obj = (Const) table.get(name);
+                return (AbstractFactory) obj.get();
+            } else if (ctx.data_type() != null) {
+                return new DefaultFactory(dtvis.visitData_type(ctx.data_type()));
+            } else if (ctx.tensor() != null) {
+                return visitTensor(ctx.tensor());
+            } else {
+                return visitRecord(ctx.record());
+            }
         }
     }
 
@@ -160,9 +249,7 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
             int [] pos = new int[n];
             for(int i = 0; i < n; ++i) {
                 Numeric aNumeric = (Numeric) expvis.visitExpression(ctx.expression(i));
-                if((int) aNumeric.get() != aNumeric.get())
-                    throw new RuntimeException("Expression is not integer");
-                pos[i] = (int) aNumeric.get();
+                pos[i] = aNumeric.asInt();
             }
             vec.add(new TensorAccess(pos));
 
