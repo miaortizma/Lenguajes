@@ -21,7 +21,7 @@ public class Interpreter {
         SLGrammarParser parser = new SLGrammarParser(tokens);
         ParseTree tree = parser.program();
 
-        MyVisitor<Object> loader = new MyVisitor<Object>();
+        MyVisitor<Object> loader = new MyVisitor<>();
         loader.visit(tree);
     }
 }

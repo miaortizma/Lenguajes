@@ -12,7 +12,7 @@ consts
     : CONST const_+ ;
 
 const_
-    : ID ASSIGN (STRING|NUMBER_LITERAL|PREDEF_BOOL) ;
+    : ID ASSIGN (STRING_LITERAL|NUMBER_LITERAL|PREDEF_BOOL) ;
 
 types
     : TYPES type+;
@@ -77,7 +77,7 @@ expression
     | NOT+ expression
     | expression AND expression
     | expression OR expression
-    | (ID|access_variable|NUMBER_LITERAL|STRING_LITERAL|PREDEF_BOOL) ;
+    | (access_variable|ID|NUMBER_LITERAL|STRING_LITERAL|PREDEF_BOOL) ;
 
 
 rel_op
@@ -136,10 +136,10 @@ parameters
     : (expression (COMMA expression)*) ;
 
 subroutine_call
-    : subroutine_call_name LEFT_PAR parameters? RIGHT_PAR ;
+    : (ID|PREDEF_FUNC) LEFT_PAR parameters? RIGHT_PAR ;
 
-subroutine_call_name
-    : (ID|PREDEF_FUNC);
+predef_func
+    : PREDEF_FUNC;
 
 subroutines
     : subroutine+ ;

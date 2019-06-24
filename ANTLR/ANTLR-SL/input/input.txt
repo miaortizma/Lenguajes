@@ -1,13 +1,24 @@
 programa hola
+const
+    str = ""
+    PI = 3.1415
 inicio
     a = 5
     b = 1 + 2
     hola()
     hola()
     hola()
+    imprimir("hola mundo")
+    imprimir(123)
+    imprimir(TRUE)
+    imprimir(SI)
+    imprimir(FALSE)
+    imprimir(NO)
+    imprimir(PI)
+    imprimir(str)
 fin
 
 subrutina hola()
 inicio
-    imprimir("holaa")
+    imprimir("hola mundo subrutina")
 fin

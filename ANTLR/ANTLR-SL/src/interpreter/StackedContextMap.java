@@ -3,6 +3,7 @@ package interpreter;
 import interpreter.assignables.Assignable;
 
 import java.util.HashMap;
+import java.util.Set;
 import java.util.Vector;
 
 /**
@@ -15,6 +16,7 @@ import java.util.Vector;
  */
 public class StackedContextMap {
 
+    private final int STACK_LIM = 1000;
 
     /**
      * read-only
@@ -66,7 +68,7 @@ public class StackedContextMap {
         return this.stack.elementAt(index);
     }
 
-    private Assignable getUnresolvedConst(String str) {
+    private Assignable getUnresolvedRef(String str) {
         Assignable res;
         if(in(context, str))
             res = context.get(str);
@@ -75,6 +77,11 @@ public class StackedContextMap {
         else
             throw new IllegalArgumentException("Variable doesn't exists");
 
+        return res;
+    }
+
+    private Assignable getUnresolvedConst(String str) {
+        Assignable res = getUnresolvedRef(str);
         if(res instanceof Reference)
             res = this.getRef(str, (Reference) res);
 
@@ -139,6 +146,8 @@ public class StackedContextMap {
 
     public boolean has(String str) { return context.containsKey(str) || globalContext.containsKey(str); }
 
+    public Set<String> topContextKeys() { return context.keySet(); }
+
     public void pop() {
         if(this.size() == 1) throw new IllegalArgumentException("Can't pop Global context!");
         stack.removeElementAt(stack.size() - 1);
@@ -146,6 +155,8 @@ public class StackedContextMap {
     }
 
     public void push() {
+        if(size() == STACK_LIM)
+            throw new StackOverflowError();
         context = new HashMap<>(); //new context
         stack.add(context);
     }

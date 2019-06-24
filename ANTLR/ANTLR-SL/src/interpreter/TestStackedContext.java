@@ -22,37 +22,60 @@ public class TestStackedContext {
 
         //Pruebas de El StackedContextMap (push, pop, put, get, putReference)
         StackedContextMap table  = new StackedContextMap();
+        Numeric aNumeric;
         table.put("var1", new Numeric(1));
         table.put("var2", new Numeric(2));
-        table.push();
-        System.out.println(table.get("var1"));
-        table.put("var3", new Numeric(3));
-        System.out.println(table.get("var3"));
 
         table.push();
+
+        aNumeric = (Numeric) table.get("var1");
+        System.out.println(aNumeric.get());
+
+        table.put("var3", new Numeric(3));
+        aNumeric = (Numeric) table.get("var3");
+        System.out.println(aNumeric.get());
+
+        table.push();
+
         try {
             System.out.println(table.get("var3"));
+            throw new RuntimeException();
         } catch(IllegalArgumentException e) {
-            System.out.println("catched");
+            System.out.println("Catched variable shouldn't exists test");
         }
+
         table.putRef("var3");
-        System.out.println(table.get("var3"));
+        aNumeric = (Numeric) table.get("var3");
+        System.out.println(aNumeric.get());
+
+        table.put("var3", new Numeric("1e5"));
+
         try {
             table.putRef("var4");
+            throw new RuntimeException();
         } catch(IllegalArgumentException e) {
-            System.out.println("catched");
+            System.out.println("Catched variable doesn't exists in last context");
         }
 
         table.pop();
 
+        aNumeric = (Numeric) table.get("var3");
+        if(aNumeric.get() != (new Numeric("1e5")).get())
+            throw new RuntimeException("ContextMap didn't update referenced variable");
+
+        System.out.println(aNumeric.get());
+
         table.pop();
 
-        System.out.println(table.get("var1"));
-        System.out.println(table.get("var2"));
+        aNumeric = (Numeric) table.get("var1");
+        System.out.println(aNumeric.get());
+        aNumeric = (Numeric) table.get("var2");
+        System.out.println(aNumeric.get());
+
         try {
             System.out.println(table.get("var3"));
         } catch(IllegalArgumentException e) {
-            System.out.println("catched");
+            System.out.println("Catched variable shouldn't exist");
         }
 
         table.putConst("hola", new Numeric());
@@ -80,7 +103,7 @@ public class TestStackedContext {
         System.out.println();
         // Tensores son 1-indexed
         int[] pos = {1, 2};
-        Numeric aNumeric = t.get(pos);
+        aNumeric = t.get(pos);
         System.out.println(aNumeric.get());
         t.put(pos, new Numeric(1));
         System.out.println(t.get(pos).get());

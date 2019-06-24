@@ -6,6 +6,9 @@ public class Cadena implements Assignable {
 
     public Cadena() { str = ""; }
 
+    public Cadena(String str) { this.str = str; }
+
+    public String get() { return str; }
 
     @Override
     public boolean IsAssignable(Object obj) { return obj instanceof String; }

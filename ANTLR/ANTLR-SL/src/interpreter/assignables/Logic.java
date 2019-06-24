@@ -18,6 +18,8 @@ public class Logic implements Assignable {
         }
     }
 
+    public boolean get() { return aBoolean; }
+
     @Override
     public boolean IsAssignable(Object obj) {
         return obj instanceof Logic;
