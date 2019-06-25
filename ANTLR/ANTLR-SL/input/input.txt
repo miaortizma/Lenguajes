@@ -1,9 +1,10 @@
 programa hola
-const
-    str = ""
-    PI = 3.1415
+// const
+    //str = ""
+    //PI = 3.1415
 var
-     myVector : vector[*] numerico
+    a : numerico
+    /*myVector : vector[*] numerico
     myRecord : registro {
         myNumeric : numerico
         myMatrix : matriz [2, 2, 3] numerico
@@ -12,13 +13,68 @@ var
         myRecursiveRecord : registro {
             hola : cadena
         }
-    }
+    }*/
 
 inicio
-    imprimir("sdasd: " + (2^10) + " perritos " + " lindos ")
-    hola()
-    imprimir(123)
-    imprimir(TRUE)
+    a = 10;
+    imprimir("sdasd: " + (2^10) + " perritos " + (a < 10) + " lindos ");
+    imprimir("sdasd: " + (2^10) + " perritos " + (a == 10) + " lindos ");
+    a = 667
+
+    si(a < 666) {
+        imprimir("Es menor");
+    sino
+        si(a < 670) {
+            imprimir("Es medio");
+        sino
+            imprimir("Es mayor");
+        }
+    }
+
+    // For test
+    desde k = 1 hasta 10 paso 1
+    {
+        imprimir(k)
+    }
+
+    desde k = 0 hasta 10 paso 5
+    {
+        imprimir(k)
+    }
+
+    desde k = 10 hasta 0 paso -2
+    {
+        imprimir(k)
+    }
+
+    desde k = 5 hasta 8 paso -2
+    {
+        imprimir(k)
+    }
+
+    // While test
+    a = 5;
+    mientras(a >= 1) {
+        si(a % 2 == 0) {
+            imprimir(a + " es par");
+        sino
+            imprimir(a + " es impar");
+        }
+        a = a - 1;
+    }
+
+    a = 3;
+    mientras(a > 0) {
+        imprimir('Dentro');
+        a = a - 1;
+    }
+
+    // Eval test
+
+    
+
+
+    /* hola(); imprimir(123); imprimir(TRUE);
     imprimir(SI)
     imprimir(FALSE)
     imprimir(NO)
@@ -34,5 +90,5 @@ fin
 
 subrutina hola()
 inicio
-    imprimir("hola mundo subrutina")
+    imprimir("hola mundo subrutina")*/
 fin

@@ -30,10 +30,11 @@ var
     : id_list DOUBLE_POINT type;
 
 sentences
-    : sentence+ ;
+    : (sentence SEMI?) +;
 
 sentence
     : expression
+    | eval
     | loop
     | assign
     | conditional_sentence
@@ -114,17 +115,20 @@ assign
 structured_literal // Structured literal for tensors and records
     : LEFT_BRACKET (expression (COMMA expression)*)? RIGHT_BRACKET ;
 
-
 conditional_sentence
-    :
-    IF LEFT_PAR expression RIGHT_PAR
-    LEFT_BRACKET sentences* (ELSE IF LEFT_PAR expression RIGHT_PAR sentences*)*
-    (ELSE sentences*)? RIGHT_BRACKET ;
+    : IF LEFT_PAR expression RIGHT_PAR
+    LEFT_BRACKET sentences* conditional_sentence_else_if*
+    conditional_sentence_final_else? RIGHT_BRACKET ;
+
+conditional_sentence_else_if
+    : (ELSE IF LEFT_PAR expression RIGHT_PAR sentences*) ;
+
+conditional_sentence_final_else
+    : (ELSE sentences*) ;
 
 loop
     : while_loop
     | repeat_loop
-    | eval_loop
     | from_loop ;
 
 while_loop
@@ -133,9 +137,12 @@ while_loop
 repeat_loop
     : REPEAT sentences* UNTIL LEFT_PAR expression RIGHT_PAR ;
 
-eval_loop
-    : EVAL LEFT_BRACKET (CASE LEFT_PAR expression RIGHT_PAR sentences*)+
+eval
+    : EVAL LEFT_BRACKET eval_case+
       (ELSE sentences*)* RIGHT_BRACKET ;
+
+eval_case
+    : (CASE LEFT_PAR expression RIGHT_PAR sentences*) ;
 
 from_loop
     : FROM assign UNTIL expression (STEP expression)? LEFT_BRACKET sentences* RIGHT_BRACKET;

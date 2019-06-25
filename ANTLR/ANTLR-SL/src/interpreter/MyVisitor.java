@@ -10,6 +10,7 @@ import interpreter.factories.TensorFactory;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
@@ -71,6 +72,7 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
     ParametersVisitor parametersVisitor = new ParametersVisitor();
     DataTypeVisitor dataTypeVisitor = new DataTypeVisitor();
     LiteralVisitor literalVisitor = new LiteralVisitor();
+    EvalVisitor evalVisitor = new EvalVisitor();
 
     @Override
     public T visitProgram(ProgramContext ctx) {
@@ -214,6 +216,12 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
     }
 
     @Override
+    public T visitEval(EvalContext ctx) {
+        evalVisitor.visitEval(ctx);
+        return null;
+    }
+
+    @Override
     public T visitSubroutine(SubroutineContext ctx) {
         if (ctx.procedure() != null) {
             if (ctx.procedure().declarations() != null)
@@ -248,26 +256,39 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
     @Override
     public T visitFrom_loop(From_loopContext ctx) {
         visitAssign(ctx.assign());
-        Assignable start = table.get(ctx.assign().ID().getText());
-        if (start instanceof Numeric) {
+        Assignable assStart = table.get(ctx.assign().ID().getText());
+        if (assStart instanceof Numeric) {
+            Numeric start = (Numeric) assStart;
             Assignable end = expressionVisitor.visitExpression(ctx.expression(0));
             if (end instanceof Numeric) {
-                for (int i = ((Numeric) start).asInt(); i < ((Numeric) end).asInt(); i++) {
+                int step = 1;
+                ExpressionContext contextStep = ctx.expression(1);
+                if (contextStep != null) {
+                    Assignable assignStep = expressionVisitor.visitExpression(contextStep);
 
+                    if (assignStep instanceof Numeric) {
+                        step = ((Numeric) assignStep).asInt();
+                    } else {
+                        throw new RuntimeException("Invalid type in step");
+                    }
                 }
+
+                int times = (((Numeric) end).asInt() - ((Numeric) start).asInt()) / step;
+
+                for (int i = 0; i <= times; i++) {
+                    for (SentencesContext sentences : ctx.sentences()) {
+                        visitSentences(sentences);
+                        start = (Numeric) table.get(ctx.assign().ID().getText());
+                        if (start.equals(end)) {
+                            break;
+                        }
+                    }
+                    table.put(ctx.assign().ID().getText(), new Numeric(start.asInt() + step));
+                }
+                return null;
             }
         }
-        throw new RuntimeException("Sentence to evaluate in REPEAT structure must be Logic");
-
-    }
-
-    @Override
-    public T visitEval_loop(Eval_loopContext ctx) {
-        Assignable assignable = expressionVisitor.visitExpression(ctx.expression());
-        if (assignable instanceof Logic) {
-
-        }
-        throw new RuntimeException("Sentence to evaluate in REPEAT structure must be Logic");
+        throw new RuntimeException("Sentence to evaluate in FROM structure must be Logic");
 
     }
 
@@ -277,8 +298,7 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
         if (assignable instanceof Logic) {
             do {
                 assignable = expressionVisitor.visitExpression(ctx.expression());
-                for (SentencesContext sentencesContext : ctx.sentences())
-                    visitSentences(sentencesContext);
+                visitListSentences(ctx.sentences());
             } while (((Logic) assignable).get());
             return null;
         }
@@ -291,8 +311,7 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
         Assignable assignable = expressionVisitor.visitExpression(ctx.expression());
         if (assignable instanceof Logic) {
             while (((Logic) assignable).get()) {
-                for (SentencesContext sentences : ctx.sentences())
-                    visitSentences(sentences);
+                visitListSentences(ctx.sentences());
                 assignable = expressionVisitor.visitExpression(ctx.expression());
             }
         } else {
@@ -337,25 +356,16 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
         Assignable toEvaluate = expressionVisitor.visitExpression(ctx.expression());
         if (toEvaluate instanceof Logic) {
             if (((Logic) toEvaluate).get()) {
-                for (SentencesContext sentences : ctx.sentences()) {
-                    visitSentences(sentences);
-                }
+                visitListSentences(ctx.sentences());
             } else {
                 List<Conditional_sentence_else_ifContext> elsifs = ctx.conditional_sentence_else_if();
-                if (elsifs != null) {
-                    for (Conditional_sentence_else_ifContext elsif : elsifs) {
-                        for (SentencesContext sentences : elsif.sentences()) {
-                            visitSentences(sentences);
-                        }
-                    }
-                }
+                if (elsifs != null)
+                    for (Conditional_sentence_else_ifContext elsif : elsifs)
+                        visitListSentences(elsif.sentences());
 
                 Conditional_sentence_final_elseContext finalElse = ctx.conditional_sentence_final_else();
-                if (finalElse != null) {
-                    for (SentencesContext sentences : finalElse.sentences()) {
-                        visitSentences(sentences);
-                    }
-                }
+                if (finalElse != null)
+                    visitListSentences(finalElse.sentences());
             }
         } else {
             throw new RuntimeException("Sentence to evaluate in IF structure must be Logic");
@@ -386,6 +396,12 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
             }*/
         }
         return null;
+    }
+
+    public void visitListSentences(List<SentencesContext> sentences) {
+        for (SentencesContext sentence : sentences) {
+            this.visitSentences(sentence);
+        }
     }
 
     @Override
@@ -421,6 +437,42 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
 
         public Vector<FormalParameter> getFormalParameters() {
             return formalParameters;
+        }
+    }
+
+    private class EvalVisitor extends SLGrammarParserBaseVisitor<Boolean> {
+        @Override
+        public Boolean visitEval(EvalContext ctx) {
+            boolean evaluated = false;
+
+            Iterator<Eval_caseContext> casesIterator = ctx.eval_case().iterator();
+            while (casesIterator.hasNext() && !evaluated) {
+                evaluated = this.visitEval_case(casesIterator.next());
+            }
+
+            // else
+            if (!evaluated) {
+                visitListSentences(ctx.sentences());
+            }
+
+            return true;
+        }
+
+        @Override
+        public Boolean visitEval_case(Eval_caseContext ctx) {
+            ExpressionContext expressionContext = ctx.expression();
+            if (expressionContext != null) {
+                Assignable assignable = expressionVisitor.visitExpression(expressionContext);
+                if (assignable instanceof Logic) {
+                    if (((Logic) assignable).get()) {
+                        visitListSentences(ctx.sentences());
+                        return true;
+                    }
+                    return false;
+                }
+            }
+
+            throw new RuntimeException("The expression to be evaluated is invalid");
         }
     }
 
@@ -611,13 +663,21 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
         public Assignable visitExpressionMultiplication(ExpressionMultiplicationContext ctx) {
             Assignable op1 = this.visit(ctx.children.get(0));
             Assignable op2 = this.visit(ctx.children.get(2));
-            boolean times = ctx.children.get(1).getChild(0).getText().equals("*");
 
-            if (op1 instanceof Numeric && op2 instanceof Numeric) {
-                return new Numeric(((Numeric) op1).get() * (times ? ((Numeric) op2).get() : (1.0 / ((Numeric) op2).get())));
+            if (!(op1 instanceof Numeric) || !(op2 instanceof Numeric)) {
+                throw new RuntimeException("This types are not operable");
             }
 
-            throw new RuntimeException("This types are not operable");
+            switch (ctx.children.get(1).getChild(0).getText()) {
+                case "*":
+                    return new Numeric(((Numeric) op1).get() * ((Numeric) op2).get());
+                case "%":
+                    return new Numeric(((Numeric) op1).get() % ((Numeric) op2).get());
+                case "/":
+                    return new Numeric(((Numeric) op1).get() / ((Numeric) op2).get());
+            }
+
+            throw new RuntimeException("Error in operation");
         }
 
         @Override
