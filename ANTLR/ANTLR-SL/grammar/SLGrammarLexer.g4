@@ -1,5 +1,12 @@
 lexer grammar SLGrammarLexer;
 
+// Ignore
+SPACES : [ \t\r\n]+ -> skip ;
+
+BLOCK_COMMENT: '/*' .*? '*/'  -> skip;
+
+COMMENT: '//' ~[\r\n]* -> skip;
+
 // Reserved words
 RESERVED
     : 'archivo'|'constantes'|'lib'|'libext'|'sin'|'variables';
@@ -101,7 +108,7 @@ fragment VALID_CHAR
     : ~[\\\r\n\f'];
 
 STRING_LITERAL
-    : ([']( SEQ_ESCAPE|VALID_CHAR )*[']) | (["]( SEQ_ESCAPE|VALID_CHAR )*["]) ;
+     : ([']( SEQ_ESCAPE|VALID_CHAR )*? [']) | (["] ( SEQ_ESCAPE|VALID_CHAR )*? ["]) ;
 
 fragment DIGIT
     : [0-9] ;
@@ -184,12 +191,18 @@ LEFT_BRACKET
 RIGHT_BRACKET
     : '}';
 
-// Ignore
-SPACES : [ \t\r\n]+ -> skip ;
-
-BLOCK_COMMENT: '/*' .*? '*/'  -> skip;
-
-COMMENT: '//' ~[\r\n]* -> skip;
-
 ANY :
     . ;
+
+START_STR : ('"') -> more, pushMode(STR1) ;
+START_LIT : ('\'') -> more, pushMode(LIT1) ;
+
+mode STR1;
+
+BASIC_STRING : '"' -> popMode ;
+TEXT : ~[\n] -> more ;
+
+mode LIT1;
+
+LITERAL_STRING : '\'' -> popMode ;
+TEXT_LIT : . -> more ;

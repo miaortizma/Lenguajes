@@ -1,41 +1,34 @@
 package interpreter.assignables;
 
-public class Cadena implements Assignable {
-
-    private String str;
-
+public class Cadena extends Primitive<String> {
     public Cadena() {
-        str = "";
+        super("");
     }
 
     public Cadena(String str) {
-        this.str = str;
+        super(str.replaceAll("\"", ""));
     }
 
     public Cadena(Character chr) {
-        this.str = chr.toString();
-    }
-
-    public String get() {
-        return str;
+        super(chr.toString());
     }
 
     public Cadena charAt(int i) {
-        if (!(1 <= i && i <= str.length()))
-            return new Cadena(str.charAt(i - 1));
+        if (!(1 <= i && i <= value.length()))
+            return new Cadena(value.charAt(i - 1));
         throw new RuntimeException();
     }
 
     @Override
-    public boolean IsAssignable(Object obj) {
+    public boolean isAssignable(Object obj) {
         return obj instanceof String;
     }
 
     @Override
-    public void AssignIfPossible(Object obj) {
-        if (!IsAssignable(obj))
+    public void assignIfPossible(Object obj) {
+        if (!isAssignable(obj))
             throw new UnsupportedOperationException();
         Cadena aCadena = (Cadena) obj;
-        str = aCadena.str;
+        value = aCadena.value;
     }
 }

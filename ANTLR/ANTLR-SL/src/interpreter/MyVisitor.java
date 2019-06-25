@@ -4,8 +4,13 @@ import gen.SLGrammarParser.*;
 import gen.SLGrammarParserBaseVisitor;
 import interpreter.assignables.*;
 import interpreter.factories.AbstractFactory;
+import interpreter.factories.DefaultFactory;
+import interpreter.factories.RecordFactory;
+import interpreter.factories.TensorFactory;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Vector;
 
 interface Access {
@@ -54,31 +59,31 @@ class FormalParameter {
         this.isRef = isRef;
     }
 }
-
 // mirar ejemplo https://jakubdziworski.github.io/java/2016/04/01/antlr_visitor_vs_listener.html
 
 public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
-
     StackedContextMap table = new StackedContextMap();
-    ExpressionVisitor expvis = new ExpressionVisitor();
-    TypeVisitor tyvis = new TypeVisitor();
-    Access_variableVisitor avvis = new Access_variableVisitor();
-    Access_tensorVisitor atvis = new Access_tensorVisitor();
-    Access_recordVisitor arvis = new Access_recordVisitor();
-    ParametersVisitor prmvis = new ParametersVisitor();
+    ExpressionVisitor expressionVisitor = new ExpressionVisitor();
+    TypeVisitor typeVisitor = new TypeVisitor();
+    Access_variableVisitor accessVariableVisitor = new Access_variableVisitor();
+    Access_tensorVisitor accessTensorVisitor = new Access_tensorVisitor();
+    Access_recordVisitor accessRecordVisitor = new Access_recordVisitor();
+    ParametersVisitor parametersVisitor = new ParametersVisitor();
+    DataTypeVisitor dataTypeVisitor = new DataTypeVisitor();
+    LiteralVisitor literalVisitor = new LiteralVisitor();
 
     @Override
     public T visitProgram(ProgramContext ctx) {
-
         //añadir declaraciones globales (CONSTS, VARIABLES, TIPOS)
         if (ctx.declarations() != null)
             this.visit(ctx.declarations());
 
         SubroutinesContext subs = ctx.subroutines();
-        for (SubroutineContext subroutine : subs.subroutine()) {
-            String str = subroutine.ID().getText();
-            table.putConst(str, new Subroutine(subroutine));
-        }
+        if (subs != null)
+            for (SubroutineContext subroutine : subs.subroutine()) {
+                String str = subroutine.ID().getText();
+                table.putConst(str, new Subroutine(subroutine));
+            }
         //añadir funciones a el ámbito de variables
         if (ctx.sentences() != null)
             this.visitSentences(ctx.sentences());
@@ -101,16 +106,7 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
         for (Const_Context const_ctx : ctx.const_()) {
             String name = const_ctx.ID().getText();
             validateFree(name);
-            if (const_ctx.STRING_LITERAL() != null) {
-                Cadena cdn = new Cadena(const_ctx.STRING_LITERAL().getText());
-                table.putConst(name, cdn);
-            } else if (const_ctx.NUMBER_LITERAL() != null) {
-                Numeric num = new Numeric(const_ctx.NUMBER_LITERAL().getText());
-                table.putConst(name, num);
-            } else if (const_ctx.PREDEF_BOOL() != null) {
-                Logic log = new Logic(const_ctx.PREDEF_BOOL().getText());
-                table.putConst(name, log);
-            }
+            literalVisitor.persistLiteral(const_ctx.literal(), name);
         }
         return null;
     }
@@ -126,7 +122,7 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
         for (AliasContext alias : ctx.alias()) {
             String name = alias.ID().getText();
             validateFree(name);
-            AbstractFactory factory = tyvis.visitType(alias.type());
+            AbstractFactory factory = typeVisitor.visitType(alias.type());
             table.putConst(name, factory);
         }
         return null;
@@ -135,7 +131,7 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
     @Override
     public T visitVars(VarsContext ctx) {
         for (VarContext var : ctx.var()) {
-            AbstractFactory factory = tyvis.visitType(var.type());
+            AbstractFactory factory = typeVisitor.visitType(var.type());
 
             for (TerminalNode id : var.id_list().ID())
                 table.put(id.getText(), factory.build());
@@ -147,12 +143,8 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
         int n = table.topContextKeys().size();
         for (Parameter param : vec) {
             Assignable assignable = param.assig;
-            if (assignable instanceof Numeric) {
-                System.out.println(((Numeric) assignable).get());
-            } else if (assignable instanceof Cadena) {
-                System.out.println(((Cadena) assignable).get());
-            } else if (assignable instanceof Logic) {
-                System.out.println(((Logic) assignable).get());
+            if (assignable instanceof Primitive) {
+                System.out.println(((Primitive) assignable).get());
             } else {
                 System.out.print(assignable); // Tensor or Record
             }
@@ -164,7 +156,7 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
         table.push();
         Vector<Parameter> parameters;
         if (ctx.parameters() != null) {
-            parameters = prmvis.visitParameters(ctx.parameters());
+            parameters = parametersVisitor.visitParameters(ctx.parameters());
         } else {
             parameters = new Vector<>();
         }
@@ -205,13 +197,13 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
             Assignable assig = formal.factory.build();
 
             if (formal.isRef) {
-                if (parameter.id != null && assig.IsAssignable(parameter.assig)) {
+                if (parameter.id != null && assig.isAssignable(parameter.assig)) {
                     table.putRef(formal.name, parameter.id);
                     continue;
                 }
                 throw new RuntimeException("Expected Referenced variable");
             }
-            if (assig.IsAssignable(parameter.assig)) {
+            if (assig.isAssignable(parameter.assig)) {
                 table.put(formal.name, parameter.assig);
             }
             throw new RuntimeException("Couldn't assign parameter to formal parameter");
@@ -223,9 +215,7 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
 
     @Override
     public T visitSubroutine(SubroutineContext ctx) {
-
         if (ctx.procedure() != null) {
-
             if (ctx.procedure().declarations() != null)
                 this.visitDeclarations(ctx.procedure().declarations());
 
@@ -244,11 +234,11 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
 
             RetContext retctx = function.ret();
 
-            Assignable ret = expvis.visitExpression(retctx.expression());
+            Assignable ret = expressionVisitor.visitExpression(retctx.expression());
 
             AbstractFactory type = (AbstractFactory) this.visit(function.type()); // Should return factory
 
-            if (!type.build().IsAssignable(ret))
+            if (!type.build().isAssignable(ret))
                 throw new ClassCastException("Incompatible types");
 
             return (T) ret;
@@ -260,11 +250,39 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
         if (ctx.subroutine_call() != null) {
             this.visit(ctx.subroutine_call());
         }
+
+        if (ctx.expression() != null) {
+            expressionVisitor.visitExpression(ctx.expression());
+        }
+
+        if (ctx.loop() != null) {
+
+        }
+
+        if (ctx.assign() != null) {
+
+        }
+
+        if (ctx.conditional_sentence() != null) {
+
+        }
+
+        if (ctx.subroutine_call() != null) {
+
+        }
+
+        return null;
+    }
+
+    @Override
+    public T visitSentences(SentencesContext ctx) {
+        for (SentenceContext sentence : ctx.sentence()) {
+            this.visit(sentence);
+        }
         return null;
     }
 
     class Subroutine {
-
         private final SubroutineContext ctx;
         private final Vector<FormalParameter> formalParameters;
 
@@ -273,7 +291,7 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
             this.formalParameters = new Vector<>();
             if (ctx.formal_parameters() != null) {
                 for (Formal_parameterContext formal : ctx.formal_parameters().formal_parameter()) {
-                    AbstractFactory factory = tyvis.visitType(formal.type());
+                    AbstractFactory factory = typeVisitor.visitType(formal.type());
                     for (Formal_parameter_idContext formal_id : formal.formal_parameter_id()) {
                         boolean isRef = formal_id.REF() != null;
                         String name = formal_id.ID().getText();
@@ -290,13 +308,117 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
         public Vector<FormalParameter> getFormalParameters() {
             return formalParameters;
         }
+    }
 
+    private class LiteralVisitor extends SLGrammarParserBaseVisitor<Primitive> {
+        @Override
+        public Primitive visitLiteral(LiteralContext ctx) {
+            if (ctx.string_literal() != null) {
+                return new Cadena(ctx.string_literal().getText());
+            } else if (ctx.NUMBER_LITERAL() != null) {
+                return new Numeric(ctx.NUMBER_LITERAL().getText());
+            } else if (ctx.PREDEF_BOOL() != null) {
+                return new Logic(ctx.PREDEF_BOOL().getText());
+            }
+            return null;
+        }
+
+        public void persistLiteral(LiteralContext ctx, String name) {
+            if (ctx.string_literal() != null) {
+                Cadena cdn = new Cadena(ctx.string_literal().getText());
+                table.putConst(name, cdn);
+            } else if (ctx.NUMBER_LITERAL() != null) {
+                Numeric num = new Numeric(ctx.NUMBER_LITERAL().getText());
+                table.putConst(name, num);
+            } else if (ctx.PREDEF_BOOL() != null) {
+                Logic log = new Logic(ctx.PREDEF_BOOL().getText());
+                table.putConst(name, log);
+            }
+        }
+    }
+
+    private class DataTypeVisitor extends SLGrammarParserBaseVisitor<Class> {
+        @Override
+        public Class visitData_type(Data_typeContext ctx) {
+            String name = ctx.DATA_TYPE().getText();
+            switch (name) {
+                case "numerico":
+                    return Numeric.class;
+                case "logico":
+                    return Logic.class;
+                case "cadena":
+                    return Cadena.class;
+                default:
+                    throw new RuntimeException("Class not found");
+            }
+        }
     }
 
     private class TypeVisitor extends SLGrammarParserBaseVisitor<AbstractFactory> {
         @Override
+        public AbstractFactory visitRecord(RecordContext ctx) {
+            Vector<String> order = new Vector<>();
+            HashMap<String, Object> fMap = new HashMap<>();
+            for (VarContext vctx : ctx.var()) {
+                AbstractFactory factory = typeVisitor.visitType(vctx.type());
+                for (TerminalNode id : vctx.id_list().ID()) {
+                    String name = id.getText();
+                    order.add(name);
+                    fMap.put(name, factory);
+                }
+            }
+
+            return new RecordFactory(fMap, order);
+        }
+
+        @Override
+        public AbstractFactory visitTensor(TensorContext ctx) {
+            AbstractFactory factory;
+            Class clss;
+            if (ctx.data_type() != null) {
+                clss = dataTypeVisitor.visitData_type(ctx.data_type());
+                factory = new DefaultFactory(clss);
+            } else {
+                factory = visitRecord(ctx.record());
+                clss = Record.class;
+            }
+
+            if (ctx.vector() != null) {
+                VectorContext vctx = ctx.vector();
+                if (vctx.TIMES() != null) {
+                    return new TensorFactory(new int[]{0}, factory, clss);
+                } else {
+                    Numeric num = (Numeric) expressionVisitor.visitExpression(vctx.expression());
+                    return new TensorFactory(new int[]{num.asInt()}, factory, clss);
+                }
+            } else {
+                MatrixContext mctx = ctx.matrix();
+                int n = mctx.mat_dim().expression().size();
+                int pos[] = new int[n];
+                for (int i = 0; i < n; ++i) {
+                    Numeric num = (Numeric) expressionVisitor.visitExpression(mctx.mat_dim().expression(i));
+                    pos[i] = num.asInt();
+                }
+
+                return new TensorFactory(pos, factory, clss);
+            }
+        }
+
+        @Override
         public AbstractFactory visitType(TypeContext ctx) {
-            return null;
+            if (ctx.ID() != null) {
+                String name = ctx.ID().getText();
+                if (!table.has(name))
+                    throw new RuntimeException("Type doesn't exist");
+                Const obj = (Const) table.get(name);
+                return (AbstractFactory) obj.get();
+            } else if (ctx.data_type() != null) {
+                return new DefaultFactory(dataTypeVisitor.visitData_type(ctx.data_type()));
+            } else if (ctx.tensor() != null) {
+                return visitTensor(ctx.tensor());
+            } else {
+                return visitRecord(ctx.record());
+            }
         }
     }
 
@@ -304,15 +426,18 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
         @Override
         public Vector<Parameter> visitParameters(ParametersContext ctx) {
             Vector<Parameter> vec = new Vector<>();
-            if (ctx.expression() != null) {
-                int n = ctx.expression().size();
-                for (ExpressionContext exp : ctx.expression()) {
-                    Assignable assig = expvis.visitExpression(exp);
-                    if (exp.ID() != null) {
-                        vec.add(new Parameter(assig, exp.ID().getText()));
-                    } else {
-                        vec.add(new Parameter(assig));
-                    }
+            List<ExpressionContext> expression = ctx.expression();
+
+            if (expression != null) {
+                int n = expression.size();
+                for (ExpressionContext exp : expression) {
+                    Assignable assig = expressionVisitor.visitExpression(exp);
+
+                    //if (assig != null) {
+                    //  vec.add(new Parameter(assig, exp.ID().getText()));
+                    //} else {
+                    vec.add(new Parameter(assig));
+                    //}
                 }
             }
             return vec;
@@ -320,21 +445,133 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
     }
 
     private class ExpressionVisitor extends SLGrammarParserBaseVisitor<Assignable> {
-        @Override
-        public Assignable visitExpression(ExpressionContext ctx) {
-            if (ctx.access_variable() != null) {
-                Access_variableVisitor vis = new Access_variableVisitor();
-                return vis.visitAccess_variable(ctx.access_variable());
-            } else if (ctx.ID() != null) {
-                return table.get(ctx.ID().getText());
-            } else if (ctx.STRING_LITERAL() != null) {
-                return new Cadena(ctx.STRING_LITERAL().getText());
-            } else if (ctx.NUMBER_LITERAL() != null) {
-                return new Numeric(ctx.NUMBER_LITERAL().getText());
-            } else if (ctx.PREDEF_BOOL() != null) {
-                return new Logic(ctx.PREDEF_BOOL().getText());
+        public String ID() {
+            return null;
+        }
+
+        public Assignable visitExpression(ExpressionContext expr) {
+            if (expr.children.size() == 3) {
+
             }
-            return new Numeric(1);
+
+            Assignable assignable = this.visit(expr);
+
+            return assignable;
+        }
+
+        @Override
+        public Assignable visitExpressionAddition(ExpressionAdditionContext ctx) {
+            Assignable op1 = this.visit(ctx.children.get(0));
+            Assignable op2 = this.visit(ctx.children.get(2));
+            boolean addition = ctx.children.get(1).getChild(0).getText().equals("+");
+
+            if ((op1 instanceof Cadena || op2 instanceof Cadena) && addition) {
+                return new Cadena(op1.toString() + op2.toString());
+            } else if (op1 instanceof Numeric && op2 instanceof Numeric) {
+                return new Numeric(((Numeric) op1).get() + (addition ? ((Numeric) op2).get() : -((Numeric) op2).get()));
+            }
+
+            throw new RuntimeException("This types are not operable");
+        }
+
+        @Override
+        public Assignable visitExpressionAnd(ExpressionAndContext ctx) {
+            Assignable op1 = this.visit(ctx.children.get(0));
+            Assignable op2 = this.visit(ctx.children.get(2));
+
+            if (op1 instanceof Logic && op2 instanceof Logic) {
+                return new Logic(((Logic) op1).get() && ((Logic) op2).get());
+            }
+
+            throw new RuntimeException("This types are not operable");
+        }
+
+        @Override
+        public Assignable visitExpressionChangeSign(ExpressionChangeSignContext ctx) {
+            Assignable op1 = this.visit(ctx.children.get(0));
+            Assignable op2 = this.visit(ctx.children.get(1));
+
+            if (op2 instanceof Numeric) {
+                return new Numeric(-((Numeric) op2).get());
+            }
+
+            throw new RuntimeException("This types are not operable");
+        }
+
+        @Override
+        public Assignable visitExpressionMultiplication(ExpressionMultiplicationContext ctx) {
+            Assignable op1 = this.visit(ctx.children.get(0));
+            Assignable op2 = this.visit(ctx.children.get(2));
+            boolean times = ctx.children.get(1).getChild(0).getText().equals("*");
+
+            if (op1 instanceof Numeric && op2 instanceof Numeric) {
+                return new Numeric(((Numeric) op1).get() * (times ? ((Numeric) op2).get() : (1.0 / ((Numeric) op2).get())));
+            }
+
+            throw new RuntimeException("This types are not operable");
+        }
+
+        @Override
+        public Assignable visitExpressionNot(ExpressionNotContext ctx) {
+            Assignable op2 = this.visit(ctx.children.get(1));
+
+            if (op2 instanceof Logic) {
+                return new Logic(!((Logic) op2).get());
+            }
+
+            throw new RuntimeException("This types are not operable");
+        }
+
+        @Override
+        public Assignable visitExpressionOr(ExpressionOrContext ctx) {
+            Assignable op1 = this.visit(ctx.children.get(0));
+            Assignable op2 = this.visit(ctx.children.get(2));
+
+            if (op1 instanceof Logic && op2 instanceof Logic) {
+                return new Logic(((Logic) op1).get() || ((Logic) op2).get());
+            }
+
+            throw new RuntimeException("This types are not operable");
+        }
+
+        @Override
+        public Assignable visitExpressionPar(ExpressionParContext ctx) {
+            return this.visit(ctx.expression());
+        }
+
+        @Override
+        public Assignable visitExpressionPower(ExpressionPowerContext ctx) {
+            Assignable op1 = this.visit(ctx.children.get(0));
+            Assignable op2 = this.visit(ctx.children.get(2));
+
+            if (op1 instanceof Numeric && op2 instanceof Numeric) {
+                return new Numeric(Math.pow(((Numeric) op1).get(), ((Numeric) op2).get()));
+            }
+
+            throw new RuntimeException("This types are not operable");
+        }
+
+        @Override
+        public Assignable visitExpressionRelational(ExpressionRelationalContext ctx) {
+            Assignable op1 = this.visit(ctx.children.get(0));
+            Assignable op2 = this.visit(ctx.children.get(2));
+
+
+            return this.visit(ctx);
+        }
+
+        @Override
+        public Assignable visitExpressionVariable(ExpressionVariableContext ctx) {
+            if (ctx.literal() != null)
+                return literalVisitor.visitLiteral(ctx.literal());
+
+            if (ctx.ID() != null)
+                return table.get(ctx.ID().getText());
+
+            if (ctx.access_variable() != null)
+                return accessVariableVisitor.visitAccess_variable(ctx.access_variable());
+
+            throw new RuntimeException("Expresion error");
         }
     }
 
@@ -345,7 +582,7 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
             for (TerminalNode id : ctx.ID())
                 vec.add(new RecordAccess(id.getText()));
             if (ctx.access_tensor() != null) {
-                vec.addAll(atvis.visitAccess_tensor(ctx.access_tensor()));
+                vec.addAll(accessTensorVisitor.visitAccess_tensor(ctx.access_tensor()));
             }
             return vec;
         }
@@ -358,15 +595,13 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
             int n = ctx.expression().size();
             int[] pos = new int[n];
             for (int i = 0; i < n; ++i) {
-                Numeric aNumeric = (Numeric) expvis.visitExpression(ctx.expression(i));
-                if ((int) aNumeric.get() != aNumeric.get())
-                    throw new RuntimeException("Expression is not integer");
-                pos[i] = (int) aNumeric.get();
+                Numeric aNumeric = (Numeric) expressionVisitor.visitExpression(ctx.expression(i));
+                pos[i] = aNumeric.asInt();
             }
             vec.add(new TensorAccess(pos));
 
             if (ctx.access_record() != null) {
-                vec.addAll(arvis.visitAccess_record(ctx.access_record()));
+                vec.addAll(accessRecordVisitor.visitAccess_record(ctx.access_record()));
             }
 
             return vec;
@@ -381,9 +616,9 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
 
             Vector<Access> vec;
             if (ctx.access_record() != null) {
-                vec = arvis.visitAccess_record(ctx.access_record());
+                vec = accessRecordVisitor.visitAccess_record(ctx.access_record());
             } else {
-                vec = atvis.visitAccess_tensor(ctx.access_tensor());
+                vec = accessTensorVisitor.visitAccess_tensor(ctx.access_tensor());
             }
 
             Assignable accesed_var = table.get(name);
@@ -412,7 +647,5 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
 
             return accesed_var;
         }
-
     }
-
 }

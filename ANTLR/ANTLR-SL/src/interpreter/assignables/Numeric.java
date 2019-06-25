@@ -1,39 +1,38 @@
 package interpreter.assignables;
 
-public class Numeric implements Assignable {
-
-    private double aDouble;
-
+public class Numeric extends Primitive<Double> {
     public Numeric() {
-        aDouble = Double.parseDouble("0");
+        super((double) 0);
+    }
+
+    public Numeric(Integer ii) {
+        super(Double.valueOf(ii));
+    }
+
+    public Numeric(Double db) {
+        super(db);
     }
 
     public Numeric(String str) {
-        aDouble = Double.parseDouble(str);
+        super(Double.parseDouble(str));
     }
 
-    public Numeric(Integer value) {
-        aDouble = Double.valueOf((double) value);
-    }
-
-    public Numeric(Double value) {
-        aDouble = Double.valueOf(value);
-    }
-
-    public double get() {
-        return aDouble;
+    public Integer asInt() {
+        if (Math.floor(value) != value || Double.isInfinite(value))
+            throw new RuntimeException("Not a integer");
+        return value.intValue();
     }
 
     @Override
-    public boolean IsAssignable(Object obj) {
+    public boolean isAssignable(Object obj) {
         return obj instanceof Numeric;
     }
 
     @Override
-    public void AssignIfPossible(Object obj) {
-        if (!IsAssignable(obj))
+    public void assignIfPossible(Object obj) {
+        if (!isAssignable(obj))
             throw new UnsupportedOperationException();
         Numeric aNumeric = (Numeric) obj;
-        aDouble = aNumeric.aDouble;
+        value = aNumeric.value;
     }
 }

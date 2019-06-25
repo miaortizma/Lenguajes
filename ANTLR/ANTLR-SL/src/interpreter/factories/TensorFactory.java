@@ -14,7 +14,6 @@ public class TensorFactory<T extends Assignable> implements AbstractFactory<Tens
     public TensorFactory(int [] dim, Class<T> clss) {
         if(clss.equals(Tensor.class))
             throw new UnsupportedOperationException("Cannot create a Tensor of tensor");
-
         factory = new DefaultFactory<>(clss);
         this.clss = clss;
         this.dim = dim;

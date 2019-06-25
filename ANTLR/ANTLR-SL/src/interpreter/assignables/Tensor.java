@@ -88,7 +88,7 @@ public class Tensor<T extends Assignable> implements Assignable {
         validateInitialized();
         validatePos(pos);
         T obj = get(pos);
-        obj.AssignIfPossible(nextObj);
+        obj.assignIfPossible(nextObj);
     }
 
     /**
@@ -109,11 +109,12 @@ public class Tensor<T extends Assignable> implements Assignable {
     }
 
     @Override
-    public boolean IsAssignable(Object obj) {
+    public boolean isAssignable(Object obj) {
         if (obj instanceof Tensor) {
             Tensor aTensor = (Tensor) obj;
             if (aTensor.initialized) {
                 boolean sameDims = true;
+
                 if (!initialized)
                     for (int i = openDims; i < n; ++i)
                         sameDims &= dim[i] == aTensor.dim[i];
@@ -125,13 +126,15 @@ public class Tensor<T extends Assignable> implements Assignable {
     }
 
     @Override
-    public void AssignIfPossible(Object obj) {
-        if (!IsAssignable(obj))
+    public void assignIfPossible(Object obj) {
+        if (!isAssignable(obj))
             throw new UnsupportedOperationException("Can't assign " + obj.getClass() + " to " + name() + " of " + this.clss);
+
         Tensor aTensor = (Tensor) obj;
         if (!initialized)
             for (int i = 0; i < openDims; ++i)
                 dim[i] = aTensor.dim[i];
+
         initialized = true;
         tensor = aTensor.tensor;
     }

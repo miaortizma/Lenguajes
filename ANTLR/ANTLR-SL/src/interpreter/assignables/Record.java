@@ -5,24 +5,29 @@ import interpreter.factories.DefaultFactory;
 
 import java.util.HashMap;
 import java.util.Set;
+import java.util.Vector;
 
 
 public class Record implements Assignable {
+    private HashMap<String, Assignable> map;
+    private Vector<String> order;
 
-    private HashMap<String, Assignable> map = new HashMap<>();
-
-    public Record(HashMap<String, AbstractFactory> map) {
-        for (String key : map.keySet())
+    public Record(HashMap<String, AbstractFactory> map, Vector<String> order) {
+        this.map = new HashMap<>();
+        for (String key : order)
             this.map.put(key, map.get(key).build());
+        this.order = order;
     }
 
-    public static Record FromClassMap(HashMap<String, Class> map) {
+    public static Record FromClasses(HashMap<String, Class> map, Vector<String> vec) {
         HashMap<String, AbstractFactory> fMap = new HashMap<>();
-        for (String key : map.keySet()) {
+        if (vec.size() != map.size())
+            throw new RuntimeException("Vec and map sizes are wrong");
+        for (String key : vec) {
             DefaultFactory factory = new DefaultFactory(map.get(key));
             fMap.put(key, factory);
         }
-        return new Record(fMap);
+        return new Record(fMap, vec);
     }
 
     public Assignable get(String str) {
@@ -35,17 +40,17 @@ public class Record implements Assignable {
 
     public void put(String str, Assignable nextObj) {
         Assignable obj = get(str);
-        obj.AssignIfPossible(nextObj);
+        obj.assignIfPossible(nextObj);
     }
 
     @Override
-    public boolean IsAssignable(Object obj) {
+    public boolean isAssignable(Object obj) {
         if (obj instanceof Record) {
             Record aRecord = (Record) obj;
             Set<String> keySet = map.keySet();
             if (aRecord.map.keySet().equals(keySet)) {
                 for (String key : keySet)
-                    if (!map.get(key).IsAssignable(map.get(key)))
+                    if (!map.get(key).isAssignable(map.get(key)))
                         return false;
                 return true;
             }
@@ -54,11 +59,11 @@ public class Record implements Assignable {
     }
 
     @Override
-    public void AssignIfPossible(Object obj) {
-        if (!IsAssignable(obj))
+    public void assignIfPossible(Object obj) {
+        if (!isAssignable(obj))
             throw new UnsupportedOperationException();
         Record aRecord = (Record) obj;
         for (String key : map.keySet())
-            map.get(key).AssignIfPossible(aRecord.get(key));
+            map.get(key).assignIfPossible(aRecord.get(key));
     }
 }

@@ -12,7 +12,7 @@ consts
     : CONST const_+ ;
 
 const_
-    : ID ASSIGN (STRING_LITERAL|NUMBER_LITERAL|PREDEF_BOOL) ;
+    : ID ASSIGN literal ;
 
 types
     : TYPES alias+;
@@ -21,7 +21,7 @@ alias:
     (ID DOUBLE_POINT type);
 
 type
-    : (ID|DATA_TYPE|tensor|record);
+    : (ID|data_type|tensor|record);
 
 vars
     : VAR var+;
@@ -43,17 +43,25 @@ record
     : RECORD LEFT_BRACKET var+ RIGHT_BRACKET;
 
 tensor
-    : vector
-    | matrix;
+    : (vector|matrix) (data_type|record);
 
 vector
-    : VECTOR LEFT_BRACE (TIMES|expression) RIGHT_BRACE (DATA_TYPE|record);
+    : VECTOR LEFT_BRACE (TIMES|expression) RIGHT_BRACE ;
 
 matrix
-    : MATRIX LEFT_BRACE mat_dim RIGHT_BRACE (DATA_TYPE|record);
+    : MATRIX LEFT_BRACE mat_dim RIGHT_BRACE ;
+
+data_type
+    : DATA_TYPE;
+
+string_literal
+    : STRING_LITERAL;
+
+literal
+    : (string_literal|NUMBER_LITERAL|PREDEF_BOOL) ;
 
 mat_dim
-    : (TIMES (COMMA TIMES)* ( COMMA expression)* ) | (expression (COMMA expression)) ;
+    : (TIMES (COMMA TIMES)* ( COMMA expression)* ) | (expression (COMMA expression)* ) ;
 
 id_list
     : ID (COMMA ID)*;
@@ -68,17 +76,17 @@ access_tensor
     : LEFT_BRACE expression ( COMMA expression )* RIGHT_BRACE access_record ? ;
 
 expression
-    : LEFT_PAR expression RIGHT_PAR
-    | expression POWER expression
-    | add_op+ expression // Change sign
-    | expression mul_op expression
-    | expression add_op expression
-    | expression rel_op expression
-    | NOT+ expression
-    | expression AND expression
-    | expression OR expression
-    | (access_variable|ID|NUMBER_LITERAL|STRING_LITERAL|PREDEF_BOOL) ;
-
+    : LEFT_PAR expression RIGHT_PAR # expressionPar
+    | expression POWER expression # expressionPower
+    | add_op+ expression # expressionChangeSign
+    | expression mul_op expression # expressionMultiplication
+    | expression add_op expression # expressionAddition
+    | expression rel_op expression # expressionRelational
+    | NOT+ expression # expressionNot
+    | expression AND expression # expressionAnd
+    | expression OR expression # expressionOr
+    | (access_variable|ID|literal) # expressionVariable
+    ;
 
 rel_op
     : NOT_EQUAL

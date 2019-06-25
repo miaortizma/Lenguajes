@@ -5,23 +5,17 @@ import interpreter.factories.AbstractFactory;
 import interpreter.factories.DefaultFactory;
 import interpreter.factories.RecordFactory;
 import interpreter.factories.TensorFactory;
-import interpreter.assignables.Cadena; // don't know why direct import is needed
 
 import java.util.HashMap;
+import java.util.Vector;
 
 public class TestStackedContext {
-
-
     public static void main(String args[]) throws IllegalAccessException {
-
-
         // Cadena
-
         Cadena aCadena = new Cadena();
 
-
         //Pruebas de El StackedContextMap (push, pop, put, get, putReference)
-        StackedContextMap table  = new StackedContextMap();
+        StackedContextMap table = new StackedContextMap();
         Numeric aNumeric;
         table.put("var1", new Numeric(1));
         table.put("var2", new Numeric(2));
@@ -40,7 +34,7 @@ public class TestStackedContext {
         try {
             System.out.println(table.get("var3"));
             throw new RuntimeException();
-        } catch(IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             System.out.println("Catched variable shouldn't exists test");
         }
 
@@ -53,14 +47,14 @@ public class TestStackedContext {
         try {
             table.putRef("var4", "var4");
             throw new RuntimeException();
-        } catch(IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             System.out.println("Catched variable doesn't exists in last context");
         }
 
         table.pop();
 
         aNumeric = (Numeric) table.get("var3");
-        if(aNumeric.get() != (new Numeric("1e5")).get())
+        if (aNumeric.get() != (new Numeric("1e5")).get())
             throw new RuntimeException("ContextMap didn't update referenced variable");
 
         System.out.println(aNumeric.get());
@@ -74,7 +68,7 @@ public class TestStackedContext {
 
         try {
             System.out.println(table.get("var3"));
-        } catch(IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             System.out.println("Catched variable shouldn't exist");
         }
 
@@ -82,7 +76,7 @@ public class TestStackedContext {
         try {
             table.get("hola");
             table.put("hola", new Numeric());
-        } catch(UnsupportedOperationException e) {
+        } catch (UnsupportedOperationException e) {
             System.out.println("Catched const test");
         }
 
@@ -90,16 +84,17 @@ public class TestStackedContext {
          * Las abstract factory son para usar TIPOS  y no tener que inicializar variables.
          */
 
-        //Ejemplo de crear un tipo de Tensor con dimensiones 2, 2, 2 y subtipo numerico
-        int [] dim = {2, 2};
+        //Ejemplo de crear un tipo de Tensor con dimensiones 2, 2 y subtipo numerico
+        int[] dim = {2, 2};
         TensorFactory<Numeric> tf = new TensorFactory<>(dim, Numeric.class);
 
         // Inicializar un tensor de tipo numerico
         Tensor<Numeric> t = tf.build();
 
-        for(int d : t.getDim()) {
+        for (int d : t.getDim()) {
             System.out.print(d + " ");
         }
+
         System.out.println();
         // Tensores son 1-indexed
         int[] pos = {1, 2};
@@ -114,44 +109,48 @@ public class TestStackedContext {
         TensorFactory<Numeric> tf2 = new TensorFactory<>(dim2, Numeric.class);
 
         Tensor<Numeric> t2 = tf2.build();
-        try{
+        try {
             t2.get(pos);
             throw new RuntimeException();
-        } catch(UnsupportedOperationException e) {
+        } catch (UnsupportedOperationException e) {
             System.out.println("Catched open tensor get test 1");
         }
 
-        t2.AssignIfPossible(t);
+        System.out.println(t2);
+
+        t2.assignIfPossible(t);
 
         System.out.println(t2.get(pos).get());
         t2.clear();
 
-        try{
+        try {
             t2.get(pos);
             throw new RuntimeException();
-        } catch(UnsupportedOperationException e) {
+        } catch (UnsupportedOperationException e) {
             System.out.println("Catched open tensor get test 2");
         }
 
         try {
             TensorFactory tf3 = new TensorFactory<>(dim, Tensor.class);
             throw new RuntimeException();
-        } catch(UnsupportedOperationException e) {
+        } catch (UnsupportedOperationException e) {
             System.out.println("Catched");
         }
 
-
-
         // Records
-
+        // Se usa Order para poder luego usar literales estructurados
+        // (requiere tener una nocion de orden entre los atributos)
 
         // Simple Record
         HashMap<String, AbstractFactory> fMap = new HashMap<>();
         fMap.put("myNumeric", new DefaultFactory(Numeric.class));
         fMap.put("myTensor1", tf);
-        fMap.put("myTensor2",  tf2);
-
-        Record aRecord = new Record(fMap);
+        fMap.put("myTensor2", tf2);
+        Vector<String> order = new Vector<>();
+        order.add("myNumeric");
+        order.add("myTensor1");
+        order.add("myTensor2");
+        Record aRecord = new Record(fMap, order);
 
 
         System.out.println("Basic Record");
@@ -167,10 +166,14 @@ public class TestStackedContext {
         cMap.put("myNumeric", Numeric.class);
         cMap.put("myCadena", Cadena.class);
         cMap.put("myLogic", Logic.class);
+        order = new Vector<>();
+        order.add("myNumeric");
+        order.add("myCadena");
+        order.add("myLogic");
+        aRecord = Record.FromClasses(cMap, order);
 
-        aRecord = Record.FromClassMap(cMap);
         System.out.println("Record From Class Map");
-        for(String key : aRecord.keys())
+        for (String key : aRecord.keys())
             System.out.println(aRecord.get(key));
         System.out.println();
 
@@ -181,30 +184,31 @@ public class TestStackedContext {
         oMap.put("myCadena", Cadena.class);
         oMap.put("myLogic", Logic.class);
         oMap.put("myTensor", tf);
+        order.add("myTensor");
 
-        RecordFactory rf = new RecordFactory(oMap);
+        RecordFactory rf = new RecordFactory(oMap, order);
 
         aRecord = rf.build();
 
-
         System.out.println("Record Factory");
-        for(String key : aRecord.keys())
+        for (String key : aRecord.keys())
             System.out.println(aRecord.get(key));
         System.out.println();
-
 
         // Record with Record inside
 
         oMap.put("myRecord", rf);
-
-        rf = new RecordFactory(oMap);
+        rf.build();
+        order.add("myRecord");
+        rf.build();
+        rf.build();
+        rf = new RecordFactory(oMap, order);
 
         aRecord = rf.build();
 
         System.out.println("Record Recursion");
-        for(String key : aRecord.keys())
+        for (String key : aRecord.keys())
             System.out.println(aRecord.get(key));
         System.out.println();
-
     }
 }

@@ -3,6 +3,7 @@ package interpreter.factories;
 import interpreter.assignables.Assignable;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 public class DefaultFactory<T extends Assignable> implements AbstractFactory<T> {
 
@@ -11,16 +12,18 @@ public class DefaultFactory<T extends Assignable> implements AbstractFactory<T> 
     public DefaultFactory(Class<T> clss) {
         try {
             ctor = clss.getConstructor();
-        } catch (Exception e) {
-            throw new RuntimeException();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException("Cannot find the class constructor for " + clss.getCanonicalName());
         }
     }
 
     public T build() {
         try {
             return ctor.newInstance();
-        } catch (Exception e) {
-            throw new RuntimeException();
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException("Cannot initializate the class " + ctor.getName());
         }
     }
 

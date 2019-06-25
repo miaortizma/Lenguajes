@@ -1,38 +1,28 @@
 package interpreter.assignables;
 
-public class Logic implements Assignable {
-    private boolean aBoolean;
-
+public class Logic extends Primitive<Boolean> {
     public Logic() {
-        aBoolean = Boolean.FALSE;
+        super(Boolean.FALSE);
+    }
+
+    public Logic(Boolean bl) {
+        super(bl);
     }
 
     public Logic(String str) {
-        switch (str) {
-            case "TRUE":
-            case "SI":
-                aBoolean = Boolean.TRUE;
-                break;
-            case "FALSE":
-            case "NO":
-                aBoolean = Boolean.FALSE;
-        }
-    }
-
-    public boolean get() {
-        return aBoolean;
+        super(str.equals("TRUE") || str.equals("SI"));
     }
 
     @Override
-    public boolean IsAssignable(Object obj) {
+    public boolean isAssignable(Object obj) {
         return obj instanceof Logic;
     }
 
     @Override
-    public void AssignIfPossible(Object obj) {
-        if (!IsAssignable(obj))
+    public void assignIfPossible(Object obj) {
+        if (!isAssignable(obj))
             throw new UnsupportedOperationException();
         Logic aLogic = (Logic) obj;
-        aBoolean = aLogic.aBoolean;
+        value = aLogic.value;
     }
 }
