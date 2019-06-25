@@ -246,6 +246,62 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
     }
 
     @Override
+    public T visitFrom_loop(From_loopContext ctx) {
+        visitAssign(ctx.assign());
+        Assignable start = table.get(ctx.assign().ID().getText());
+        if (start instanceof Numeric) {
+            Assignable end = expressionVisitor.visitExpression(ctx.expression(0));
+            if (end instanceof Numeric) {
+                for (int i = ((Numeric) start).asInt(); i < ((Numeric) end).asInt(); i++) {
+
+                }
+            }
+        }
+        throw new RuntimeException("Sentence to evaluate in REPEAT structure must be Logic");
+
+    }
+
+    @Override
+    public T visitEval_loop(Eval_loopContext ctx) {
+        Assignable assignable = expressionVisitor.visitExpression(ctx.expression());
+        if (assignable instanceof Logic) {
+
+        }
+        throw new RuntimeException("Sentence to evaluate in REPEAT structure must be Logic");
+
+    }
+
+    @Override
+    public T visitRepeat_loop(Repeat_loopContext ctx) {
+        Assignable assignable = expressionVisitor.visitExpression(ctx.expression());
+        if (assignable instanceof Logic) {
+            do {
+                assignable = expressionVisitor.visitExpression(ctx.expression());
+                for (SentencesContext sentencesContext : ctx.sentences())
+                    visitSentences(sentencesContext);
+            } while (((Logic) assignable).get());
+            return null;
+        }
+
+        throw new RuntimeException("Sentence to evaluate in REPEAT structure must be Logic");
+    }
+
+    @Override
+    public T visitWhile_loop(While_loopContext ctx) {
+        Assignable assignable = expressionVisitor.visitExpression(ctx.expression());
+        if (assignable instanceof Logic) {
+            while (((Logic) assignable).get()) {
+                for (SentencesContext sentences : ctx.sentences())
+                    visitSentences(sentences);
+                assignable = expressionVisitor.visitExpression(ctx.expression());
+            }
+        } else {
+            throw new RuntimeException("Sentence to evaluate in WHILE structure must be Logic");
+        }
+        return null;
+    }
+
+    @Override
     public T visitSentence(SentenceContext ctx) {
         if (ctx.subroutine_call() != null) {
             this.visit(ctx.subroutine_call());
@@ -256,21 +312,79 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
         }
 
         if (ctx.loop() != null) {
-
+            visit(ctx.loop());
         }
 
-        if (ctx.assign() != null) {
-
+        AssignContext assignContext = ctx.assign();
+        if (assignContext != null) {
+            visitAssign(assignContext);
         }
 
-        if (ctx.conditional_sentence() != null) {
-
+        Conditional_sentenceContext conditionalSentenceContext = ctx.conditional_sentence();
+        if (conditionalSentenceContext != null) {
+            visitConditional_sentence(conditionalSentenceContext);
         }
 
         if (ctx.subroutine_call() != null) {
-
+            // this.visitSubroutine_call(ctx.subroutine_call());
         }
 
+        return null;
+    }
+
+    @Override
+    public T visitConditional_sentence(Conditional_sentenceContext ctx) {
+        Assignable toEvaluate = expressionVisitor.visitExpression(ctx.expression());
+        if (toEvaluate instanceof Logic) {
+            if (((Logic) toEvaluate).get()) {
+                for (SentencesContext sentences : ctx.sentences()) {
+                    visitSentences(sentences);
+                }
+            } else {
+                List<Conditional_sentence_else_ifContext> elsifs = ctx.conditional_sentence_else_if();
+                if (elsifs != null) {
+                    for (Conditional_sentence_else_ifContext elsif : elsifs) {
+                        for (SentencesContext sentences : elsif.sentences()) {
+                            visitSentences(sentences);
+                        }
+                    }
+                }
+
+                Conditional_sentence_final_elseContext finalElse = ctx.conditional_sentence_final_else();
+                if (finalElse != null) {
+                    for (SentencesContext sentences : finalElse.sentences()) {
+                        visitSentences(sentences);
+                    }
+                }
+            }
+        } else {
+            throw new RuntimeException("Sentence to evaluate in IF structure must be Logic");
+        }
+        return null;
+    }
+
+    @Override
+    public T visitAssign(AssignContext assignContext) {
+        ExpressionContext expressionContext = assignContext.expression();
+        if (expressionContext != null) {
+            Assignable assignable = expressionVisitor.visitExpression(expressionContext);
+
+            if (assignContext.ID() != null && assignable != null) {
+                table.put(assignContext.ID().getText(), assignable);
+            } else if (assignContext.access_variable() != null) {
+                Access_variableContext accessVariableContext = assignContext.access_variable();
+                String name = accessVariableContext.ID().getText();
+                validateExists(name);
+                table.put(name, assignable);
+            }
+        } else if (assignContext.structured_literal() != null) {
+            // Assignable assignable = expressionVisitor.visitExpression();
+            /*if (assignContext.ID() != null && assignable != null) {
+                table.put(assignContext.ID().getText(), assignable);
+            } else if (assignContext.access_variable() != null) {
+                // accessVariableVisitor.visitAccess_variable();
+            }*/
+        }
         return null;
     }
 
@@ -450,12 +564,7 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
         }
 
         public Assignable visitExpression(ExpressionContext expr) {
-            if (expr.children.size() == 3) {
-
-            }
-
             Assignable assignable = this.visit(expr);
-
             return assignable;
         }
 
@@ -555,9 +664,28 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
         public Assignable visitExpressionRelational(ExpressionRelationalContext ctx) {
             Assignable op1 = this.visit(ctx.children.get(0));
             Assignable op2 = this.visit(ctx.children.get(2));
+            String operator = ctx.children.get(1).getChild(0).getText();
 
+            if (op1 instanceof Numeric && op2 instanceof Numeric) {
 
-            return this.visit(ctx);
+                switch (operator) {
+                    case ">":
+                        return new Logic(((Numeric) op1).get() > ((Numeric) op2).get());
+                    case "<":
+                        return new Logic(((Numeric) op1).get() < ((Numeric) op2).get());
+                    case ">=":
+                        return new Logic(((Numeric) op1).get() >= ((Numeric) op2).get());
+                    case "==":
+                        return new Logic(((Numeric) op1).get().equals(((Numeric) op2).get()));
+                    case "<>":
+                        return new Logic(!((Numeric) op1).get().equals(((Numeric) op2).get()));
+                    case "<=":
+                        return new Logic(((Numeric) op1).get() <= ((Numeric) op2).get());
+                }
+            } else {
+                throw new RuntimeException("This types are not operable");
+            }
+            return null;
         }
 
         @Override
