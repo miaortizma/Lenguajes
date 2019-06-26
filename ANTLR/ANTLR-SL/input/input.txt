@@ -4,6 +4,7 @@ programa hola
     //PI = 3.1415
 var
     a : numerico
+    let, msg : cadena
     /*myVector : vector[*] numerico
     myRecord : registro {
         myNumeric : numerico
@@ -16,7 +17,7 @@ var
     }*/
 
 inicio
-    a = 10;
+    /* a = 10;
     imprimir("sdasd: " + (2^10) + " perritos " + (a < 10) + " lindos ");
     imprimir("sdasd: " + (2^10) + " perritos " + (a == 10) + " lindos ");
     a = 667
@@ -68,11 +69,28 @@ inicio
         imprimir('Dentro');
         a = a - 1;
     }
+    */
 
     // Eval test
 
-    
+    let = "a";
+    eval
+    {
+        caso ( let >= 'A' and let <= 'Z' )
+            imprimir("1");
+            msg = "letra mayúscula"
+        caso ( let >= 'a' and let <= 'z' )
+        imprimir("2");
+            msg = "letra minúscula"
+        caso ( let >= '0' and let <= '9' )
+        imprimir("3");
+            msg = "dígito"
+        sino
+        imprimir("4");
+            msg = "algún otro"
+    }
 
+    imprimir(msg);
 
     /* hola(); imprimir(123); imprimir(TRUE);
     imprimir(SI)

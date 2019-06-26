@@ -1,6 +1,6 @@
 package interpreter.assignables;
 
-public class Logic extends Primitive<Boolean> {
+public class Logic extends Primitive<Boolean> implements Comparable<Logic> {
     public Logic() {
         super(Boolean.FALSE);
     }
@@ -24,5 +24,25 @@ public class Logic extends Primitive<Boolean> {
             throw new UnsupportedOperationException();
         Logic aLogic = (Logic) obj;
         value = aLogic.value;
+    }
+
+    @Override
+    public boolean greaterThan(Logic object) {
+        return (value.compareTo(object.value)) > 0;
+    }
+
+    @Override
+    public boolean lessThan(Logic object) {
+        return (value.compareTo(object.value)) < 0;
+    }
+
+    @Override
+    public boolean greaterOrEqualThan(Logic object) {
+        return (value.compareTo(object.value)) >= 0;
+    }
+
+    @Override
+    public boolean lessOrEqualThan(Logic object) {
+        return (value.compareTo(object.value)) <= 0;
     }
 }

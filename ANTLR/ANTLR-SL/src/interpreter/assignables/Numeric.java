@@ -1,6 +1,6 @@
 package interpreter.assignables;
 
-public class Numeric extends Primitive<Double> {
+public class Numeric extends Primitive<Double> implements Comparable<Numeric> {
     public Numeric() {
         super((double) 0);
     }
@@ -34,5 +34,25 @@ public class Numeric extends Primitive<Double> {
             throw new UnsupportedOperationException();
         Numeric aNumeric = (Numeric) obj;
         value = aNumeric.value;
+    }
+
+    @Override
+    public boolean greaterThan(Numeric object) {
+        return value > object.value;
+    }
+
+    @Override
+    public boolean lessThan(Numeric object) {
+        return value < object.value;
+    }
+
+    @Override
+    public boolean greaterOrEqualThan(Numeric object) {
+        return value >= object.value;
+    }
+
+    @Override
+    public boolean lessOrEqualThan(Numeric object) {
+        return value <= object.value;
     }
 }

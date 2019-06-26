@@ -2,6 +2,7 @@ package interpreter;
 
 import gen.SLGrammarParser.*;
 import gen.SLGrammarParserBaseVisitor;
+import interpreter.assignables.Comparable;
 import interpreter.assignables.*;
 import interpreter.factories.AbstractFactory;
 import interpreter.factories.DefaultFactory;
@@ -334,6 +335,11 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
             visit(ctx.loop());
         }
 
+        EvalContext evalContext = ctx.eval();
+        if (evalContext != null) {
+            visitEval(evalContext);
+        }
+
         AssignContext assignContext = ctx.assign();
         if (assignContext != null) {
             visitAssign(assignContext);
@@ -632,7 +638,7 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
                 return new Numeric(((Numeric) op1).get() + (addition ? ((Numeric) op2).get() : -((Numeric) op2).get()));
             }
 
-            throw new RuntimeException("This types are not operable");
+            throw new RuntimeException("These types are not operable");
         }
 
         @Override
@@ -644,7 +650,7 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
                 return new Logic(((Logic) op1).get() && ((Logic) op2).get());
             }
 
-            throw new RuntimeException("This types are not operable");
+            throw new RuntimeException("These types are not operable");
         }
 
         @Override
@@ -656,7 +662,7 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
                 return new Numeric(-((Numeric) op2).get());
             }
 
-            throw new RuntimeException("This types are not operable");
+            throw new RuntimeException("These types are not operable");
         }
 
         @Override
@@ -665,7 +671,7 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
             Assignable op2 = this.visit(ctx.children.get(2));
 
             if (!(op1 instanceof Numeric) || !(op2 instanceof Numeric)) {
-                throw new RuntimeException("This types are not operable");
+                throw new RuntimeException("These types are not operable");
             }
 
             switch (ctx.children.get(1).getChild(0).getText()) {
@@ -688,7 +694,7 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
                 return new Logic(!((Logic) op2).get());
             }
 
-            throw new RuntimeException("This types are not operable");
+            throw new RuntimeException("These types are not operable");
         }
 
         @Override
@@ -700,7 +706,7 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
                 return new Logic(((Logic) op1).get() || ((Logic) op2).get());
             }
 
-            throw new RuntimeException("This types are not operable");
+            throw new RuntimeException("These types are not operable");
         }
 
         @Override
@@ -717,7 +723,7 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
                 return new Numeric(Math.pow(((Numeric) op1).get(), ((Numeric) op2).get()));
             }
 
-            throw new RuntimeException("This types are not operable");
+            throw new RuntimeException("These types are not operable");
         }
 
         @Override
@@ -726,24 +732,25 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
             Assignable op2 = this.visit(ctx.children.get(2));
             String operator = ctx.children.get(1).getChild(0).getText();
 
-            if (op1 instanceof Numeric && op2 instanceof Numeric) {
-
+            if (op1 instanceof Comparable && op2 instanceof Comparable) {
+                Comparable cp1 = (Comparable) op1;
+                Comparable cp2 = (Comparable) op2;
                 switch (operator) {
                     case ">":
-                        return new Logic(((Numeric) op1).get() > ((Numeric) op2).get());
+                        return new Logic(cp1.greaterThan(cp2));
                     case "<":
-                        return new Logic(((Numeric) op1).get() < ((Numeric) op2).get());
+                        return new Logic(cp1.lessThan(cp2));
                     case ">=":
-                        return new Logic(((Numeric) op1).get() >= ((Numeric) op2).get());
+                        return new Logic(cp1.greaterOrEqualThan(cp2));
                     case "==":
-                        return new Logic(((Numeric) op1).get().equals(((Numeric) op2).get()));
+                        return new Logic(cp1.equals(cp2));
                     case "<>":
-                        return new Logic(!((Numeric) op1).get().equals(((Numeric) op2).get()));
+                        return new Logic(!cp1.equals(cp2));
                     case "<=":
-                        return new Logic(((Numeric) op1).get() <= ((Numeric) op2).get());
+                        return new Logic(cp1.lessOrEqualThan(cp2));
                 }
             } else {
-                throw new RuntimeException("This types are not operable");
+                throw new RuntimeException("These types are not operable");
             }
             return null;
         }

@@ -21,7 +21,7 @@ public class Cadena extends Primitive<String> {
 
     @Override
     public boolean isAssignable(Object obj) {
-        return obj instanceof String;
+        return obj instanceof Cadena;
     }
 
     @Override
