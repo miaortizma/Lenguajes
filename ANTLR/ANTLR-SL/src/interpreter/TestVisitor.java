@@ -19,7 +19,7 @@ public class TestVisitor {
 
         CommonTokenStream commonTokenStream = new CommonTokenStream(new SLGrammarLexer(inputStream));
         SLGrammarParser parser = new SLGrammarParser(commonTokenStream);
-        MyVisitor visitor = new MyVisitor<>();
+        MyVisitor<Object> visitor = new MyVisitor<>();
         // System.out.println(parser.program().toStringTree());
         visitor.visit(parser.program());
     }

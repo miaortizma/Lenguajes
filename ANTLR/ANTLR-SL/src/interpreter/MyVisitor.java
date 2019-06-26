@@ -10,10 +10,7 @@ import interpreter.factories.RecordFactory;
 import interpreter.factories.TensorFactory;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
 
 interface Access {
 }
@@ -50,6 +47,8 @@ class Parameter {
     }
 }
 
+
+
 class FormalParameter {
     AbstractFactory factory;
     String name;
@@ -73,349 +72,12 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
     ParametersVisitor parametersVisitor = new ParametersVisitor();
     DataTypeVisitor dataTypeVisitor = new DataTypeVisitor();
     LiteralVisitor literalVisitor = new LiteralVisitor();
+    ProgramVisitor programVisitor = new ProgramVisitor();
     EvalVisitor evalVisitor = new EvalVisitor();
 
     @Override
     public T visitProgram(ProgramContext ctx) {
-        //añadir declaraciones globales (CONSTS, VARIABLES, TIPOS)
-        if (ctx.declarations() != null)
-            this.visit(ctx.declarations());
-
-        SubroutinesContext subs = ctx.subroutines();
-        if (subs != null)
-            for (SubroutineContext subroutine : subs.subroutine()) {
-                String str = subroutine.ID().getText();
-                table.putConst(str, new Subroutine(subroutine));
-            }
-        //añadir funciones a el ámbito de variables
-        if (ctx.sentences() != null)
-            this.visitSentences(ctx.sentences());
-
-        return null;
-    }
-
-    private void validateExists(String name) {
-        if (!table.has(name))
-            throw new RuntimeException("Identifier doesn't exists: " + name);
-    }
-
-    private void validateFree(String name) {
-        if (table.has(name))
-            throw new RuntimeException("Identifier already exists: " + name);
-    }
-
-    @Override
-    public T visitConsts(ConstsContext ctx) {
-        for (Const_Context const_ctx : ctx.const_()) {
-            String name = const_ctx.ID().getText();
-            validateFree(name);
-            literalVisitor.persistLiteral(const_ctx.literal(), name);
-        }
-        return null;
-    }
-
-    /**
-     * Should return an AbstractFactory
-     *
-     * @param ctx
-     * @return
-     */
-    @Override
-    public T visitTypes(TypesContext ctx) {
-        for (AliasContext alias : ctx.alias()) {
-            String name = alias.ID().getText();
-            validateFree(name);
-            AbstractFactory factory = typeVisitor.visitType(alias.type());
-            table.putConst(name, factory);
-        }
-        return null;
-    }
-
-    @Override
-    public T visitVars(VarsContext ctx) {
-        for (VarContext var : ctx.var()) {
-            AbstractFactory factory = typeVisitor.visitType(var.type());
-
-            for (TerminalNode id : var.id_list().ID())
-                table.put(id.getText(), factory.build());
-        }
-        return null;
-    }
-
-    private void imprimir(Vector<Parameter> vec) {
-        int n = table.topContextKeys().size();
-        for (Parameter param : vec) {
-            Assignable assignable = param.assig;
-            if (assignable instanceof Primitive) {
-                System.out.println(((Primitive) assignable).get());
-            } else {
-                System.out.print(assignable); // Tensor or Record
-            }
-        }
-    }
-
-    @Override
-    public T visitSubroutine_call(Subroutine_callContext ctx) {
-        table.push();
-        Vector<Parameter> parameters;
-        if (ctx.parameters() != null) {
-            parameters = parametersVisitor.visitParameters(ctx.parameters());
-        } else {
-            parameters = new Vector<>();
-        }
-
-        String name;
-        if (ctx.PREDEF_FUNC() != null) {
-            if (ctx.parameters() != null)
-                this.visit(ctx.parameters());
-
-            name = ctx.PREDEF_FUNC().getText();
-            switch (name) {
-                case "imprimir": {
-                    imprimir(parameters);
-                    table.pop();
-                    return null;
-                }
-            }
-        }
-        name = ctx.ID().getText();
-        if (!table.has(name))
-            throw new UnsupportedOperationException("Subroutine doesn't exists: " + name);
-
-        Const cnst = (Const) table.get(name);
-        Object obj = cnst.get();
-        if (!(obj instanceof MyVisitor.Subroutine))
-            throw new UnsupportedOperationException("Not a subroutine: " + name);
-
-        MyVisitor.Subroutine sub = (MyVisitor.Subroutine) obj;
-        Vector<FormalParameter> formalParameters = sub.getFormalParameters();
-
-        if (formalParameters.size() != parameters.size())
-            throw new RuntimeException("Got wrong number of parameters");
-        int n = parameters.size();
-
-        for (int i = 0; i < n; ++i) {
-            FormalParameter formal = formalParameters.get(i);
-            Parameter parameter = parameters.get(i);
-            Assignable assig = formal.factory.build();
-
-            if (formal.isRef) {
-                if (parameter.id != null && assig.isAssignable(parameter.assig)) {
-                    table.putRef(formal.name, parameter.id);
-                    continue;
-                }
-                throw new RuntimeException("Expected Referenced variable");
-            }
-            if (assig.isAssignable(parameter.assig)) {
-                table.put(formal.name, parameter.assig);
-            }
-            throw new RuntimeException("Couldn't assign parameter to formal parameter");
-        }
-        T ret = visitSubroutine(sub.ctx);
-        table.pop();
-        return ret;
-    }
-
-    @Override
-    public T visitEval(EvalContext ctx) {
-        evalVisitor.visitEval(ctx);
-        return null;
-    }
-
-    @Override
-    public T visitSubroutine(SubroutineContext ctx) {
-        if (ctx.procedure() != null) {
-            if (ctx.procedure().declarations() != null)
-                this.visitDeclarations(ctx.procedure().declarations());
-
-            if (ctx.procedure().sentences() != null)
-                this.visitSentences(ctx.procedure().sentences());
-
-            return null;
-        } else {
-            FunctionContext function = ctx.function();
-
-            if (ctx.function().declarations() != null)
-                this.visitDeclarations(ctx.procedure().declarations());
-
-            if (ctx.function().sentences() != null)
-                this.visitSentences(ctx.procedure().sentences());
-
-            RetContext retctx = function.ret();
-
-            Assignable ret = expressionVisitor.visitExpression(retctx.expression());
-
-            AbstractFactory type = (AbstractFactory) this.visit(function.type()); // Should return factory
-
-            if (!type.build().isAssignable(ret))
-                throw new ClassCastException("Incompatible types");
-
-            return (T) ret;
-        }
-    }
-
-    @Override
-    public T visitFrom_loop(From_loopContext ctx) {
-        visitAssign(ctx.assign());
-        Assignable assStart = table.get(ctx.assign().ID().getText());
-        if (assStart instanceof Numeric) {
-            Numeric start = (Numeric) assStart;
-            Assignable end = expressionVisitor.visitExpression(ctx.expression(0));
-            if (end instanceof Numeric) {
-                int step = 1;
-                ExpressionContext contextStep = ctx.expression(1);
-                if (contextStep != null) {
-                    Assignable assignStep = expressionVisitor.visitExpression(contextStep);
-
-                    if (assignStep instanceof Numeric) {
-                        step = ((Numeric) assignStep).asInt();
-                    } else {
-                        throw new RuntimeException("Invalid type in step");
-                    }
-                }
-
-                int times = (((Numeric) end).asInt() - ((Numeric) start).asInt()) / step;
-
-                for (int i = 0; i <= times; i++) {
-                    for (SentencesContext sentences : ctx.sentences()) {
-                        visitSentences(sentences);
-                        start = (Numeric) table.get(ctx.assign().ID().getText());
-                        if (start.equals(end)) {
-                            break;
-                        }
-                    }
-                    table.put(ctx.assign().ID().getText(), new Numeric(start.asInt() + step));
-                }
-                return null;
-            }
-        }
-        throw new RuntimeException("Sentence to evaluate in FROM structure must be Logic");
-
-    }
-
-    @Override
-    public T visitRepeat_loop(Repeat_loopContext ctx) {
-        Assignable assignable = expressionVisitor.visitExpression(ctx.expression());
-        if (assignable instanceof Logic) {
-            do {
-                assignable = expressionVisitor.visitExpression(ctx.expression());
-                visitListSentences(ctx.sentences());
-            } while (((Logic) assignable).get());
-            return null;
-        }
-
-        throw new RuntimeException("Sentence to evaluate in REPEAT structure must be Logic");
-    }
-
-    @Override
-    public T visitWhile_loop(While_loopContext ctx) {
-        Assignable assignable = expressionVisitor.visitExpression(ctx.expression());
-        if (assignable instanceof Logic) {
-            while (((Logic) assignable).get()) {
-                visitListSentences(ctx.sentences());
-                assignable = expressionVisitor.visitExpression(ctx.expression());
-            }
-        } else {
-            throw new RuntimeException("Sentence to evaluate in WHILE structure must be Logic");
-        }
-        return null;
-    }
-
-    @Override
-    public T visitSentence(SentenceContext ctx) {
-        if (ctx.subroutine_call() != null) {
-            this.visit(ctx.subroutine_call());
-        }
-
-        if (ctx.expression() != null) {
-            expressionVisitor.visitExpression(ctx.expression());
-        }
-
-        if (ctx.loop() != null) {
-            visit(ctx.loop());
-        }
-
-        EvalContext evalContext = ctx.eval();
-        if (evalContext != null) {
-            visitEval(evalContext);
-        }
-
-        AssignContext assignContext = ctx.assign();
-        if (assignContext != null) {
-            visitAssign(assignContext);
-        }
-
-        Conditional_sentenceContext conditionalSentenceContext = ctx.conditional_sentence();
-        if (conditionalSentenceContext != null) {
-            visitConditional_sentence(conditionalSentenceContext);
-        }
-
-        if (ctx.subroutine_call() != null) {
-            // this.visitSubroutine_call(ctx.subroutine_call());
-        }
-
-        return null;
-    }
-
-    @Override
-    public T visitConditional_sentence(Conditional_sentenceContext ctx) {
-        Assignable toEvaluate = expressionVisitor.visitExpression(ctx.expression());
-        if (toEvaluate instanceof Logic) {
-            if (((Logic) toEvaluate).get()) {
-                visitListSentences(ctx.sentences());
-            } else {
-                List<Conditional_sentence_else_ifContext> elsifs = ctx.conditional_sentence_else_if();
-                if (elsifs != null)
-                    for (Conditional_sentence_else_ifContext elsif : elsifs)
-                        visitListSentences(elsif.sentences());
-
-                Conditional_sentence_final_elseContext finalElse = ctx.conditional_sentence_final_else();
-                if (finalElse != null)
-                    visitListSentences(finalElse.sentences());
-            }
-        } else {
-            throw new RuntimeException("Sentence to evaluate in IF structure must be Logic");
-        }
-        return null;
-    }
-
-    @Override
-    public T visitAssign(AssignContext assignContext) {
-        ExpressionContext expressionContext = assignContext.expression();
-        if (expressionContext != null) {
-            Assignable assignable = expressionVisitor.visitExpression(expressionContext);
-
-            if (assignContext.ID() != null && assignable != null) {
-                table.put(assignContext.ID().getText(), assignable);
-            } else if (assignContext.access_variable() != null) {
-                Access_variableContext accessVariableContext = assignContext.access_variable();
-                String name = accessVariableContext.ID().getText();
-                validateExists(name);
-                table.put(name, assignable);
-            }
-        } else if (assignContext.structured_literal() != null) {
-            // Assignable assignable = expressionVisitor.visitExpression();
-            /*if (assignContext.ID() != null && assignable != null) {
-                table.put(assignContext.ID().getText(), assignable);
-            } else if (assignContext.access_variable() != null) {
-                // accessVariableVisitor.visitAccess_variable();
-            }*/
-        }
-        return null;
-    }
-
-    public void visitListSentences(List<SentencesContext> sentences) {
-        for (SentencesContext sentence : sentences) {
-            this.visitSentences(sentence);
-        }
-    }
-
-    @Override
-    public T visitSentences(SentencesContext ctx) {
-        for (SentenceContext sentence : ctx.sentence()) {
-            this.visit(sentence);
-        }
-        return null;
+        return (T) programVisitor.visitProgram(ctx);
     }
 
     class Subroutine {
@@ -446,6 +108,302 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
         }
     }
 
+
+    private Assignable imprimir(Vector<Parameter> vec) {
+        for (Parameter param : vec) {
+            Assignable assignable = param.assig;
+            if (assignable instanceof Primitive) {
+                System.out.println(((Primitive) assignable).get());
+            } else {
+                System.out.print(assignable); // Tensor or Record
+            }
+        }
+        return null;
+    }
+
+    private Class deriveClassFromFactory(AbstractFactory factory) {
+        if (factory instanceof RecordFactory)
+            return Record.class;
+        if (factory instanceof TensorFactory)
+            return Tensor.class;
+        if (factory instanceof DefaultFactory) {
+            DefaultFactory defaultFactory = (DefaultFactory) factory;
+            return defaultFactory.getClss();
+        }
+        throw new RuntimeException("deriveClassFromFactoryError");
+    }
+
+    private Assignable leer(Vector<Parameter> parameters) {
+        for (Parameter param : parameters) {
+            Scanner sc = new Scanner(System.in);
+            if(param.id == null)
+                throw new RuntimeException("Expected identifier got expression");
+            Assignable assig = table.get(param.id);
+            String input = sc.next();
+            if (assig instanceof Numeric)
+                assig.assignIfPossible(new Numeric(input));
+
+            if (assig instanceof Logic)
+                assig.assignIfPossible(new Logic(input));
+
+
+            if (assig instanceof Cadena)
+                assig.assignIfPossible(new Cadena(input));
+
+
+            DefaultFactory factory = new DefaultFactory(param.assig.getClass());
+
+            //table.put(param.id, new );
+        }
+        return null;
+    }
+
+    private Assignable sin(Vector<Parameter> parameters) {
+        if(parameters.size() != 1)
+            throw new RuntimeException("Sin function expects 1 parameter");
+        Assignable assignable = parameters.firstElement().assig;
+        if (!(assignable instanceof Numeric))
+            throw new RuntimeException("Expected Numeric parameter");
+        Numeric num = (Numeric) assignable;
+
+        return new Numeric(Math.sin(num.get()));
+    }
+
+    private void validateExists(String name) {
+        if (!table.has(name))
+            throw new RuntimeException("Identifier doesn't exists: " + name);
+    }
+
+    private void validateFree(String name) {
+        if (table.has(name))
+            throw new RuntimeException("Identifier already exists: " + name);
+    }
+
+    private class ProgramVisitor<T> extends SLGrammarParserBaseVisitor<T> {
+
+
+        @Override
+        public T visitProgram(ProgramContext ctx) {
+            //añadir declaraciones globales (CONSTS, VARIABLES, TIPOS)
+            if (ctx.declarations() != null)
+                this.visit(ctx.declarations());
+
+            SubroutinesContext subs = ctx.subroutines();
+            if (subs != null)
+                for (SubroutineContext subroutine : subs.subroutine()) {
+                    String str = subroutine.ID().getText();
+                    table.putConst(str, new Subroutine(subroutine));
+                }
+            //añadir funciones a el ámbito de variables
+            if (ctx.sentences() != null)
+                this.visitSentences(ctx.sentences());
+
+            return null;
+        }
+
+        @Override
+        public T visitConsts(ConstsContext ctx) {
+            for (Const_Context const_ctx : ctx.const_()) {
+                String name = const_ctx.ID().getText();
+                validateFree(name);
+                literalVisitor.persistLiteral(const_ctx.literal(), name);
+            }
+            return null;
+        }
+
+        /**
+         * Should return an AbstractFactory
+         *
+         * @param ctx
+         * @return
+         */
+        @Override
+        public T visitTypes(TypesContext ctx) {
+            for (AliasContext alias : ctx.alias()) {
+                String name = alias.ID().getText();
+                validateFree(name);
+                AbstractFactory factory = typeVisitor.visitType(alias.type());
+                table.putConst(name, factory);
+            }
+            return null;
+        }
+
+        @Override
+        public T visitVars(VarsContext ctx) {
+            for (VarContext var : ctx.var()) {
+                AbstractFactory factory = typeVisitor.visitType(var.type());
+
+                for (TerminalNode id : var.id_list().ID())
+                    table.put(id.getText(), factory.build());
+            }
+            return null;
+        }
+
+        @Override
+        public T visitFrom_loop(From_loopContext ctx) {
+            visitAssign(ctx.assign());
+            Assignable assStart = table.get(ctx.assign().ID().getText());
+            if (assStart instanceof Numeric) {
+                Numeric start = (Numeric) assStart;
+                Assignable end = expressionVisitor.visitExpression(ctx.expression(0));
+                if (end instanceof Numeric) {
+                    int step = 1;
+                    ExpressionContext contextStep = ctx.expression(1);
+                    if (contextStep != null) {
+                        Assignable assignStep = expressionVisitor.visitExpression(contextStep);
+
+                        if (assignStep instanceof Numeric) {
+                            step = ((Numeric) assignStep).asInt();
+                        } else {
+                            throw new RuntimeException("Invalid type in step");
+                        }
+                    }
+
+                    int times = (((Numeric) end).asInt() - ((Numeric) start).asInt()) / step;
+
+                    for (int i = 0; i <= times; i++) {
+                        for (SentencesContext sentences : ctx.sentences()) {
+                            visitSentences(sentences);
+                            start = (Numeric) table.get(ctx.assign().ID().getText());
+                            if (start.equals(end)) {
+                                break;
+                            }
+                        }
+                        table.put(ctx.assign().ID().getText(), new Numeric(start.asInt() + step));
+                    }
+                    return null;
+                }
+            }
+            throw new RuntimeException("Sentence to evaluate in FROM structure must be Logic");
+
+        }
+
+        @Override
+        public T visitRepeat_loop(Repeat_loopContext ctx) {
+            Assignable assignable = expressionVisitor.visitExpression(ctx.expression());
+            if (assignable instanceof Logic) {
+                do {
+                    assignable = expressionVisitor.visitExpression(ctx.expression());
+                    visitListSentences(ctx.sentences());
+                } while (((Logic) assignable).get());
+                return null;
+            }
+
+            throw new RuntimeException("Sentence to evaluate in REPEAT structure must be Logic");
+        }
+
+        @Override
+        public T visitWhile_loop(While_loopContext ctx) {
+            Assignable assignable = expressionVisitor.visitExpression(ctx.expression());
+            if (assignable instanceof Logic) {
+                while (((Logic) assignable).get()) {
+                    visitListSentences(ctx.sentences());
+                    assignable = expressionVisitor.visitExpression(ctx.expression());
+                }
+            } else {
+                throw new RuntimeException("Sentence to evaluate in WHILE structure must be Logic");
+            }
+            return null;
+        }
+
+        @Override
+        public T visitSentence(SentenceContext ctx) {
+
+            if (ctx.expression() != null) {
+                expressionVisitor.visitExpression(ctx.expression());
+            }
+
+            if (ctx.loop() != null) {
+                visit(ctx.loop());
+            }
+
+            EvalContext evalContext = ctx.eval();
+            if (evalContext != null) {
+                evalVisitor.visitEval(evalContext);
+            }
+
+            AssignContext assignContext = ctx.assign();
+            if (assignContext != null) {
+                visitAssign(assignContext);
+            }
+
+            Conditional_sentenceContext conditionalSentenceContext = ctx.conditional_sentence();
+            if (conditionalSentenceContext != null) {
+                visitConditional_sentence(conditionalSentenceContext);
+            }
+
+            return null;
+        }
+
+        @Override
+        public T visitConditional_sentence(Conditional_sentenceContext ctx) {
+            Assignable toEvaluate = expressionVisitor.visitExpression(ctx.expression());
+            //System.out.println("Conditional Sentence");
+            if (toEvaluate instanceof Logic) {
+                if (((Logic) toEvaluate).get()) {
+                    visitListSentences(ctx.sentences());
+                } else {
+                    List<Conditional_sentence_else_ifContext> elsifs = ctx.conditional_sentence_else_if();
+                    if (elsifs != null)
+                        for (Conditional_sentence_else_ifContext elsif : elsifs){
+                            Logic logic = (Logic) expressionVisitor.visitExpression(elsif.expression());
+                            if (logic.get()){
+                                visitListSentences(elsif.sentences());
+                                return null;
+                            }
+                        }
+
+                    Conditional_sentence_final_elseContext finalElse = ctx.conditional_sentence_final_else();
+                    if (finalElse != null)
+                        visitListSentences(finalElse.sentences());
+                }
+            } else {
+                throw new RuntimeException("Sentence to evaluate in IF structure must be Logic");
+            }
+            return null;
+        }
+
+        @Override
+        public T visitAssign(AssignContext assignContext) {
+            ExpressionContext expressionContext = assignContext.expression();
+            if (expressionContext != null) {
+                Assignable assignable = expressionVisitor.visitExpression(expressionContext);
+
+                if (assignContext.ID() != null && assignable != null) {
+                    table.put(assignContext.ID().getText(), assignable);
+                } else if (assignContext.access_variable() != null) {
+                    Access_variableContext accessVariableContext = assignContext.access_variable();
+                    String name = accessVariableContext.ID().getText();
+                    Assignable assgn = accessVariableVisitor.visitAccess_variable(accessVariableContext);
+                    assgn.assignIfPossible(assignable);
+                }
+            } else if (assignContext.structured_literal() != null) {
+                // Assignable assignable = expressionVisitor.visitExpression();
+            /*if (assignContext.ID() != null && assignable != null) {
+                table.put(assignContext.ID().getText(), assignable);
+            } else if (assignContext.access_variable() != null) {
+                // accessVariableVisitor.visitAccess_variable();
+            }*/
+            }
+            return null;
+        }
+
+        public void visitListSentences(List<SentencesContext> sentences) {
+            for (SentencesContext sentence : sentences) {
+                this.visitSentences(sentence);
+            }
+        }
+
+        @Override
+        public T visitSentences(SentencesContext ctx) {
+            for (SentenceContext sentence : ctx.sentence())
+                visitSentence(sentence);
+
+            return null;
+        }
+
+    }
+
     private class EvalVisitor extends SLGrammarParserBaseVisitor<Boolean> {
         @Override
         public Boolean visitEval(EvalContext ctx) {
@@ -458,7 +416,7 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
 
             // else
             if (!evaluated) {
-                visitListSentences(ctx.sentences());
+                programVisitor.visitListSentences(ctx.sentences());
             }
 
             return true;
@@ -471,7 +429,7 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
                 Assignable assignable = expressionVisitor.visitExpression(expressionContext);
                 if (assignable instanceof Logic) {
                     if (((Logic) assignable).get()) {
-                        visitListSentences(ctx.sentences());
+                        programVisitor.visitListSentences(ctx.sentences());
                         return true;
                     }
                     return false;
@@ -550,9 +508,14 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
             if (ctx.data_type() != null) {
                 clss = dataTypeVisitor.visitData_type(ctx.data_type());
                 factory = new DefaultFactory(clss);
-            } else {
+            } else if (ctx.record() != null){
                 factory = visitRecord(ctx.record());
                 clss = Record.class;
+            } else {
+                String name = ctx.ID().getText();
+                Const obj = (Const) table.get(name);
+                factory = (AbstractFactory) obj.get();
+                clss = deriveClassFromFactory(factory);
             }
 
             if (ctx.vector() != null) {
@@ -601,15 +564,19 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
             List<ExpressionContext> expression = ctx.expression();
 
             if (expression != null) {
-                int n = expression.size();
                 for (ExpressionContext exp : expression) {
+
                     Assignable assig = expressionVisitor.visitExpression(exp);
 
-                    //if (assig != null) {
-                    //  vec.add(new Parameter(assig, exp.ID().getText()));
-                    //} else {
+                    if (exp instanceof ExpressionVariableContext) {
+                        ExpressionVariableContext expCtx = (ExpressionVariableContext) exp;
+                        if (expCtx.ID() != null) {
+                            vec.add(new Parameter(assig, expCtx.ID().getText()));
+                            continue;
+                        }
+                    }
+
                     vec.add(new Parameter(assig));
-                    //}
                 }
             }
             return vec;
@@ -617,9 +584,6 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
     }
 
     private class ExpressionVisitor extends SLGrammarParserBaseVisitor<Assignable> {
-        public String ID() {
-            return null;
-        }
 
         public Assignable visitExpression(ExpressionContext expr) {
             Assignable assignable = this.visit(expr);
@@ -757,6 +721,7 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
 
         @Override
         public Assignable visitExpressionVariable(ExpressionVariableContext ctx) {
+
             if (ctx.literal() != null)
                 return literalVisitor.visitLiteral(ctx.literal());
 
@@ -766,8 +731,116 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
             if (ctx.access_variable() != null)
                 return accessVariableVisitor.visitAccess_variable(ctx.access_variable());
 
-            throw new RuntimeException("Expresion error");
+            if (ctx.subroutine_call() != null)
+                return visitSubroutine_call(ctx.subroutine_call());
+
+            throw new RuntimeException("VisitExpressionVariable error");
         }
+
+        public Assignable visitPredefFunc(String name, Vector<Parameter> parameters) {
+            switch(name) {
+                case "imprimir":
+                    return imprimir(parameters);
+                case "leer":
+                    return leer(parameters);
+                case "sin":
+                    return sin(parameters);
+            }
+            return null;
+        }
+
+        @Override
+        public Assignable visitSubroutine_call(Subroutine_callContext ctx) {
+            Vector<Parameter> parameters;
+            if (ctx.parameters() != null) {
+                parameters = parametersVisitor.visitParameters(ctx.parameters());
+            } else {
+                parameters = new Vector<>();
+            }
+
+            table.push();
+
+            String name;
+            if (ctx.predef_func() != null) {
+                name = ctx.predef_func().getText();
+                Assignable ret = visitPredefFunc(name, parameters);
+                table.pop();
+                return ret;
+            }
+            name = ctx.ID().getText();
+
+            if (!table.has(name))
+                throw new UnsupportedOperationException("Subroutine doesn't exists: " + name);
+
+            Const cnst = (Const) table.get(name);
+            Object obj = cnst.get();
+            if (!(obj instanceof MyVisitor.Subroutine))
+                throw new UnsupportedOperationException("Not a subroutine: " + name);
+
+            MyVisitor.Subroutine sub = (MyVisitor.Subroutine) obj;
+            Vector<FormalParameter> formalParameters = sub.getFormalParameters();
+
+            if (formalParameters.size() != parameters.size())
+                throw new RuntimeException("Got wrong number of parameters");
+            int n = parameters.size();
+
+            for (int i = 0; i < n; ++i) {
+                FormalParameter formal = formalParameters.get(i);
+                Parameter parameter = parameters.get(i);
+                Assignable assig = formal.factory.build();
+
+                if (formal.isRef) {
+                    if (parameter.id != null && assig.isAssignable(parameter.assig)) {
+                        table.putRef(formal.name, parameter.id);
+                        continue;
+                    }
+                    throw new RuntimeException("Expected Referenced variable");
+                }
+                if (assig.isAssignable(parameter.assig)) {
+
+                    table.put(formal.name, parameter.assig);
+                    continue;
+                }
+                throw new RuntimeException("Couldn't assign parameter to formal parameter");
+            }
+
+            Assignable ret = visitSubroutine(sub.ctx);
+            table.pop();
+            return ret;
+        }
+
+        @Override
+        public Assignable visitSubroutine(SubroutineContext ctx) {
+            if (ctx.procedure() != null) {
+                if (ctx.procedure().declarations() != null)
+                    programVisitor.visitDeclarations(ctx.procedure().declarations());
+
+                if (ctx.procedure().sentences() != null)
+                    programVisitor.visitSentences(ctx.procedure().sentences());
+
+                return null;
+            } else {
+                FunctionContext function = ctx.function();
+
+                if (function.declarations() != null)
+                    programVisitor.visitDeclarations(function.declarations());
+
+                if (function.sentences() != null)
+                    programVisitor.visitSentences(function.sentences());
+
+                RetContext retctx = function.ret();
+
+                Assignable ret = expressionVisitor.visitExpression(retctx.expression());
+
+                AbstractFactory type = typeVisitor.visitType(function.type()); // Should return factory
+
+                if (!type.build().isAssignable(ret))
+                    throw new ClassCastException("Incompatible types");
+
+                return ret;
+            }
+        }
+
     }
 
     private class Access_recordVisitor extends SLGrammarParserBaseVisitor<Vector<Access>> {

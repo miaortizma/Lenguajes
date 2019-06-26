@@ -1,0 +1,22 @@
+programa FizzBuzz
+var
+    i : numerico
+inicio
+    desde i = 1 hasta 100 paso 1
+    {
+        fizz_buzz(i)
+    }
+fin
+
+
+subrutina fizz_buzz(n : numerico)
+inicio
+    si (n%3 == 0 and n%5 == 0)
+    {
+        imprimir(n  + " FizzBuzz")
+    sino si (n%3 == 0)
+        imprimir(n + " Fizz")
+    sino si (n%5 == 0)
+        imprimir(n  + " Buzz")
+    }
+fin

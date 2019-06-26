@@ -37,14 +37,13 @@ sentence
     | eval
     | loop
     | assign
-    | conditional_sentence
-    | subroutine_call ;
+    | conditional_sentence;
 
 record
     : RECORD LEFT_BRACKET var+ RIGHT_BRACKET;
 
 tensor
-    : (vector|matrix) (data_type|record);
+    : (vector|matrix) (ID|data_type|record);
 
 vector
     : VECTOR LEFT_BRACE (TIMES|expression) RIGHT_BRACE ;
@@ -86,7 +85,7 @@ expression
     | NOT+ expression # expressionNot
     | expression AND expression # expressionAnd
     | expression OR expression # expressionOr
-    | (access_variable|ID|literal) # expressionVariable
+    | (subroutine_call|access_variable|ID|literal) # expressionVariable
     ;
 
 rel_op
@@ -151,7 +150,7 @@ parameters
     : (expression (COMMA expression)*) ;
 
 subroutine_call
-    : (ID|PREDEF_FUNC) LEFT_PAR parameters? RIGHT_PAR ;
+    : (ID|predef_func) LEFT_PAR parameters? RIGHT_PAR ;
 
 predef_func
     : PREDEF_FUNC;
@@ -175,7 +174,7 @@ procedure
     :  declarations? START sentences? END;
 
 function
-    : RETURNS type declarations? START sentences? RETURNS LEFT_PAR ret RIGHT_PAR END;
+    : RETURNS type declarations? START sentences? ret END;
 
 ret
     : RETURNS LEFT_PAR expression RIGHT_PAR ;

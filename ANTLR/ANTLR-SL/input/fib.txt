@@ -1,0 +1,40 @@
+programa fibonnaci
+var
+    n : numerico
+inicio
+    imprimir("Ingrese un numero:")
+    leer(n)
+    fib(n)
+    imprimir("Fib recursivo")
+    imprimir(fib_rec(n+1))
+fin
+
+subrutina fib(n : numerico)
+var
+    a, b, c, i : numerico
+inicio
+    a = 1
+    b = 1
+    desde i = 1 hasta n paso 1
+    {
+        imprimir(b)
+        c = b
+        b = a + b
+        a = c
+    }
+fin
+
+
+subrutina fib_rec(n : numerico) retorna numerico
+var
+    res : numerico
+inicio
+    si (n == 1) {
+        res = 1
+    sino si (n == 2)
+        res = 1
+    sino
+        res = fib_rec(n - 1) + fib_rec(n - 2)
+    }
+    retorna (res)
+fin

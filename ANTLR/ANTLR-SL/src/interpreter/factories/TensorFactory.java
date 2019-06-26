@@ -2,7 +2,6 @@ package interpreter.factories;
 
 
 import interpreter.assignables.Assignable;
-import interpreter.assignables.Record;
 import interpreter.assignables.Tensor;
 
 public class TensorFactory<T extends Assignable> implements AbstractFactory<Tensor> {

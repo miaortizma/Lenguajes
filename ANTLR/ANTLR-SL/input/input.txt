@@ -1,20 +1,26 @@
 programa hola
-// const
-    //str = ""
-    //PI = 3.1415
+const
+    str = ""
+    PI = 3.1415
+tipos
+    NUM : numerico
+    REC : registro {
+                  myNumeric : numerico
+                  myMatrix : matriz [2, 2, 3] numerico
+                  myLogic : logico
+                  myCadena : cadena
+                  myRecursiveRecord : registro {
+                      hola : cadena
+                  }
+              }
+    STR : cadena
 var
-    a, let : numerico
-    msg : cadena
-    /*myVector : vector[*] numerico
-    myRecord : registro {
-        myNumeric : numerico
-        myMatrix : matriz [2, 2, 3] numerico
-        myLogic : logico
-        myCadena : cadena
-        myRecursiveRecord : registro {
-            hola : cadena
-        }
-    }*/
+    a, let, k : NUM
+    msg : STR
+    myVector : vector[*] NUM
+    myRecord : REC
+    prueba : cadena
+    pruebaNum : NUM
 
 inicio
     a = 10;
@@ -38,15 +44,21 @@ inicio
         imprimir(k)
     }
 
+    imprimir("###########")
+
     desde k = 0 hasta 10 paso 5
     {
         imprimir(k)
     }
 
+    imprimir("###########")
+
     desde k = 10 hasta 0 paso -2
     {
         imprimir(k)
     }
+
+    imprimir("###########")
 
     desde k = 5 hasta 8 paso -2
     {
@@ -74,13 +86,13 @@ inicio
 
     // Eval test
 
-    /* let = 66;
+    let = 66;
     eval
     {
         caso (let < 10)
             imprimir("1");
             msg = "menor a diez"
-        caso (let >= 10 && let < 10)
+        caso (let >= 10 and let < 10)
             imprimir("2");
             msg = "entre 10 y 20"
         sino
@@ -89,21 +101,35 @@ inicio
     }
 
     imprimir(msg);
- imprimir(123); imprimir(TRUE);
+    imprimir(123); imprimir(TRUE);
     imprimir(SI)
     imprimir(FALSE)
     imprimir(NO)
     imprimir(PI)
-    imprimir(str)
+    //imprimir(str)
     imprimir(myRecord.myNumeric)
     imprimir(myRecord.myMatrix[1, 1, 1])
     imprimir(myRecord.myLogic)
-    imprimir(myRecord.myCadena)
+    //imprimir(myRecord.myCadena)
     imprimir("UwU")
+    imprimir("Prueba assign record")
+    myRecord.myRecursiveRecord.hola = "Hey-Oh"
     imprimir(myRecord.myRecursiveRecord.hola)
+    hola()
+    imprimir("Ingrese una cadena")
+    leer(prueba)
+    imprimir(prueba)
+    imprimir("Ingrese un numero")
+    leer(pruebaNum)
+    imprimir(pruebaNum)
 fin
-*/
+
+
 subrutina hola()
 inicio
     imprimir("hola mundo subrutina")
 fin
+
+
+
+suburutina

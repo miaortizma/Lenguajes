@@ -4,3 +4,4 @@ ANTLR/ANTLR-SL/.idea/workspace.xml
 ANTLR/ANTLR-SL/grammar/*.tokens
 gen/
 out/
+ANTLR/ANTLR-SL/.attach*
