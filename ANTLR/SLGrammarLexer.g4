@@ -11,9 +11,6 @@ COMMENT: '//' ~[\r\n]* -> skip;
 RESERVED
     : 'archivo'|'constantes'|'lib'|'libext'|'variables';
 
-PREDEF_FUNC
-    : 'imprimir' | 'sin' | 'leer';
-
 PROGRAM
     : 'programa';
 
@@ -101,14 +98,11 @@ OR
 AND
     : 'and';
 
-fragment SEQ_ESCAPE
-    : [\\][.] ;
-
 fragment VALID_CHAR
     : ~[\r\n\f];
 
 STRING_LITERAL
-     : ([']( SEQ_ESCAPE|VALID_CHAR )*? [']) | (["] ( SEQ_ESCAPE|VALID_CHAR )*? ["]) ;
+     : ([']( VALID_CHAR )*? [']) | (["] ( VALID_CHAR )*? ["]) ;
 
 fragment DIGIT
     : [0-9] ;

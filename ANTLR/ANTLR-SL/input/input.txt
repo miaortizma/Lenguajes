@@ -3,8 +3,8 @@ programa hola
     //str = ""
     //PI = 3.1415
 var
-    a, k : numerico
-    let, msg : cadena
+    a, let : numerico
+    msg : cadena
     /*myVector : vector[*] numerico
     myRecord : registro {
         myNumeric : numerico
@@ -38,6 +38,21 @@ inicio
         imprimir(k)
     }
 
+    desde k = 0 hasta 10 paso 5
+    {
+        imprimir(k)
+    }
+
+    desde k = 10 hasta 0 paso -2
+    {
+        imprimir(k)
+    }
+
+    desde k = 5 hasta 8 paso -2
+    {
+        imprimir(k)
+    }
+
     // While test
     a = 5;
     mientras(a >= 1) {
@@ -55,24 +70,26 @@ inicio
         a = a - 1;
     }
 
+    hola();
+
     // Eval test
 
-    let = "b";
+    /* let = 66;
     eval
     {
-        caso ( let >= 'A' and let <= 'Z' )
-            msg = "letra mayúscula"
-        caso ( let >= 'a' and let <= 'z' )
-            msg = "letra minúscula"
-        caso ( let >= '0' and let <= '9' )
-            msg = "dígito"
+        caso (let < 10)
+            imprimir("1");
+            msg = "menor a diez"
+        caso (let >= 10 && let < 10)
+            imprimir("2");
+            msg = "entre 10 y 20"
         sino
-            msg = "algún otro"
+            imprimir("4");
+            msg = "mayor a 20"
     }
 
     imprimir(msg);
-
-    /* hola(); imprimir(123); imprimir(TRUE);
+ imprimir(123); imprimir(TRUE);
     imprimir(SI)
     imprimir(FALSE)
     imprimir(NO)
@@ -85,8 +102,8 @@ inicio
     imprimir("UwU")
     imprimir(myRecord.myRecursiveRecord.hola)
 fin
-
+*/
 subrutina hola()
 inicio
-    imprimir("hola mundo subrutina")*/
+    imprimir("hola mundo subrutina")
 fin

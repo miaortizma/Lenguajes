@@ -1,6 +1,6 @@
 package interpreter.assignables;
 
-public class Cadena extends Primitive<String> implements Comparable<Cadena> {
+public class Cadena extends Primitive<String> {
     public Cadena() {
         super("");
     }
@@ -30,25 +30,5 @@ public class Cadena extends Primitive<String> implements Comparable<Cadena> {
             throw new UnsupportedOperationException();
         Cadena aCadena = (Cadena) obj;
         value = aCadena.value;
-    }
-
-    @Override
-    public boolean greaterThan(Cadena object) {
-        return value.compareTo(object.value) > 0;
-    }
-
-    @Override
-    public boolean lessThan(Cadena object) {
-        return value.compareTo(object.value) < 0;
-    }
-
-    @Override
-    public boolean greaterOrEqualThan(Cadena object) {
-        return value.compareTo(object.value) >= 0;
-    }
-
-    @Override
-    public boolean lessOrEqualThan(Cadena object) {
-        return value.compareTo(object.value) <= 0;
     }
 }

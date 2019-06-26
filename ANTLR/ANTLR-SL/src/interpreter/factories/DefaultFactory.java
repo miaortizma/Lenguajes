@@ -18,15 +18,6 @@ public class DefaultFactory<T extends Assignable> implements AbstractFactory<T> 
         }
     }
 
-    public T build(Object... args) {
-        try {
-            return ctor.newInstance(args);
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
-            throw new IllegalArgumentException("Cannot initializate the class " + ctor.getName());
-        }
-    }
-
     public T build() {
         try {
             return ctor.newInstance();

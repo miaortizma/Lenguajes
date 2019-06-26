@@ -33,12 +33,12 @@ sentences
     : (sentence SEMI?) +;
 
 sentence
-    : expression
+    : subroutine_call
     | eval
     | loop
     | assign
     | conditional_sentence
-    | subroutine_call ;
+    | expression ;
 
 record
     : RECORD LEFT_BRACKET var+ RIGHT_BRACKET;
@@ -76,8 +76,8 @@ access_record
 access_tensor
     : LEFT_BRACE expression ( COMMA expression )* RIGHT_BRACE access_record ? ;
 
-expression
-    : LEFT_PAR expression RIGHT_PAR # expressionPar
+expression :
+    LEFT_PAR expression RIGHT_PAR # expressionPar
     | expression POWER expression # expressionPower
     | add_op+ expression # expressionChangeSign
     | expression mul_op expression # expressionMultiplication
@@ -86,7 +86,7 @@ expression
     | NOT+ expression # expressionNot
     | expression AND expression # expressionAnd
     | expression OR expression # expressionOr
-    | (access_variable|ID|literal) # expressionVariable
+    | (subroutine_call|access_variable|ID|literal) # expressionVariable
     ;
 
 rel_op
@@ -148,13 +148,10 @@ from_loop
     : FROM assign UNTIL expression (STEP expression)? LEFT_BRACKET sentences* RIGHT_BRACKET;
 
 parameters
-    : (expression (COMMA expression)*) ;
+    : expression (COMMA expression)* ;
 
 subroutine_call
-    : (ID|PREDEF_FUNC) LEFT_PAR parameters? RIGHT_PAR ;
-
-predef_func
-    : PREDEF_FUNC;
+    : ID LEFT_PAR parameters? RIGHT_PAR ;
 
 subroutines
     : subroutine+ ;
@@ -179,4 +176,3 @@ function
 
 ret
     : RETURNS LEFT_PAR expression RIGHT_PAR ;
-

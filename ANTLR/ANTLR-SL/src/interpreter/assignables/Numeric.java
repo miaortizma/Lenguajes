@@ -24,6 +24,11 @@ public class Numeric extends Primitive<Double> implements Comparable<Numeric> {
     }
 
     @Override
+    public boolean equals(Object obj) {
+        return value.equals(((Numeric) obj).value);
+    }
+
+    @Override
     public boolean isAssignable(Object obj) {
         return obj instanceof Numeric;
     }
