@@ -3,7 +3,7 @@ programa hola
     //str = ""
     //PI = 3.1415
 var
-    a : numerico
+    a, k : numerico
     let, msg : cadena
     /*myVector : vector[*] numerico
     myRecord : registro {
@@ -17,7 +17,7 @@ var
     }*/
 
 inicio
-    /* a = 10;
+    a = 10;
     imprimir("sdasd: " + (2^10) + " perritos " + (a < 10) + " lindos ");
     imprimir("sdasd: " + (2^10) + " perritos " + (a == 10) + " lindos ");
     a = 667
@@ -38,21 +38,6 @@ inicio
         imprimir(k)
     }
 
-    desde k = 0 hasta 10 paso 5
-    {
-        imprimir(k)
-    }
-
-    desde k = 10 hasta 0 paso -2
-    {
-        imprimir(k)
-    }
-
-    desde k = 5 hasta 8 paso -2
-    {
-        imprimir(k)
-    }
-
     // While test
     a = 5;
     mientras(a >= 1) {
@@ -69,24 +54,19 @@ inicio
         imprimir('Dentro');
         a = a - 1;
     }
-    */
 
     // Eval test
 
-    let = "a";
+    let = "b";
     eval
     {
         caso ( let >= 'A' and let <= 'Z' )
-            imprimir("1");
             msg = "letra mayúscula"
         caso ( let >= 'a' and let <= 'z' )
-        imprimir("2");
             msg = "letra minúscula"
         caso ( let >= '0' and let <= '9' )
-        imprimir("3");
             msg = "dígito"
         sino
-        imprimir("4");
             msg = "algún otro"
     }
 

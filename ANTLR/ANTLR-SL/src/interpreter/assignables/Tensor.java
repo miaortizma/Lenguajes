@@ -4,7 +4,7 @@ import interpreter.factories.AbstractFactory;
 
 import java.util.Vector;
 
-public class Tensor<T extends Assignable> implements Assignable {
+public class Tensor<T extends Assignable> extends Assignable {
     private final AbstractFactory<T> factory;
     private final Class<T> clss;
     private final int[] dim;

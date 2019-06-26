@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.Vector;
 
 
-public class Record implements Assignable {
+public class Record extends Assignable {
     private HashMap<String, Assignable> map;
     private Vector<String> order;
 

@@ -9,7 +9,7 @@ import java.util.Vector;
 /**
  * read-only
  */
-class Const implements Assignable {
+class Const extends Assignable {
 
     private Object maskedInstance;
 
@@ -155,7 +155,7 @@ public class StackedContextMap {
         return stack.size();
     }
 
-    private class Reference implements Assignable {
+    private class Reference extends Assignable {
         int level;
 
         public Reference(int level) {

@@ -1,6 +1,6 @@
 package interpreter.assignables;
 
-public abstract class Primitive<T> implements Assignable {
+public abstract class Primitive<T> extends Assignable {
     T value;
 
     Primitive(T value) {

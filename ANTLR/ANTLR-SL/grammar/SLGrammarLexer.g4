@@ -9,10 +9,7 @@ COMMENT: '//' ~[\r\n]* -> skip;
 
 // Reserved words
 RESERVED
-    : 'archivo'|'constantes'|'lib'|'libext'|'sin'|'variables';
-
-PREDEF_FUNC
-    : 'imprimir';
+    : 'archivo'|'constantes'|'lib'|'libext'|'variables';
 
 PROGRAM
     : 'programa';
@@ -101,14 +98,11 @@ OR
 AND
     : 'and';
 
-fragment SEQ_ESCAPE
-    : [\\][.] ;
-
 fragment VALID_CHAR
-    : ~[\\\r\n\f'];
+    : ~[\r\n\f];
 
 STRING_LITERAL
-     : ([']( SEQ_ESCAPE|VALID_CHAR )*? [']) | (["] ( SEQ_ESCAPE|VALID_CHAR )*? ["]) ;
+     : ([']( VALID_CHAR )*? [']) | (["] ( VALID_CHAR )*? ["]) ;
 
 fragment DIGIT
     : [0-9] ;

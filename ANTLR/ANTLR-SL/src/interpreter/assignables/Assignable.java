@@ -1,7 +1,7 @@
 package interpreter.assignables;
 
-public interface Assignable {
-    boolean isAssignable(Object obj);
+public abstract class Assignable implements SubroutineReturn {
+    public abstract boolean isAssignable(Object obj);
 
-    void assignIfPossible(Object obj);
+    public abstract void assignIfPossible(Object obj);
 }

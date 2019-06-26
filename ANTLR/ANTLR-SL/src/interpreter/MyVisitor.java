@@ -10,10 +10,7 @@ import interpreter.factories.RecordFactory;
 import interpreter.factories.TensorFactory;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
 
 interface Access {
 }
@@ -142,8 +139,27 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
         return null;
     }
 
-    private void imprimir(Vector<Parameter> vec) {
-        int n = table.topContextKeys().size();
+    private Assignable sin(Parameter parameter) {
+        Assignable assignable = parameter.assig;
+        if (assignable instanceof Numeric) {
+            return new Numeric(Math.sin(((Numeric) assignable).get()));
+        }
+        throw new RuntimeException("Cannot evaluate sin of " + assignable.getClass().getCanonicalName());
+    }
+
+    private SubroutineReturn leer(Vector<Parameter> parameters) {
+        for (Parameter parameter : parameters) {
+            Scanner sc = new Scanner(System.in);
+            DefaultFactory factory = new DefaultFactory(parameter.assig.getClass());
+            String input = sc.next();
+            table.put(parameter.id, new Numeric(input));
+            System.out.println(input);
+        }
+
+        return new HandledReturn();
+    }
+
+    private SubroutineReturn imprimir(Vector<Parameter> vec) {
         for (Parameter param : vec) {
             Assignable assignable = param.assig;
             if (assignable instanceof Primitive) {
@@ -152,10 +168,23 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
                 System.out.print(assignable); // Tensor or Record
             }
         }
+        return new HandledReturn();
     }
 
-    @Override
-    public T visitSubroutine_call(Subroutine_callContext ctx) {
+    public SubroutineReturn visitPredefinedFunction(String name, Vector<Parameter> parameters) {
+        switch (name) {
+            case "imprimir":
+                return imprimir(parameters);
+            case "leer":
+                return leer(parameters);
+            case "sin":
+                if (parameters.size() > 1) throw new RuntimeException("sin function accepts only one parameter");
+                return sin(parameters.firstElement());
+        }
+        return null;
+    }
+
+    public Assignable visitSubroutineCall(Subroutine_callContext ctx) {
         table.push();
         Vector<Parameter> parameters;
         if (ctx.parameters() != null) {
@@ -164,21 +193,14 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
             parameters = new Vector<>();
         }
 
-        String name;
-        if (ctx.PREDEF_FUNC() != null) {
-            if (ctx.parameters() != null)
-                this.visit(ctx.parameters());
-
-            name = ctx.PREDEF_FUNC().getText();
-            switch (name) {
-                case "imprimir": {
-                    imprimir(parameters);
-                    table.pop();
-                    return null;
-                }
-            }
+        String name = ctx.ID().getText();
+        SubroutineReturn result = visitPredefinedFunction(name, parameters);
+        if (!(result instanceof NullReturn)) {
+            if (result instanceof Assignable)
+                return (Assignable) result;
+            return null;
         }
-        name = ctx.ID().getText();
+
         if (!table.has(name))
             throw new UnsupportedOperationException("Subroutine doesn't exists: " + name);
 
@@ -213,7 +235,7 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
         }
         T ret = visitSubroutine(sub.ctx);
         table.pop();
-        return ret;
+        return (Assignable) ret;
     }
 
     @Override
@@ -274,7 +296,9 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
                     }
                 }
 
-                int times = (((Numeric) end).asInt() - ((Numeric) start).asInt()) / step;
+                int times = (((Numeric) end).asInt() - start.asInt()) / step;
+
+                table.put(ctx.assign().ID().getText(), new Numeric());
 
                 for (int i = 0; i <= times; i++) {
                     for (SentencesContext sentences : ctx.sentences()) {
@@ -351,7 +375,7 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
         }
 
         if (ctx.subroutine_call() != null) {
-            // this.visitSubroutine_call(ctx.subroutine_call());
+            this.visitSubroutineCall(ctx.subroutine_call());
         }
 
         return null;
@@ -732,7 +756,7 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
             Assignable op2 = this.visit(ctx.children.get(2));
             String operator = ctx.children.get(1).getChild(0).getText();
 
-            if (op1 instanceof Comparable && op2 instanceof Comparable) {
+            if (op1 instanceof Comparable && op2 instanceof Comparable && op1.isAssignable(op2)) {
                 Comparable cp1 = (Comparable) op1;
                 Comparable cp2 = (Comparable) op2;
                 switch (operator) {
@@ -765,6 +789,9 @@ public class MyVisitor<T> extends SLGrammarParserBaseVisitor<T> {
 
             if (ctx.access_variable() != null)
                 return accessVariableVisitor.visitAccess_variable(ctx.access_variable());
+
+            if (ctx.subroutine_call() != null)
+                return MyVisitor.this.visitSubroutineCall(ctx.subroutine_call());
 
             throw new RuntimeException("Expresion error");
         }
