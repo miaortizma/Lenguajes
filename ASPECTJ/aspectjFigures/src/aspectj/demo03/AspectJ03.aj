@@ -1,8 +1,6 @@
-package aspectjdemo01;
+package aspectj.demo03;
 
 // Note: Must import FigureElement & Point
-import figures.FigureElement;
-import figures.Point;
 
 public aspect AspectJ03 {
 
@@ -12,7 +10,7 @@ public aspect AspectJ03 {
                     call(void Point.setX(int))              ||
                     call(void Point.setY(int))
             )
-            && within (ClassTest03);
+            && within (aspectj.demo03.ClassTest03);
 
     before() : moveAction()  {
         System.out.println("before move");

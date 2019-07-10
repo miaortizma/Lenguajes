@@ -1,4 +1,4 @@
-package aspectjdemo01;
+package aspectj.demo03;
 
 import figures.FigureElement;
 import figures.Line;

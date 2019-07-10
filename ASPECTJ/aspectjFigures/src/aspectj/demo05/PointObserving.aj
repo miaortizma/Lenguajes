@@ -1,4 +1,4 @@
-package aspectjdemo01;
+package aspectj.demo05;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,7 @@ public aspect PointObserving {
 
     pointcut moveAction(Point point) : call(void Point.move(int,int) )
             && target(point)
-            && within(PointObservingTest);
+            && within(aspectj.demo05.PointObservingTest);
 
     after(Point point) : moveAction(point)  {
         System.out.println("Point moved");

@@ -1,4 +1,4 @@
-package aspectjdemo01;
+package aspectj.demo05;
 
 import figures.Point;
 
