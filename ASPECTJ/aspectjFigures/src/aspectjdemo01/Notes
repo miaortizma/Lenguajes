@@ -1,0 +1,30 @@
+// 'within' used to limit the scope of the pointcut
+// in the case below:
+// Only Containing join point inside class ClassTest01.
+//        within (ClassTest01)
+//        If you using import
+
+import figures.Point;
+
+// Then Can write shorter code:
+
+        pointcut callSetX()  : call(void  Point.setX(int)) && within (ClassTest01) ;
+
+// Collection of JoinPoints call Point.setX(int), any package name,
+// and method return  void
+pointcut callSetX()  : call(void  *.Point.setX(int)) ;
+
+// Collection of JoinPoints call Point.setX(int), any package name,
+// and method return any
+pointcut callSetX()  : call(* *.Point.setX(int)) ;
+
+
+
+// Collection of JoinPoints call public static method setX(int) of class with package name is 'sample'
+// and class name have suffix Point,
+// and setX(int) return int
+pointcut callSetX()  : call(public static int sample.*Point.setX(int)) ;
+
+
+// Using (..) to describe the method has 0 or more parameters.
+pointcut callSetX()  : call(public static int sample.*Point.setX(..)) ;
